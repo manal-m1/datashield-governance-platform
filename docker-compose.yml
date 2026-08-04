@@ -22,26 +22,35 @@ services:
   airflow:
     image: apache/airflow:2.7.1
     container_name: datagov-airflow
+
     environment:
-      - AIRFLOW__CORE__EXECUTOR=SequentialExecutor
-      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=sqlite:////opt/airflow/airflow.db
-      - AIRFLOW__CORE__LOAD_EXAMPLES=False
-      - AIRFLOW__WEBSERVER__RBAC=True
-      - _AIRFLOW_DB_UPGRADE=True
-      - _AIRFLOW_WWW_USER_CREATE=True
-      - _AIRFLOW_WWW_USER_USERNAME=admin
-      - _AIRFLOW_WWW_USER_PASSWORD=admin
-      - AIRFLOW__API__AUTH_BACKENDS=airflow.api.auth.backend.basic_auth
+      AIRFLOW__CORE__EXECUTOR: SequentialExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: sqlite:////opt/airflow/airflow.db
+      AIRFLOW__CORE__LOAD_EXAMPLES: "False"
+      AIRFLOW__WEBSERVER__RBAC: "True"
+      AIRFLOW__API__AUTH_BACKENDS: airflow.api.auth.backend.basic_auth
+
+      _AIRFLOW_DB_UPGRADE: "true"
+      _AIRFLOW_WWW_USER_CREATE: "true"
+      _AIRFLOW_WWW_USER_USERNAME: admin
+      _AIRFLOW_WWW_USER_PASSWORD: admin
+
     ports:
       - "8081:8080"
+
     volumes:
       - ./airflow/dags:/opt/airflow/dags
       - ./airflow/logs:/opt/airflow/logs
       - ./airflow/datasets:/opt/airflow/datasets
-    command: standalone
+      - ./airflow/plugins:/opt/airflow/plugins
+
+    command: bash -c "airflow db migrate && airflow users create \
+      --username admin --password admin --firstname admin --lastname admin --role Admin --email admin@example.com; \
+      airflow webserver & airflow scheduler"
+
+    restart: unless-stopped
     networks:
       - datagov-network
-    restart: unless-stopped
 
   # SERVICE 1: Authentication (Port 8001)
   auth-service:

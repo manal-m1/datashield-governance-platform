@@ -162,7 +162,7 @@ def detect_pii_taxonomie(**context):
     # Analyze each row
     all_detections = []
     for row in data:
-        text = " ".join(str(v) for v in row.values() if v)
+        text = " ".join(f"{k}: {v}" for k, v in row.items() if v)
         response = requests.post(
             f"{SERVICE_URLS['taxonomie']}/analyze",
             json={"text": text}
@@ -192,7 +192,7 @@ def detect_pii_presidio(**context):
     # Analyze with Presidio
     all_detections = []
     for row in data:
-        text = " ".join(str(v) for v in row.values() if v)
+        text = " ".join(f"{k}: {v}" for k, v in row.items() if v)
         response = requests.post(
             f"{SERVICE_URLS['presidio']}/analyze",
             json={"text": text}

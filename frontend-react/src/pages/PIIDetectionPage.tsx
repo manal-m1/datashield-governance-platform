@@ -21,7 +21,6 @@ import { Button } from '../components/ui/Button';
 import { useToast } from '../context/ToastContext';
 import apiClient from '../services/api';
 import { useAuthStore } from '../store/authStore';
-
 interface Detection {
     entity_type: string;
     start: number;
@@ -29,6 +28,86 @@ interface Detection {
     score: number;
     value: string;
 }
+
+const CHUNK_SIZE = 250_000;
+
+// Heuristique légère pour détecter la langue dominante d'un chunk
+const detectLanguage = (text: string): 'fr' | 'en' => {
+    const frenchMarkers = /\b(le|la|les|des|et|est|une|dans|pour|avec|nom|prénom|adresse|ville|téléphone|naissance)\b/gi;
+    const matches = text.match(frenchMarkers);
+    return matches && matches.length > 3 ? 'fr' : 'en';
+};
+
+const CONCURRENCY_LIMIT = 3;
+
+// Résout les chevauchements : garde la détection avec le meilleur score
+const resolveOverlaps = (detections: Detection[]): Detection[] => {
+    if (detections.length === 0) return [];
+
+    const sorted = [...detections].sort((a, b) => {
+        if (a.start !== b.start) return a.start - b.start;
+        return b.score - a.score;
+    });
+
+    const resolved: Detection[] = [];
+    let lastEnd = -1;
+
+    for (const det of sorted) {
+        if (det.start >= lastEnd) {
+            resolved.push(det);
+            lastEnd = det.end;
+        } else if (resolved.length > 0 && det.score > resolved[resolved.length - 1].score) {
+            resolved[resolved.length - 1] = det;
+            lastEnd = det.end;
+        }
+    }
+
+    return resolved;
+};
+
+const analyzeInChunks = async (
+    fullText: string,
+    entityFilter: string
+): Promise<Detection[]> => {
+    const seen = new Set<string>();
+    const chunks: { offset: number; text: string }[] = [];
+
+    for (let offset = 0; offset < fullText.length; offset += CHUNK_SIZE) {
+        const chunk = fullText.slice(offset, offset + CHUNK_SIZE);
+        if (chunk.trim()) chunks.push({ offset, text: chunk });
+    }
+
+    const allDetections: Detection[] = [];
+
+    for (let i = 0; i < chunks.length; i += CONCURRENCY_LIMIT) {
+        const batch = chunks.slice(i, i + CONCURRENCY_LIMIT);
+
+        const batchResults = await Promise.all(
+            batch.map(({ offset, text }) => {
+                const lang = detectLanguage(text);
+                return apiClient.post('/presidio/analyze', {
+                    text,
+                    language: lang,
+                    score_threshold: 0.3,
+                    entities: entityFilter === 'ALL' ? undefined : [entityFilter]
+                }).then(resp => ({ offset, detections: resp.data.detections as Detection[] }));
+            })
+        );
+
+        for (const { offset, detections } of batchResults) {
+            for (const d of detections) {
+                const shifted = { ...d, start: d.start + offset, end: d.end + offset };
+                const key = `${shifted.entity_type}:${shifted.start}:${shifted.end}`;
+                if (!seen.has(key)) {
+                    seen.add(key);
+                    allDetections.push(shifted);
+                }
+            }
+        }
+    }
+
+    return resolveOverlaps(allDetections);
+};
 
 // Entity type descriptions for Moroccan context
 const ENTITY_INFO: Record<string, { name: string; desc: string; risk: string }> = {
@@ -109,39 +188,33 @@ const PIIDetectionPage = () => {
     const [lastScannedText, setLastScannedText] = useState('');
 
     const handleAnalyze = async () => {
-        setIsAnalyzing(true);
-        setError('');
-        setResults([]);
+    setIsAnalyzing(true);
+    setError('');
+    setResults([]);
 
-        try {
-            let scanText = text;
+    try {
+        let scanText = text;
 
-            if (activeTab === 'dataset' && selectedDatasetId) {
-                const previewResp = await apiClient.get(`/cleaning/datasets/${selectedDatasetId}/preview?rows=5`);
-                scanText = JSON.stringify(previewResp.data.preview, null, 2);
-            }
-
-            if (!scanText) {
-                setError('No content available to scan');
-                setIsAnalyzing(false);
-                return;
-            }
-
-            setLastScannedText(scanText); // Store for submission context
-
-            const resp = await apiClient.post('/presidio/analyze', {
-                text: scanText,
-                language: 'fr',
-                score_threshold: 0.3,
-                entities: selectedEntity === 'ALL' ? undefined : [selectedEntity]
-            });
-
-            setResults(resp.data.detections);
-        } catch (err: any) {
-            setError('Detection service (Presidio) unavailable or timed out');
-        } finally {
-            setIsAnalyzing(false);
+        if (activeTab === 'dataset' && selectedDatasetId) {
+            const fullResp = await apiClient.get(`/cleaning/datasets/${selectedDatasetId}/full-scan-data`);
+            scanText = JSON.stringify(fullResp.data.data);
         }
+
+        if (!scanText) {
+            setError('No content available to scan');
+            setIsAnalyzing(false);
+            return;
+        }
+
+        setLastScannedText(scanText);
+
+        const detections = await analyzeInChunks(scanText, selectedEntity);
+        setResults(detections);
+    } catch (err: any) {
+        setError('Detection service (Presidio) unavailable or timed out');
+    } finally {
+        setIsAnalyzing(false);
+    }
     };
 
     const handleExportCSV = () => {

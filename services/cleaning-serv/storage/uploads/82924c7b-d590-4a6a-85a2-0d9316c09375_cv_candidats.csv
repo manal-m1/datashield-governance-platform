@@ -1,0 +1,501 @@
+id,nom,prenom,email,telephone,ville,universite,diplome,secteur,experience_annees,salaire_mad,genre,selectionne,date_maj
+1,Ghali,Khalid,khalid.ghali0@outlook.ma,+212 699338053,Agadir,ENCG Casablanca,,Marketing,7,15894.0,homme,1,2022-01-01
+2,Benali,Loubna,loubna.benali1@outlook.ma,+212 623609569,Tanger,ISCAE Casablanca,Bac,Juridique,16,6356.0,femme,1,2022-01-02
+3,Cherkaoui,Mohammed,mohammed.cherkaoui2@outlook.ma,+212 678488768,Oujda,Université Abdelmalek Essaadi Tanger,Bac,Commercial,4,8790.0,homme,1,2022-01-03
+4,Benjelloun,Mehdi,mehdi.benjelloun3@hotmail.com,+212 650907604,Rabat,Université Mohammed V Rabat,BTS,Finance,6,20690.0,homme,0,2022-01-04
+5,Benali,Mohammed,mohammed.benali4@yahoo.fr,+212 678546052,Marrakech,ISCAE Casablanca,Licence,Finance,19,24049.0,homme,1,2022-01-05
+6,Idrissi,Rachid,rachid.idrissi5@gmail.com,+212 645210753,Oujda,ENSA Agadir,Bac,Commercial,19,,homme,0,2022-01-06
+7,Sekkat,Hamza,hamza.sekkat6@gmail.com,+212 644093077,Agadir,ISCAE Casablanca,Master,Commercial,3,11057.0,homme,1,2022-01-07
+8,Alaoui,Btissam,btissam.alaoui7@gmail.com,+212 636737775,Casablanca,Université Cadi Ayyad Marrakech,,Commercial,5,20082.0,femme,1,2022-01-08
+9,Filali,Saad,saad.filali8@hotmail.com,+212 664856769,Marrakech,ENCG Casablanca,,Informatique,6,4661.0,homme,1,2022-01-09
+10,Cherkaoui,Tariq,tariq.cherkaoui9@outlook.ma,+212 626374601,Casablanca,ENSA Agadir,Licence,Finance,17,8644.0,homme,0,2022-01-10
+11,Filali,Tariq,tariq.filali10@yahoo.fr,+212 688326927,Rabat,Université Hassan II Casablanca,Bac,Commercial,4,19711.0,homme,0,2022-01-11
+12,Benali,Ghita,ghita.benali11@hotmail.com,,Tanger,Université Sidi Mohammed Ben Abdellah Fès,BTS,Informatique,19,6920.0,femme,1,2022-01-12
+13,Sekkat,Khadija,khadija.sekkat12@outlook.ma,+212 670910677,Oujda,ENCG Casablanca,Licence,Logistique,2,20002.0,femme,1,2022-01-13
+14,Bouzidi,Tariq,tariq.bouzidi13@hotmail.com,+212 650104523,Oujda,Université Hassan II Casablanca,Master,Informatique,6,18025.0,homme,1,2022-01-14
+15,Kettani,Khalid,khalid.kettani14@yahoo.fr,+212 634567790,Fès,Université Sidi Mohammed Ben Abdellah Fès,,Finance,21,12946.0,homme,1,2022-01-15
+16,Fassi,Ahmed,ahmed.fassi15@outlook.ma,+212 663698471,Marrakech,Université Cadi Ayyad Marrakech,,Juridique,13,16732.0,homme,1,2022-01-16
+17,Idrissi,Youssef,youssef.idrissi16@hotmail.com,+212 688107941,Tetouan,ISCAE Casablanca,Licence,Logistique,6,10236.0,homme,0,2022-01-17
+18,Kettani,Rachid,rachid.kettani17@yahoo.fr,,Agadir,Université Mohammed V Rabat,Licence,Finance,4,20309.0,homme,0,2022-01-18
+19,Bennis,Nabil,nabil.bennis18@gmail.com,+212 649993954,Tetouan,ENSA Agadir,Master,Informatique,21,17518.0,homme,0,2022-01-19
+20,Moussaoui,Mehdi,mehdi.moussaoui19@yahoo.fr,+212 698934079,Fès,Université Abdelmalek Essaadi Tanger,Doctorat,RH,4,4352.0,homme,0,2022-01-20
+21,Bennis,Ahmed,ahmed.bennis20@gmail.com,+212 664716658,Rabat,ENSA Agadir,BTS,Marketing,22,11005.0,homme,1,2022-01-21
+22,Fassi,Bilal,bilal.fassi21@hotmail.com,+212 631595966,Agadir,Université Cadi Ayyad Marrakech,Licence,Finance,1,,homme,1,2022-01-22
+23,Ouali,Anas,anas.ouali22@outlook.ma,+212 669544511,Tanger,Université Hassan II Casablanca,Licence,Commercial,20,20542.0,homme,1,2022-01-23
+24,Cherkaoui,Hicham,hicham.cherkaoui23@outlook.ma,+212 647026182,Tetouan,Université Abdelmalek Essaadi Tanger,BTS,Informatique,21,4956.0,homme,0,2022-01-24
+25,Fassi,Ahmed,ahmed.fassi24@hotmail.com,,Tanger,Université Mohammed V Rabat,Master,Commercial,5,,homme,0,2022-01-25
+26,Idrissi,Laila,laila.idrissi25@outlook.ma,+212 668401945,Tetouan,Université Cadi Ayyad Marrakech,Doctorat,Commercial,14,12595.0,femme,0,2022-01-26
+27,Berrada,Tariq,tariq.berrada26@outlook.ma,+212 686085630,Tanger,Université Abdelmalek Essaadi Tanger,Licence,Commercial,20,19140.0,homme,0,2022-01-27
+28,Kettani,Rachid,rachid.kettani27@gmail.com,+212 646185155,Tetouan,Université Cadi Ayyad Marrakech,Master,Commercial,9,16803.0,homme,1,2022-01-28
+29,Alaoui,Omar,omar.alaoui28@hotmail.com,+212 638997485,Tanger,ISCAE Casablanca,Master,Commercial,22,,homme,0,2022-01-29
+30,Ziani,Anas,anas.ziani29@yahoo.fr,+212 627642355,Fès,Université Cadi Ayyad Marrakech,Master,Logistique,23,10675.0,homme,1,2022-01-30
+31,Ziani,Mohammed,mohammed.ziani30@gmail.com,+212 693261653,Meknès,Université Mohammed V Rabat,Licence,Finance,6,4955.0,homme,0,2022-01-31
+32,Idrissi,Khalid,khalid.idrissi31@hotmail.com,+212 687076110,Agadir,ENCG Casablanca,Bac,Finance,4,10295.0,homme,1,2022-02-01
+33,Idrissi,Mohammed,mohammed.idrissi32@gmail.com,+212 684652023,Marrakech,Université Sidi Mohammed Ben Abdellah Fès,Master,Marketing,0,19921.0,homme,1,2022-02-02
+34,Chraibi,Zineb,zineb.chraibi33@yahoo.fr,+212 615384935,Rabat,Université Abdelmalek Essaadi Tanger,Licence,Informatique,12,22096.0,femme,0,2022-02-03
+35,Cherkaoui,Loubna,loubna.cherkaoui34@yahoo.fr,+212 622155092,Kenitra,ISCAE Casablanca,Master,RH,20,,femme,1,2022-02-04
+36,Moussaoui,Fatima,fatima.moussaoui35@hotmail.com,+212 624514254,Casablanca,Université Mohammed V Rabat,BTS,Logistique,17,8703.0,femme,1,2022-02-05
+37,Chraibi,Karim,karim.chraibi36@yahoo.fr,+212 629678933,Marrakech,Université Cadi Ayyad Marrakech,Licence,Informatique,12,10563.0,homme,1,2022-02-06
+38,Filali,Rachid,rachid.filali37@gmail.com,+212 633063155,Casablanca,ISCAE Casablanca,Doctorat,Logistique,20,16003.0,homme,0,2022-02-07
+39,Ouali,Bilal,bilal.ouali38@yahoo.fr,+212 633593741,Agadir,Université Mohammed V Rabat,Licence,Finance,20,14817.0,homme,1,2022-02-08
+40,Bouzidi,Nabil,nabil.bouzidi39@gmail.com,+212 696097818,Marrakech,ENCG Casablanca,Master,Commercial,17,15171.0,homme,1,2022-02-09
+41,Bouzidi,Mehdi,mehdi.bouzidi40@gmail.com,+212 649247228,Tanger,ISCAE Casablanca,BTS,Marketing,4,16582.0,homme,1,2022-02-10
+42,Ouali,Khalid,khalid.ouali41@yahoo.fr,+212 669010024,Tanger,ISCAE Casablanca,Licence,Marketing,12,,homme,1,2022-02-11
+43,Benjelloun,Karim,karim.benjelloun42@hotmail.com,+212 679748793,Kenitra,Université Sidi Mohammed Ben Abdellah Fès,Bac,Juridique,3,21778.0,homme,1,2022-02-12
+44,Fassi,Laila,laila.fassi43@outlook.ma,+212 613133211,Casablanca,ENSA Agadir,Licence,RH,16,16473.0,femme,1,2022-02-13
+45,Lahlou,Mohammed,mohammed.lahlou44@yahoo.fr,+212 621616152,Rabat,Université Abdelmalek Essaadi Tanger,,Marketing,2,13461.0,homme,1,2022-02-14
+46,Chraibi,Tariq,tariq.chraibi45@gmail.com,+212 611726199,Agadir,Université Sidi Mohammed Ben Abdellah Fès,Master,Commercial,16,24098.0,homme,1,2022-02-15
+47,Berrada,Mohammed,mohammed.berrada46@gmail.com,+212 622756935,Tanger,Université Hassan II Casablanca,BTS,Finance,10,19596.0,homme,1,2022-02-16
+48,Kettani,Ahmed,ahmed.kettani47@yahoo.fr,+212 615071915,Meknès,Université Abdelmalek Essaadi Tanger,Licence,RH,20,4529.0,homme,1,2022-02-17
+49,Ouali,Mehdi,mehdi.ouali48@hotmail.com,+212 642005216,Fès,Université Sidi Mohammed Ben Abdellah Fès,Licence,Informatique,19,23342.0,homme,1,2022-02-18
+50,Amrani,Youssef,youssef.amrani49@hotmail.com,+212 677552809,Fès,Université Cadi Ayyad Marrakech,Licence,Commercial,22,23975.0,homme,1,2022-02-19
+51,Ghali,Loubna,loubna.ghali50@gmail.com,+212 683418978,Tetouan,Université Abdelmalek Essaadi Tanger,Master,Commercial,20,16765.0,femme,0,2022-02-20
+52,Benali,Fatima,fatima.benali51@gmail.com,+212 660352901,Rabat,Université Abdelmalek Essaadi Tanger,Bac,Marketing,3,17910.0,femme,1,2022-02-21
+53,Fassi,Hafsa,hafsa.fassi52@hotmail.com,+212 612276787,Fès,Université Mohammed V Rabat,Master,RH,1,,femme,1,2022-02-22
+54,Ouali,Houda,houda.ouali53@outlook.ma,+212 670974870,Tetouan,Université Cadi Ayyad Marrakech,Master,Finance,19,13131.0,femme,1,2022-02-23
+55,Chraibi,Khalid,khalid.chraibi54@yahoo.fr,+212 651245272,Casablanca,Université Hassan II Casablanca,Master,Juridique,15,,homme,1,2022-02-24
+56,Berrada,Samira,samira.berrada55@gmail.com,+212 633278769,Tanger,ENSA Agadir,Licence,Logistique,17,20385.0,femme,0,2022-02-25
+57,Berrada,Mohammed,mohammed.berrada56@gmail.com,+212 625342276,Tanger,ISCAE Casablanca,Master,Logistique,7,4374.0,homme,1,2022-02-26
+58,Idrissi,Rachid,rachid.idrissi57@hotmail.com,+212 644829066,Meknès,ENCG Casablanca,Bac,Finance,2,16197.0,homme,0,2022-02-27
+59,Bensouda,Nabil,nabil.bensouda58@yahoo.fr,+212 679863927,Marrakech,Université Sidi Mohammed Ben Abdellah Fès,Licence,Finance,8,8648.0,homme,1,2022-02-28
+60,Idrissi,Rachid,rachid.idrissi59@hotmail.com,+212 611228807,Fès,Université Mohammed V Rabat,Doctorat,Logistique,19,6365.0,homme,1,2022-03-01
+61,Cherkaoui,Khalid,khalid.cherkaoui60@yahoo.fr,+212 635288599,Casablanca,Université Sidi Mohammed Ben Abdellah Fès,Master,Juridique,5,21909.0,homme,1,2022-03-02
+62,Bennis,Youssef,youssef.bennis61@yahoo.fr,+212 665495163,Oujda,Université Hassan II Casablanca,Bac,RH,9,5646.0,homme,0,2022-03-03
+63,Cherkaoui,Hafsa,hafsa.cherkaoui62@yahoo.fr,+212 659840603,Fès,ISCAE Casablanca,Licence,Logistique,20,4013.0,femme,1,2022-03-04
+64,Ouali,Omar,omar.ouali63@gmail.com,+212 642134440,Rabat,Université Hassan II Casablanca,Licence,Finance,9,8599.0,homme,0,2022-03-05
+65,Filali,Rachid,rachid.filali64@outlook.ma,+212 674825507,Marrakech,Université Abdelmalek Essaadi Tanger,Licence,Marketing,12,6278.0,homme,0,2022-03-06
+66,Tahiri,Rachid,rachid.tahiri65@hotmail.com,+212 651156180,Fès,ENCG Casablanca,Licence,Informatique,16,18296.0,homme,0,2022-03-07
+67,Rachidi,Rachid,rachid.rachidi66@outlook.ma,+212 681572022,Casablanca,Université Hassan II Casablanca,Bac,Juridique,8,,homme,0,2022-03-08
+68,Sekkat,Soukaina,soukaina.sekkat67@hotmail.com,+212 685912072,Fès,Université Sidi Mohammed Ben Abdellah Fès,Master,Commercial,16,12321.0,femme,1,2022-03-09
+69,Ziani,Bilal,bilal.ziani68@yahoo.fr,+212 645823502,Rabat,Université Cadi Ayyad Marrakech,Master,Juridique,23,7814.0,homme,1,2022-03-10
+70,Lahlou,Khadija,khadija.lahlou69@gmail.com,+212 647967791,Oujda,Université Cadi Ayyad Marrakech,Master,Marketing,8,17125.0,femme,0,2022-03-11
+71,Ouali,Fatima,fatima.ouali70@outlook.ma,+212 617640167,Agadir,Université Abdelmalek Essaadi Tanger,Master,Marketing,8,7216.0,femme,1,2022-03-12
+72,Rachidi,Rachid,rachid.rachidi71@gmail.com,+212 696717649,Kenitra,ENSA Agadir,Bac,Commercial,0,6113.0,homme,0,2022-03-13
+73,Sekkat,Hicham,hicham.sekkat72@hotmail.com,+212 617322153,Oujda,Université Sidi Mohammed Ben Abdellah Fès,BTS,Finance,1,24740.0,homme,1,2022-03-14
+74,Chraibi,Imane,imane.chraibi73@gmail.com,+212 653391803,Tetouan,Université Sidi Mohammed Ben Abdellah Fès,Doctorat,Logistique,15,14238.0,femme,1,2022-03-15
+75,Benjelloun,Hicham,hicham.benjelloun74@gmail.com,+212 646073939,Fès,Université Hassan II Casablanca,Doctorat,RH,0,17760.0,homme,1,2022-03-16
+76,Benali,Mohammed,mohammed.benali75@outlook.ma,+212 661588363,Tanger,ENCG Casablanca,Doctorat,Juridique,9,24939.0,homme,1,2022-03-17
+77,Lahlou,Khadija,khadija.lahlou76@yahoo.fr,+212 652023297,Meknès,Université Sidi Mohammed Ben Abdellah Fès,BTS,Commercial,17,,femme,1,2022-03-18
+78,Cherkaoui,Tariq,tariq.cherkaoui77@gmail.com,+212 628303750,Tanger,Université Mohammed V Rabat,Master,Juridique,7,7374.0,homme,0,2022-03-19
+79,Benkirane,Tariq,tariq.benkirane78@yahoo.fr,+212 694710223,Oujda,ENSA Agadir,Licence,Marketing,20,10430.0,homme,1,2022-03-20
+80,Lahlou,Hamza,hamza.lahlou79@hotmail.com,+212 667678210,Tanger,Université Hassan II Casablanca,Master,Logistique,10,23850.0,homme,0,2022-03-21
+81,Idrissi,Ghita,ghita.idrissi80@gmail.com,+212 693110764,Casablanca,Université Mohammed V Rabat,Master,Juridique,22,23465.0,femme,1,2022-03-22
+82,Sekkat,Mohammed,mohammed.sekkat81@outlook.ma,+212 664134634,Tanger,Université Abdelmalek Essaadi Tanger,Master,RH,1,15970.0,homme,1,2022-03-23
+83,Benjelloun,Mohammed,mohammed.benjelloun82@hotmail.com,+212 673442983,Marrakech,Université Cadi Ayyad Marrakech,Master,Marketing,7,4629.0,homme,1,2022-03-24
+84,Ghali,Anas,anas.ghali83@hotmail.com,+212 640284261,Agadir,Université Abdelmalek Essaadi Tanger,Bac,RH,21,20653.0,homme,0,2022-03-25
+85,Benali,Ahmed,ahmed.benali84@outlook.ma,+212 677480480,Fès,Université Cadi Ayyad Marrakech,,Logistique,7,,homme,1,2022-03-26
+86,Sekkat,Saad,saad.sekkat85@gmail.com,+212 628737371,Tanger,Université Abdelmalek Essaadi Tanger,BTS,Juridique,16,9724.0,homme,0,2022-03-27
+87,Benjelloun,Nabil,nabil.benjelloun86@gmail.com,+212 672344320,Rabat,Université Sidi Mohammed Ben Abdellah Fès,Master,Informatique,14,15083.0,homme,1,2022-03-28
+88,Ziani,Anas,anas.ziani87@hotmail.com,+212 619163766,Agadir,Université Mohammed V Rabat,Master,Juridique,16,17149.0,homme,0,2022-03-29
+89,Ouali,Houda,houda.ouali88@gmail.com,+212 695655047,Agadir,Université Cadi Ayyad Marrakech,Licence,Logistique,22,23816.0,femme,0,2022-03-30
+90,Fassi,Bilal,bilal.fassi89@yahoo.fr,+212 691560164,Tanger,Université Hassan II Casablanca,Licence,Juridique,23,13472.0,homme,1,2022-03-31
+91,Benkirane,Bilal,bilal.benkirane90@outlook.ma,+212 669636639,Agadir,Université Mohammed V Rabat,Doctorat,Commercial,12,10276.0,homme,1,2022-04-01
+92,Fassi,Ahmed,ahmed.fassi91@yahoo.fr,+212 643833647,Meknès,Université Hassan II Casablanca,Master,Juridique,18,19635.0,homme,0,2022-04-02
+93,Rachidi,Salma,salma.rachidi92@gmail.com,+212 612843236,Tanger,Université Mohammed V Rabat,Master,Finance,4,,femme,0,2022-04-03
+94,Benkirane,Khalid,khalid.benkirane93@hotmail.com,+212 622126467,Casablanca,Université Mohammed V Rabat,Master,Juridique,11,17994.0,homme,1,2022-04-04
+95,Rachidi,Khadija,khadija.rachidi94@outlook.ma,+212 684488797,Oujda,Université Abdelmalek Essaadi Tanger,Master,Juridique,0,14552.0,femme,1,2022-04-05
+96,Filali,Karim,karim.filali95@gmail.com,+212 666366866,Marrakech,Université Cadi Ayyad Marrakech,Licence,RH,22,20959.0,homme,1,2022-04-06
+97,Moussaoui,Ahmed,ahmed.moussaoui96@gmail.com,+212 641853087,Kenitra,Université Cadi Ayyad Marrakech,Master,Informatique,4,10099.0,homme,0,2022-04-07
+98,Ghali,Saad,saad.ghali97@hotmail.com,+212 632362925,Tetouan,ENCG Casablanca,Licence,RH,7,13499.0,homme,0,2022-04-08
+99,Benkirane,Mohammed,mohammed.benkirane98@hotmail.com,+212 640781302,Agadir,Université Mohammed V Rabat,Licence,RH,12,23576.0,homme,0,2022-04-09
+100,Rachidi,Khalid,khalid.rachidi99@yahoo.fr,+212 694464768,Casablanca,Université Sidi Mohammed Ben Abdellah Fès,Master,Marketing,7,7178.0,homme,0,2022-04-10
+101,Tazi,Saad,saad.tazi100@outlook.ma,+212 659439294,Fès,Université Sidi Mohammed Ben Abdellah Fès,BTS,Finance,24,23118.0,homme,1,2022-04-11
+102,Moussaoui,Rachid,rachid.moussaoui101@outlook.ma,+212 681335020,Fès,Université Hassan II Casablanca,,RH,22,10116.0,homme,1,2022-04-12
+103,Ghali,Hicham,hicham.ghali102@hotmail.com,+212 675972086,Tetouan,Université Hassan II Casablanca,Doctorat,Commercial,10,19563.0,homme,0,2022-04-13
+104,Chraibi,Hicham,hicham.chraibi103@yahoo.fr,+212 660122260,Marrakech,Université Abdelmalek Essaadi Tanger,Licence,Logistique,0,7568.0,homme,0,2022-04-14
+105,Bouzidi,Laila,laila.bouzidi104@outlook.ma,+212 637640477,Agadir,Université Mohammed V Rabat,Licence,Commercial,12,13847.0,femme,0,2022-04-15
+106,Alaoui,Mehdi,mehdi.alaoui105@hotmail.com,+212 651537804,Meknès,Université Hassan II Casablanca,Bac,Logistique,18,18135.0,homme,1,2022-04-16
+107,Hajji,Mohammed,mohammed.hajji106@gmail.com,+212 655145249,Tetouan,Université Hassan II Casablanca,Licence,Juridique,23,22587.0,homme,1,2022-04-17
+108,Amrani,Loubna,loubna.amrani107@outlook.ma,+212 651682179,Marrakech,ENSA Agadir,Master,Marketing,2,21774.0,femme,0,2022-04-18
+109,Alaoui,Nabil,nabil.alaoui108@yahoo.fr,+212 639754469,Agadir,Université Mohammed V Rabat,Bac,Finance,23,5742.0,homme,0,2022-04-19
+110,Tahiri,Omar,omar.tahiri109@yahoo.fr,+212 657384057,Casablanca,ISCAE Casablanca,,Commercial,16,22309.0,homme,1,2022-04-20
+111,Chraibi,Nabil,nabil.chraibi110@yahoo.fr,+212 635698550,Oujda,Université Abdelmalek Essaadi Tanger,BTS,Finance,4,,homme,1,2022-04-21
+112,Berrada,Rachid,rachid.berrada111@gmail.com,+212 630729471,Meknès,Université Hassan II Casablanca,Licence,Commercial,19,21658.0,homme,1,2022-04-22
+113,Ziani,Hafsa,hafsa.ziani112@outlook.ma,+212 664148890,Kenitra,Université Abdelmalek Essaadi Tanger,,Juridique,20,21340.0,femme,0,2022-04-23
+114,Sekkat,Ghita,ghita.sekkat113@outlook.ma,+212 612592536,Fès,Université Cadi Ayyad Marrakech,Licence,Logistique,7,5939.0,femme,0,2022-04-24
+115,Bennis,Ahmed,ahmed.bennis114@gmail.com,+212 654918675,Rabat,Université Abdelmalek Essaadi Tanger,Master,Informatique,13,24337.0,homme,1,2022-04-25
+116,Ghali,Laila,laila.ghali115@outlook.ma,+212 675532833,Casablanca,ISCAE Casablanca,Licence,Marketing,3,20001.0,femme,0,2022-04-26
+117,Hajji,Khadija,khadija.hajji116@gmail.com,+212 682613245,Fès,Université Sidi Mohammed Ben Abdellah Fès,Licence,Commercial,10,4968.0,femme,0,2022-04-27
+118,Moussaoui,Omar,omar.moussaoui117@gmail.com,+212 627296381,Tanger,ISCAE Casablanca,Licence,Commercial,19,18846.0,homme,1,2022-04-28
+119,Bouzidi,Salma,salma.bouzidi118@gmail.com,+212 664745732,Rabat,Université Sidi Mohammed Ben Abdellah Fès,Bac,Juridique,14,,femme,0,2022-04-29
+120,Benkirane,Saad,saad.benkirane119@yahoo.fr,+212 630218082,Fès,Université Abdelmalek Essaadi Tanger,Licence,Marketing,18,19360.0,homme,1,2022-04-30
+121,Bennis,Zineb,zineb.bennis120@outlook.ma,+212 671963740,Marrakech,Université Sidi Mohammed Ben Abdellah Fès,Master,Logistique,6,10262.0,femme,0,2022-05-01
+122,Benali,Salma,salma.benali121@gmail.com,+212 675454344,Meknès,Université Cadi Ayyad Marrakech,,Logistique,18,5058.0,femme,0,2022-05-02
+123,Tahiri,Ahmed,ahmed.tahiri122@outlook.ma,+212 638190067,Fès,Université Mohammed V Rabat,Doctorat,Commercial,18,,homme,1,2022-05-03
+124,Chraibi,Ahmed,ahmed.chraibi123@yahoo.fr,+212 661359205,Kenitra,Université Sidi Mohammed Ben Abdellah Fès,Master,Informatique,10,14724.0,homme,0,2022-05-04
+125,Sekkat,Ahmed,ahmed.sekkat124@gmail.com,+212 650990129,Oujda,Université Sidi Mohammed Ben Abdellah Fès,Licence,Informatique,4,9178.0,homme,1,2022-05-05
+126,Amrani,Hicham,hicham.amrani125@hotmail.com,+212 683007749,Marrakech,Université Abdelmalek Essaadi Tanger,Licence,Finance,4,10980.0,homme,1,2022-05-06
+127,Benkirane,Loubna,loubna.benkirane126@yahoo.fr,+212 651156155,Casablanca,Université Cadi Ayyad Marrakech,Licence,Marketing,21,13200.0,femme,0,2022-05-07
+128,Tahiri,Laila,laila.tahiri127@hotmail.com,+212 617946155,Casablanca,ENCG Casablanca,Licence,Marketing,7,5229.0,femme,1,2022-05-08
+129,Hajji,Youssef,youssef.hajji128@outlook.ma,+212 692959736,Casablanca,ENCG Casablanca,Master,Logistique,9,24969.0,homme,0,2022-05-09
+130,Tahiri,Nabil,nabil.tahiri129@outlook.ma,+212 620384778,Casablanca,ENCG Casablanca,Master,Finance,5,12467.0,homme,1,2022-05-10
+131,Moussaoui,Ahmed,ahmed.moussaoui130@yahoo.fr,+212 649242670,Oujda,ENCG Casablanca,Licence,Juridique,14,23124.0,homme,0,2022-05-11
+132,Rachidi,Hamza,hamza.rachidi131@outlook.ma,+212 616703560,Fès,Université Mohammed V Rabat,Licence,Marketing,15,6289.0,homme,1,2022-05-12
+133,Tahiri,Mehdi,mehdi.tahiri132@hotmail.com,+212 670336852,Agadir,ISCAE Casablanca,Doctorat,Finance,16,5239.0,homme,0,2022-05-13
+134,Moussaoui,Khalid,khalid.moussaoui133@gmail.com,,Fès,Université Abdelmalek Essaadi Tanger,Master,Finance,7,,homme,1,2022-05-14
+135,Sekkat,Fatima,fatima.sekkat134@gmail.com,+212 639012949,Tanger,Université Abdelmalek Essaadi Tanger,Licence,Commercial,7,20170.0,femme,1,2022-05-15
+136,Sekkat,Anas,anas.sekkat135@gmail.com,+212 677642498,Meknès,ENSA Agadir,,Logistique,24,4125.0,homme,1,2022-05-16
+137,Ouali,Nabil,nabil.ouali136@yahoo.fr,+212 630709963,Rabat,Université Cadi Ayyad Marrakech,BTS,Finance,8,16504.0,homme,0,2022-05-17
+138,Tahiri,Saad,saad.tahiri137@outlook.ma,+212 685211737,Agadir,ENCG Casablanca,Licence,Informatique,1,19398.0,homme,0,2022-05-18
+139,Hajji,Hicham,hicham.hajji138@hotmail.com,+212 692434203,Agadir,Université Mohammed V Rabat,Licence,Informatique,14,10638.0,homme,1,2022-05-19
+140,Benali,Houda,houda.benali139@outlook.ma,+212 667888503,Fès,Université Cadi Ayyad Marrakech,Master,RH,17,10570.0,femme,1,2022-05-20
+141,Kettani,Soukaina,soukaina.kettani140@outlook.ma,+212 639581501,Agadir,ENCG Casablanca,BTS,Logistique,2,7249.0,femme,0,2022-05-21
+142,Benjelloun,Youssef,youssef.benjelloun141@outlook.ma,+212 611406368,Tetouan,Université Mohammed V Rabat,Doctorat,Commercial,16,13110.0,homme,1,2022-05-22
+143,Ziani,Mohammed,mohammed.ziani142@gmail.com,+212 669565730,Tetouan,Université Cadi Ayyad Marrakech,Licence,Juridique,3,11595.0,homme,0,2022-05-23
+144,Bennis,Rachid,rachid.bennis143@hotmail.com,+212 682894131,Tanger,Université Abdelmalek Essaadi Tanger,Licence,RH,3,,homme,1,2022-05-24
+145,Ziani,Tariq,tariq.ziani144@hotmail.com,+212 628001960,Rabat,Université Abdelmalek Essaadi Tanger,Master,Informatique,13,16115.0,homme,0,2022-05-25
+146,Tahiri,Hamza,hamza.tahiri145@outlook.ma,+212 699856306,Kenitra,ISCAE Casablanca,Master,Commercial,8,10294.0,homme,0,2022-05-26
+147,Kettani,Bilal,bilal.kettani146@gmail.com,+212 665194542,Oujda,Université Hassan II Casablanca,Licence,RH,8,,homme,1,2022-05-27
+148,Bensouda,Anas,anas.bensouda147@gmail.com,+212 626150865,Fès,ISCAE Casablanca,Doctorat,Logistique,24,16595.0,homme,0,2022-05-28
+149,Ouali,Mohammed,mohammed.ouali148@hotmail.com,+212 696017098,Oujda,Université Sidi Mohammed Ben Abdellah Fès,Master,Commercial,22,5969.0,homme,1,2022-05-29
+150,Ziani,Bilal,bilal.ziani149@gmail.com,+212 673349631,Kenitra,ISCAE Casablanca,Doctorat,Logistique,17,,homme,1,2022-05-30
+151,Amrani,Fatima,fatima.amrani150@gmail.com,+212 647043861,Fès,ENCG Casablanca,Doctorat,Finance,9,21275.0,femme,0,2022-05-31
+152,Benali,Saad,saad.benali151@gmail.com,+212 692974992,Fès,ENSA Agadir,Master,Marketing,20,8470.0,homme,0,2022-06-01
+153,Lahlou,Hamza,hamza.lahlou152@yahoo.fr,+212 620897034,Rabat,Université Cadi Ayyad Marrakech,Licence,Finance,3,14225.0,homme,1,2022-06-02
+154,Ziani,Anas,anas.ziani153@outlook.ma,,Oujda,ENSA Agadir,Master,Logistique,11,13556.0,homme,0,2022-06-03
+155,Fassi,Hafsa,hafsa.fassi154@hotmail.com,+212 627071962,Tetouan,Université Hassan II Casablanca,Licence,Commercial,7,13206.0,femme,1,2022-06-04
+156,Amrani,Ahmed,ahmed.amrani155@hotmail.com,+212 649265186,Casablanca,Université Sidi Mohammed Ben Abdellah Fès,Master,Informatique,1,13991.0,homme,1,2022-06-05
+157,Alaoui,Khalid,khalid.alaoui156@yahoo.fr,+212 615432019,Oujda,Université Cadi Ayyad Marrakech,Licence,Juridique,21,11519.0,homme,1,2022-06-06
+158,Sekkat,Hafsa,hafsa.sekkat157@outlook.ma,+212 698238972,Meknès,Université Mohammed V Rabat,Master,Informatique,12,17669.0,femme,0,2022-06-07
+159,Tahiri,Ahmed,ahmed.tahiri158@hotmail.com,+212 695588239,Meknès,ENCG Casablanca,Licence,Commercial,20,8612.0,homme,0,2022-06-08
+160,Amrani,Tariq,tariq.amrani159@gmail.com,+212 664089633,Fès,Université Sidi Mohammed Ben Abdellah Fès,Licence,Finance,15,16373.0,homme,0,2022-06-09
+161,Bouzidi,Hicham,hicham.bouzidi160@hotmail.com,+212 664133825,Casablanca,Université Abdelmalek Essaadi Tanger,Licence,Juridique,1,21582.0,homme,0,2022-06-10
+162,Ziani,Karim,karim.ziani161@gmail.com,+212 620392034,Marrakech,Université Hassan II Casablanca,Bac,Commercial,10,19552.0,homme,1,2022-06-11
+163,Idrissi,Karim,karim.idrissi162@yahoo.fr,+212 626394487,Kenitra,Université Sidi Mohammed Ben Abdellah Fès,Master,Logistique,9,18646.0,homme,1,2022-06-12
+164,Benali,Karim,karim.benali163@gmail.com,+212 640671003,Tanger,ENCG Casablanca,Master,Informatique,14,9238.0,homme,0,2022-06-13
+165,Ouali,Youssef,youssef.ouali164@hotmail.com,+212 690021414,Casablanca,ISCAE Casablanca,Master,Logistique,16,19577.0,homme,0,2022-06-14
+166,Benjelloun,Loubna,loubna.benjelloun165@hotmail.com,+212 656737861,Tanger,Université Sidi Mohammed Ben Abdellah Fès,Licence,Juridique,7,19504.0,femme,0,2022-06-15
+167,Hajji,Mehdi,mehdi.hajji166@hotmail.com,+212 661484872,Oujda,ISCAE Casablanca,Bac,Juridique,17,,homme,1,2022-06-16
+168,Tazi,Omar,omar.tazi167@yahoo.fr,+212 646204667,Oujda,ENCG Casablanca,Bac,Informatique,22,4302.0,homme,0,2022-06-17
+169,Filali,Omar,omar.filali168@yahoo.fr,+212 653683574,Tanger,Université Abdelmalek Essaadi Tanger,Licence,Logistique,8,16144.0,homme,1,2022-06-18
+170,Filali,Nabil,nabil.filali169@outlook.ma,+212 672612095,Kenitra,Université Cadi Ayyad Marrakech,Doctorat,RH,24,21370.0,homme,0,2022-06-19
+171,Ziani,Karim,karim.ziani170@hotmail.com,,Casablanca,Université Mohammed V Rabat,Licence,Logistique,7,14055.0,homme,1,2022-06-20
+172,Lahlou,Khalid,khalid.lahlou171@gmail.com,+212 638563971,Marrakech,Université Abdelmalek Essaadi Tanger,Licence,Juridique,13,,homme,1,2022-06-21
+173,Alaoui,Anas,anas.alaoui172@yahoo.fr,+212 664351768,Fès,ISCAE Casablanca,Licence,Logistique,24,7072.0,homme,0,2022-06-22
+174,Benali,Hamza,hamza.benali173@hotmail.com,+212 681415950,Rabat,ISCAE Casablanca,Licence,Commercial,17,17598.0,homme,0,2022-06-23
+175,Benjelloun,Anas,anas.benjelloun174@hotmail.com,+212 635793044,Oujda,Université Mohammed V Rabat,,Finance,21,18287.0,homme,1,2022-06-24
+176,Benjelloun,Hamza,hamza.benjelloun175@yahoo.fr,+212 618329442,Meknès,Université Cadi Ayyad Marrakech,Master,RH,19,17965.0,homme,0,2022-06-25
+177,Amrani,Anas,anas.amrani176@outlook.ma,+212 666501560,Kenitra,Université Sidi Mohammed Ben Abdellah Fès,Licence,Marketing,19,23508.0,homme,1,2022-06-26
+178,Hajji,Mehdi,mehdi.hajji177@yahoo.fr,+212 618831924,Rabat,Université Mohammed V Rabat,Bac,Commercial,20,13519.0,homme,1,2022-06-27
+179,Ouali,Khadija,khadija.ouali178@yahoo.fr,+212 649722995,Marrakech,Université Hassan II Casablanca,,Finance,11,,femme,1,2022-06-28
+180,Benali,Youssef,youssef.benali179@gmail.com,+212 613456653,Agadir,Université Hassan II Casablanca,Licence,Marketing,18,15865.0,homme,1,2022-06-29
+181,Ghali,Karim,karim.ghali180@gmail.com,+212 670186000,Fès,ENCG Casablanca,Licence,Informatique,13,12125.0,homme,0,2022-06-30
+182,Benjelloun,Tariq,tariq.benjelloun181@outlook.ma,+212 678997670,Oujda,Université Abdelmalek Essaadi Tanger,BTS,Marketing,16,7291.0,homme,0,2022-07-01
+183,Tazi,Zineb,zineb.tazi182@hotmail.com,+212 640912354,Fès,ISCAE Casablanca,Master,Commercial,23,8033.0,femme,1,2022-07-02
+184,Bennis,Btissam,btissam.bennis183@yahoo.fr,+212 647516108,Rabat,Université Cadi Ayyad Marrakech,Master,Logistique,20,9105.0,femme,0,2022-07-03
+185,Benjelloun,Bilal,bilal.benjelloun184@outlook.ma,+212 654181713,Fès,ENCG Casablanca,Licence,Commercial,2,,homme,1,2022-07-04
+186,Ouali,Youssef,youssef.ouali185@gmail.com,+212 614058848,Agadir,Université Abdelmalek Essaadi Tanger,Licence,Marketing,22,12133.0,homme,0,2022-07-05
+187,Sekkat,Khadija,khadija.sekkat186@yahoo.fr,+212 672201082,Rabat,Université Abdelmalek Essaadi Tanger,Master,Juridique,6,20958.0,femme,0,2022-07-06
+188,Ghali,Rachid,rachid.ghali187@hotmail.com,,Oujda,ENCG Casablanca,Master,Finance,16,9704.0,homme,1,2022-07-07
+189,Fassi,Rachid,rachid.fassi188@gmail.com,+212 665109050,Casablanca,ENSA Agadir,Master,Finance,11,11848.0,homme,0,2022-07-08
+190,Cherkaoui,Ahmed,ahmed.cherkaoui189@gmail.com,,Meknès,Université Abdelmalek Essaadi Tanger,Licence,Marketing,8,16975.0,homme,1,2022-07-09
+191,Tazi,Saad,saad.tazi190@gmail.com,+212 673391073,Rabat,ENSA Agadir,Master,Finance,14,10924.0,homme,1,2022-07-10
+192,Ziani,Soukaina,soukaina.ziani191@outlook.ma,+212 651040759,Tetouan,Université Hassan II Casablanca,Licence,Juridique,17,24212.0,femme,1,2022-07-11
+193,Benali,Btissam,btissam.benali192@hotmail.com,+212 629339821,Agadir,Université Hassan II Casablanca,Doctorat,Commercial,20,23614.0,femme,1,2022-07-12
+194,Fassi,Khalid,khalid.fassi193@yahoo.fr,+212 644275469,Rabat,Université Abdelmalek Essaadi Tanger,Master,Finance,12,4488.0,homme,1,2022-07-13
+195,Ouali,Rachid,rachid.ouali194@outlook.ma,+212 699393763,Rabat,Université Hassan II Casablanca,,Marketing,20,11114.0,homme,1,2022-07-14
+196,Alaoui,Khalid,khalid.alaoui195@outlook.ma,+212 638398068,Tetouan,Université Cadi Ayyad Marrakech,Licence,RH,7,19740.0,homme,0,2022-07-15
+197,Tazi,Mohammed,mohammed.tazi196@outlook.ma,+212 676134855,Oujda,ENSA Agadir,Master,RH,13,,homme,1,2022-07-16
+198,Bennis,Hafsa,hafsa.bennis197@gmail.com,+212 626530109,Rabat,ENSA Agadir,Licence,Informatique,7,5667.0,femme,1,2022-07-17
+199,Lahlou,Imane,imane.lahlou198@hotmail.com,+212 633195170,Meknès,Université Abdelmalek Essaadi Tanger,Licence,Finance,13,8114.0,femme,1,2022-07-18
+200,Bennis,Samira,samira.bennis199@outlook.ma,+212 637965074,Fès,Université Hassan II Casablanca,,Commercial,6,7553.0,femme,1,2022-07-19
+201,Lahlou,Bilal,bilal.lahlou200@yahoo.fr,+212 644575901,Oujda,Université Mohammed V Rabat,Master,Marketing,22,11761.0,homme,0,2022-07-20
+202,Chraibi,Hicham,hicham.chraibi201@hotmail.com,+212 682888141,Meknès,ISCAE Casablanca,Licence,Finance,11,5000.0,homme,1,2022-07-21
+203,Bensouda,Ahmed,ahmed.bensouda202@yahoo.fr,+212 654324346,Oujda,ENCG Casablanca,Licence,Logistique,10,19638.0,homme,1,2022-07-22
+204,Idrissi,Fatima,fatima.idrissi203@hotmail.com,+212 680001235,Meknès,ENCG Casablanca,Doctorat,Juridique,21,21772.0,femme,0,2022-07-23
+205,Moussaoui,Hicham,hicham.moussaoui204@yahoo.fr,+212 687309808,Agadir,ENSA Agadir,Licence,Finance,21,9450.0,homme,1,2022-07-24
+206,Cherkaoui,Bilal,bilal.cherkaoui205@gmail.com,+212 656276888,Meknès,Université Abdelmalek Essaadi Tanger,Master,Finance,10,7712.0,homme,1,2022-07-25
+207,Sekkat,Tariq,tariq.sekkat206@outlook.ma,+212 675257895,Tanger,Université Abdelmalek Essaadi Tanger,Licence,RH,24,5367.0,homme,1,2022-07-26
+208,Benkirane,Karim,karim.benkirane207@yahoo.fr,+212 660794649,Meknès,Université Cadi Ayyad Marrakech,,Juridique,21,12189.0,homme,1,2022-07-27
+209,Lahlou,Mehdi,mehdi.lahlou208@hotmail.com,+212 620539669,Casablanca,Université Sidi Mohammed Ben Abdellah Fès,Master,Marketing,12,13013.0,homme,1,2022-07-28
+210,Benjelloun,Bilal,bilal.benjelloun209@outlook.ma,+212 672670767,Casablanca,ISCAE Casablanca,Bac,Finance,17,20838.0,homme,0,2022-07-29
+211,Bensouda,Mehdi,mehdi.bensouda210@outlook.ma,+212 696708216,Kenitra,Université Sidi Mohammed Ben Abdellah Fès,Master,RH,1,23156.0,homme,1,2022-07-30
+212,Amrani,Nabil,nabil.amrani211@hotmail.com,+212 657108178,Tanger,ENSA Agadir,Master,Informatique,20,7726.0,homme,0,2022-07-31
+213,Hajji,Mehdi,mehdi.hajji212@yahoo.fr,+212 627292909,Tanger,ENCG Casablanca,Master,Juridique,14,8806.0,homme,1,2022-08-01
+214,Filali,Khalid,khalid.filali213@gmail.com,+212 629413938,Fès,Université Cadi Ayyad Marrakech,Master,RH,19,6190.0,homme,1,2022-08-02
+215,Hajji,Nabil,nabil.hajji214@gmail.com,+212 668149762,Tanger,Université Cadi Ayyad Marrakech,Licence,RH,17,,homme,0,2022-08-03
+216,Benali,Anas,anas.benali215@yahoo.fr,+212 627016233,Fès,Université Cadi Ayyad Marrakech,Bac,Commercial,14,16178.0,homme,0,2022-08-04
+217,Benjelloun,Hicham,hicham.benjelloun216@outlook.ma,+212 660746642,Kenitra,ENSA Agadir,Master,RH,18,6875.0,homme,1,2022-08-05
+218,Benkirane,Karim,karim.benkirane217@outlook.ma,+212 687337555,Kenitra,Université Sidi Mohammed Ben Abdellah Fès,Master,Commercial,22,9592.0,homme,0,2022-08-06
+219,Ziani,Nabil,nabil.ziani218@outlook.ma,+212 666043692,Agadir,ENCG Casablanca,Doctorat,Finance,23,21824.0,homme,1,2022-08-07
+220,Bensouda,Btissam,btissam.bensouda219@outlook.ma,+212 644020414,Casablanca,Université Cadi Ayyad Marrakech,Doctorat,Finance,11,,femme,0,2022-08-08
+221,Ziani,Mohammed,mohammed.ziani220@yahoo.fr,+212 623907579,Meknès,ENCG Casablanca,Doctorat,Informatique,12,12927.0,homme,0,2022-08-09
+222,Idrissi,Bilal,bilal.idrissi221@outlook.ma,+212 682562038,Meknès,Université Hassan II Casablanca,Master,Logistique,21,18437.0,homme,1,2022-08-10
+223,Amrani,Hamza,hamza.amrani222@hotmail.com,+212 616124152,Tetouan,Université Abdelmalek Essaadi Tanger,Licence,Logistique,10,15530.0,homme,1,2022-08-11
+224,Alaoui,Mohammed,mohammed.alaoui223@outlook.ma,+212 611164795,Tetouan,Université Abdelmalek Essaadi Tanger,Master,Logistique,4,,homme,1,2022-08-12
+225,Benali,Anas,anas.benali224@gmail.com,+212 653332370,Marrakech,ENCG Casablanca,Master,Commercial,0,15207.0,homme,0,2022-08-13
+226,Fassi,Mohammed,mohammed.fassi225@outlook.ma,+212 663009395,Oujda,Université Mohammed V Rabat,,Juridique,23,6989.0,homme,1,2022-08-14
+227,Cherkaoui,Khadija,khadija.cherkaoui226@yahoo.fr,+212 690875917,Agadir,Université Mohammed V Rabat,Doctorat,Juridique,2,16040.0,femme,1,2022-08-15
+228,Moussaoui,Tariq,tariq.moussaoui227@gmail.com,+212 679518245,Marrakech,ENSA Agadir,Doctorat,Informatique,21,13218.0,homme,1,2022-08-16
+229,Chraibi,Nadia,nadia.chraibi228@yahoo.fr,+212 650580924,Marrakech,ENSA Agadir,Master,Juridique,18,10471.0,femme,1,2022-08-17
+230,Filali,Nabil,nabil.filali229@yahoo.fr,+212 635086627,Rabat,Université Abdelmalek Essaadi Tanger,Bac,Logistique,22,6863.0,homme,1,2022-08-18
+231,Alaoui,Loubna,loubna.alaoui230@gmail.com,+212 621959207,Rabat,Université Hassan II Casablanca,Licence,Logistique,6,14693.0,femme,1,2022-08-19
+232,Tazi,Nabil,nabil.tazi231@yahoo.fr,+212 667190864,Marrakech,ISCAE Casablanca,Doctorat,RH,11,5177.0,homme,0,2022-08-20
+233,Benjelloun,Anas,anas.benjelloun232@yahoo.fr,+212 673881480,Tanger,Université Sidi Mohammed Ben Abdellah Fès,BTS,Juridique,14,8760.0,homme,1,2022-08-21
+234,Benjelloun,Khalid,khalid.benjelloun233@outlook.ma,+212 663274943,Oujda,Université Sidi Mohammed Ben Abdellah Fès,Licence,Finance,24,4011.0,homme,0,2022-08-22
+235,Berrada,Hicham,hicham.berrada234@hotmail.com,+212 630060832,Agadir,ENSA Agadir,Bac,Finance,4,20353.0,homme,1,2022-08-23
+236,Moussaoui,Bilal,bilal.moussaoui235@yahoo.fr,+212 610077175,Marrakech,Université Hassan II Casablanca,Doctorat,RH,14,24783.0,homme,0,2022-08-24
+237,Cherkaoui,Saad,saad.cherkaoui236@yahoo.fr,+212 621074355,Meknès,ENSA Agadir,Licence,RH,7,15556.0,homme,1,2022-08-25
+238,Cherkaoui,Omar,omar.cherkaoui237@yahoo.fr,+212 695964888,Oujda,ISCAE Casablanca,Master,RH,9,15563.0,homme,1,2022-08-26
+239,Bouzidi,Hicham,hicham.bouzidi238@outlook.ma,+212 661689101,Rabat,Université Sidi Mohammed Ben Abdellah Fès,BTS,Finance,15,18051.0,homme,0,2022-08-27
+240,Rachidi,Anas,anas.rachidi239@hotmail.com,+212 629789002,Meknès,ENCG Casablanca,Bac,Logistique,7,15022.0,homme,0,2022-08-28
+241,Alaoui,Zineb,zineb.alaoui240@gmail.com,+212 660426676,Rabat,ENSA Agadir,Master,RH,0,12234.0,femme,0,2022-08-29
+242,Benkirane,Btissam,btissam.benkirane241@outlook.ma,+212 678667106,Rabat,Université Cadi Ayyad Marrakech,Bac,Informatique,11,20173.0,femme,1,2022-08-30
+243,Berrada,Soukaina,soukaina.berrada242@outlook.ma,+212 642648168,Oujda,ENCG Casablanca,Licence,Commercial,4,17178.0,femme,1,2022-08-31
+244,Tazi,Hicham,hicham.tazi243@hotmail.com,+212 690183226,Rabat,ISCAE Casablanca,Doctorat,RH,2,10570.0,homme,0,2022-09-01
+245,Moussaoui,Karim,karim.moussaoui244@hotmail.com,+212 659375565,Kenitra,ISCAE Casablanca,Licence,Commercial,0,4406.0,homme,1,2022-09-02
+246,Sekkat,Meryem,meryem.sekkat245@outlook.ma,+212 631725224,Casablanca,ENSA Agadir,BTS,Marketing,3,13206.0,femme,0,2022-09-03
+247,Berrada,Youssef,youssef.berrada246@gmail.com,+212 682554179,Kenitra,Université Abdelmalek Essaadi Tanger,Master,RH,7,8431.0,homme,1,2022-09-04
+248,Bennis,Houda,houda.bennis247@outlook.ma,+212 618552442,Casablanca,ENSA Agadir,Licence,Finance,2,10542.0,femme,1,2022-09-05
+249,Tahiri,Khadija,khadija.tahiri248@hotmail.com,+212 619618395,Tetouan,Université Abdelmalek Essaadi Tanger,Licence,Juridique,9,12906.0,femme,0,2022-09-06
+250,Filali,Loubna,loubna.filali249@gmail.com,+212 646566791,Tetouan,ISCAE Casablanca,Licence,RH,1,8146.0,femme,1,2022-09-07
+251,Bennis,Omar,omar.bennis250@hotmail.com,+212 619714177,Rabat,Université Hassan II Casablanca,Licence,Juridique,10,,homme,0,2022-09-08
+252,Lahlou,Hicham,hicham.lahlou251@gmail.com,+212 659626984,Agadir,ISCAE Casablanca,Bac,Marketing,24,16611.0,homme,0,2022-09-09
+253,Benjelloun,Laila,laila.benjelloun252@yahoo.fr,+212 686914300,Agadir,Université Sidi Mohammed Ben Abdellah Fès,Licence,Informatique,9,17076.0,femme,0,2022-09-10
+254,Tahiri,Nabil,nabil.tahiri253@hotmail.com,+212 684313640,Casablanca,ENCG Casablanca,Master,Juridique,20,20524.0,homme,0,2022-09-11
+255,Amrani,Saad,saad.amrani254@hotmail.com,+212 697094903,Meknès,ENCG Casablanca,Master,Commercial,13,8882.0,homme,1,2022-09-12
+256,Ziani,Tariq,tariq.ziani255@outlook.ma,+212 615051646,Oujda,Université Mohammed V Rabat,Master,Logistique,6,18113.0,homme,1,2022-09-13
+257,Tahiri,Zineb,zineb.tahiri256@hotmail.com,+212 680734518,Rabat,Université Mohammed V Rabat,Master,RH,1,17645.0,femme,1,2022-09-14
+258,Lahlou,Bilal,bilal.lahlou257@hotmail.com,+212 610285711,Oujda,ISCAE Casablanca,Bac,Marketing,8,10012.0,homme,0,2022-09-15
+259,Rachidi,Khalid,khalid.rachidi258@yahoo.fr,+212 699164252,Kenitra,Université Sidi Mohammed Ben Abdellah Fès,Licence,Marketing,15,21347.0,homme,0,2022-09-16
+260,Ouali,Youssef,youssef.ouali259@hotmail.com,+212 667244528,Agadir,Université Mohammed V Rabat,Master,Juridique,12,11151.0,homme,1,2022-09-17
+261,Alaoui,Youssef,youssef.alaoui260@yahoo.fr,+212 627353135,Tanger,ENCG Casablanca,Master,Informatique,8,7610.0,homme,1,2022-09-18
+262,Kettani,Loubna,loubna.kettani261@yahoo.fr,+212 624689949,Kenitra,ENSA Agadir,Bac,Finance,19,13884.0,femme,0,2022-09-19
+263,Ghali,Mehdi,mehdi.ghali262@yahoo.fr,+212 697217186,Kenitra,Université Hassan II Casablanca,Doctorat,RH,3,10894.0,homme,1,2022-09-20
+264,Hajji,Omar,omar.hajji263@yahoo.fr,+212 686350218,Casablanca,Université Hassan II Casablanca,Master,Marketing,21,17467.0,homme,1,2022-09-21
+265,Rachidi,Hafsa,hafsa.rachidi264@gmail.com,+212 643976813,Fès,Université Sidi Mohammed Ben Abdellah Fès,Master,Informatique,9,,femme,1,2022-09-22
+266,Sekkat,Saad,saad.sekkat265@outlook.ma,+212 661308081,Kenitra,ISCAE Casablanca,,Logistique,21,,homme,1,2022-09-23
+267,Sekkat,Bilal,bilal.sekkat266@gmail.com,+212 656597588,Rabat,Université Mohammed V Rabat,Master,Marketing,11,16289.0,homme,0,2022-09-24
+268,Chraibi,Omar,omar.chraibi267@hotmail.com,+212 621059860,Marrakech,ENSA Agadir,Master,Informatique,16,16208.0,homme,0,2022-09-25
+269,Lahlou,Mehdi,mehdi.lahlou268@gmail.com,+212 614900164,Marrakech,Université Hassan II Casablanca,Master,Finance,13,14828.0,homme,1,2022-09-26
+270,Idrissi,Mohammed,mohammed.idrissi269@gmail.com,+212 619909551,Rabat,Université Hassan II Casablanca,Master,Finance,13,6137.0,homme,0,2022-09-27
+271,Kettani,Houda,houda.kettani270@hotmail.com,+212 691061139,Fès,Université Cadi Ayyad Marrakech,Doctorat,Marketing,24,,femme,1,2022-09-28
+272,Alaoui,Salma,salma.alaoui271@hotmail.com,+212 616336356,Fès,ISCAE Casablanca,Master,Commercial,1,23914.0,femme,1,2022-09-29
+273,Benjelloun,Soukaina,soukaina.benjelloun272@hotmail.com,+212 632456258,Casablanca,Université Cadi Ayyad Marrakech,Licence,Marketing,20,5286.0,femme,0,2022-09-30
+274,Cherkaoui,Ghita,ghita.cherkaoui273@gmail.com,+212 694287147,Agadir,ENCG Casablanca,Master,Juridique,24,19710.0,femme,1,2022-10-01
+275,Chraibi,Saad,saad.chraibi274@gmail.com,+212 690813044,Oujda,Université Hassan II Casablanca,Master,RH,19,15371.0,homme,0,2022-10-02
+276,Bouzidi,Mehdi,mehdi.bouzidi275@hotmail.com,+212 610460796,Fès,Université Sidi Mohammed Ben Abdellah Fès,Master,Informatique,10,19945.0,homme,1,2022-10-03
+277,Amrani,Fatima,fatima.amrani276@outlook.ma,+212 624503356,Tanger,Université Abdelmalek Essaadi Tanger,Licence,Marketing,15,11052.0,femme,1,2022-10-04
+278,Benkirane,Tariq,tariq.benkirane277@outlook.ma,+212 615994376,Casablanca,Université Abdelmalek Essaadi Tanger,,RH,18,7654.0,homme,1,2022-10-05
+279,Filali,Hamza,hamza.filali278@yahoo.fr,,Tetouan,ENSA Agadir,Doctorat,Juridique,22,22743.0,homme,1,2022-10-06
+280,Idrissi,Imane,imane.idrissi279@hotmail.com,+212 682098768,Meknès,Université Hassan II Casablanca,Master,RH,5,19600.0,femme,1,2022-10-07
+281,Rachidi,Nadia,nadia.rachidi280@yahoo.fr,+212 619392609,Tetouan,Université Hassan II Casablanca,BTS,Marketing,23,12636.0,femme,1,2022-10-08
+282,Bouzidi,Bilal,bilal.bouzidi281@outlook.ma,+212 627089239,Casablanca,ENCG Casablanca,Master,Finance,18,10441.0,homme,1,2022-10-09
+283,Alaoui,Youssef,youssef.alaoui282@yahoo.fr,+212 688703071,Kenitra,Université Hassan II Casablanca,Master,Informatique,4,13667.0,homme,0,2022-10-10
+284,Tahiri,Mehdi,mehdi.tahiri283@hotmail.com,+212 649824448,Oujda,Université Sidi Mohammed Ben Abdellah Fès,Master,Informatique,3,16149.0,homme,0,2022-10-11
+285,Cherkaoui,Tariq,tariq.cherkaoui284@hotmail.com,+212 684931500,Meknès,Université Cadi Ayyad Marrakech,Doctorat,Finance,14,5798.0,homme,0,2022-10-12
+286,Ghali,Ahmed,ahmed.ghali285@hotmail.com,+212 639851990,Tetouan,Université Hassan II Casablanca,Master,Commercial,3,13600.0,homme,0,2022-10-13
+287,Bouzidi,Nabil,nabil.bouzidi286@gmail.com,+212 694641191,Meknès,Université Hassan II Casablanca,Master,Marketing,19,9495.0,homme,1,2022-10-14
+288,Berrada,Hamza,hamza.berrada287@yahoo.fr,+212 629097931,Tanger,ENCG Casablanca,Licence,Informatique,9,13900.0,homme,1,2022-10-15
+289,Benjelloun,Nabil,nabil.benjelloun288@outlook.ma,+212 629012021,Tanger,ISCAE Casablanca,Master,Marketing,23,17673.0,homme,1,2022-10-16
+290,Benkirane,Khalid,khalid.benkirane289@outlook.ma,+212 663789198,Tanger,Université Mohammed V Rabat,Master,Juridique,21,15130.0,homme,0,2022-10-17
+291,Filali,Ahmed,ahmed.filali290@outlook.ma,+212 645104616,Casablanca,ISCAE Casablanca,Licence,Marketing,2,19222.0,homme,1,2022-10-18
+292,Sekkat,Nabil,nabil.sekkat291@gmail.com,+212 685261977,Oujda,ENCG Casablanca,Licence,RH,4,5300.0,homme,0,2022-10-19
+293,Benkirane,Meryem,meryem.benkirane292@gmail.com,+212 646827955,Casablanca,ISCAE Casablanca,Licence,Finance,5,13435.0,femme,1,2022-10-20
+294,Ghali,Anas,anas.ghali293@hotmail.com,+212 635254492,Marrakech,ENCG Casablanca,Licence,Commercial,20,,homme,1,2022-10-21
+295,Bouzidi,Mohammed,mohammed.bouzidi294@outlook.ma,+212 671555093,Kenitra,Université Sidi Mohammed Ben Abdellah Fès,Licence,Marketing,21,,homme,0,2022-10-22
+296,Ouali,Saad,saad.ouali295@gmail.com,+212 667293031,Kenitra,ENSA Agadir,Licence,Commercial,7,20393.0,homme,0,2022-10-23
+297,Alaoui,Khadija,khadija.alaoui296@hotmail.com,+212 655562388,Tanger,Université Hassan II Casablanca,BTS,Commercial,6,14617.0,femme,0,2022-10-24
+298,Berrada,Bilal,bilal.berrada297@outlook.ma,+212 637090738,Marrakech,ENCG Casablanca,Master,Juridique,20,9752.0,homme,1,2022-10-25
+299,Kettani,Mehdi,mehdi.kettani298@yahoo.fr,+212 643269285,Fès,ENCG Casablanca,Licence,Logistique,9,13852.0,homme,1,2022-10-26
+300,Ghali,Rachid,rachid.ghali299@hotmail.com,+212 642436728,Fès,Université Mohammed V Rabat,Bac,Finance,5,10295.0,homme,1,2022-10-27
+301,Benkirane,Khalid,khalid.benkirane300@gmail.com,+212 674999068,Tanger,ENCG Casablanca,Master,Commercial,13,21456.0,homme,0,2022-10-28
+302,Hajji,Hamza,hamza.hajji301@gmail.com,+212 672730418,Tetouan,Université Abdelmalek Essaadi Tanger,Licence,Informatique,3,7225.0,homme,1,2022-10-29
+303,Filali,Bilal,bilal.filali302@hotmail.com,+212 690244867,Casablanca,ENSA Agadir,Doctorat,RH,24,5316.0,homme,1,2022-10-30
+304,Kettani,Ahmed,ahmed.kettani303@hotmail.com,+212 696656822,Tanger,Université Hassan II Casablanca,Master,Informatique,12,16337.0,homme,1,2022-10-31
+305,Tahiri,Karim,karim.tahiri304@gmail.com,+212 663102022,Agadir,Université Hassan II Casablanca,Master,Juridique,19,10807.0,homme,0,2022-11-01
+306,Benkirane,Meryem,meryem.benkirane305@yahoo.fr,+212 638748123,Meknès,Université Mohammed V Rabat,,Juridique,16,7683.0,femme,0,2022-11-02
+307,Lahlou,Karim,karim.lahlou306@outlook.ma,+212 654988955,Kenitra,Université Sidi Mohammed Ben Abdellah Fès,Master,Informatique,22,11227.0,homme,1,2022-11-03
+308,Alaoui,Tariq,tariq.alaoui307@yahoo.fr,+212 676290435,Fès,Université Hassan II Casablanca,Licence,Finance,6,7273.0,homme,0,2022-11-04
+309,Sekkat,Salma,salma.sekkat308@hotmail.com,+212 650850837,Rabat,Université Abdelmalek Essaadi Tanger,BTS,Informatique,3,4145.0,femme,0,2022-11-05
+310,Chraibi,Rachid,rachid.chraibi309@yahoo.fr,+212 633623755,Fès,Université Hassan II Casablanca,Master,Marketing,13,9010.0,homme,0,2022-11-06
+311,Benali,Mehdi,mehdi.benali310@gmail.com,+212 691248172,Kenitra,Université Abdelmalek Essaadi Tanger,Licence,Informatique,2,20035.0,homme,1,2022-11-07
+312,Ziani,Mohammed,mohammed.ziani311@hotmail.com,+212 618659522,Meknès,ENSA Agadir,Licence,RH,23,7040.0,homme,1,2022-11-08
+313,Benkirane,Rachid,rachid.benkirane312@outlook.ma,+212 664441451,Kenitra,ENSA Agadir,Licence,RH,4,13654.0,homme,1,2022-11-09
+314,Idrissi,Salma,salma.idrissi313@gmail.com,+212 665967937,Rabat,Université Cadi Ayyad Marrakech,Master,Logistique,15,20866.0,femme,1,2022-11-10
+315,Ziani,Hafsa,hafsa.ziani314@gmail.com,+212 639639841,Tanger,Université Cadi Ayyad Marrakech,Licence,RH,22,23563.0,femme,1,2022-11-11
+316,Benkirane,Khalid,khalid.benkirane315@outlook.ma,+212 627811802,Marrakech,Université Abdelmalek Essaadi Tanger,,Informatique,19,21633.0,homme,0,2022-11-12
+317,Chraibi,Khalid,khalid.chraibi316@outlook.ma,+212 674812392,Rabat,Université Sidi Mohammed Ben Abdellah Fès,Licence,RH,3,21014.0,homme,1,2022-11-13
+318,Ouali,Omar,omar.ouali317@yahoo.fr,+212 636912512,Kenitra,Université Hassan II Casablanca,Master,Finance,23,18996.0,homme,0,2022-11-14
+319,Chraibi,Hamza,hamza.chraibi318@hotmail.com,+212 691428039,Kenitra,ENCG Casablanca,Doctorat,Commercial,23,20336.0,homme,1,2022-11-15
+320,Idrissi,Hicham,hicham.idrissi319@outlook.ma,+212 649101526,Agadir,Université Hassan II Casablanca,Master,RH,1,12853.0,homme,0,2022-11-16
+321,Tahiri,Karim,karim.tahiri320@outlook.ma,+212 613100581,Agadir,Université Cadi Ayyad Marrakech,Master,Marketing,17,15695.0,homme,0,2022-11-17
+322,Hajji,Hicham,hicham.hajji321@hotmail.com,+212 646216069,Oujda,ISCAE Casablanca,Licence,Finance,18,6852.0,homme,0,2022-11-18
+323,Ouali,Hicham,hicham.ouali322@outlook.ma,+212 680781141,Agadir,ENCG Casablanca,Bac,Logistique,18,20014.0,homme,0,2022-11-19
+324,Tazi,Hicham,hicham.tazi323@outlook.ma,+212 628861720,Casablanca,Université Abdelmalek Essaadi Tanger,Master,Marketing,16,4987.0,homme,0,2022-11-20
+325,Sekkat,Loubna,loubna.sekkat324@yahoo.fr,+212 622545745,Marrakech,ENCG Casablanca,Licence,Informatique,13,11622.0,femme,0,2022-11-21
+326,Alaoui,Anas,anas.alaoui325@gmail.com,+212 687752208,Meknès,ISCAE Casablanca,Licence,Commercial,18,13160.0,homme,1,2022-11-22
+327,Benjelloun,Omar,omar.benjelloun326@gmail.com,+212 646575804,Rabat,Université Hassan II Casablanca,,Informatique,21,21484.0,homme,1,2022-11-23
+328,Fassi,Mehdi,mehdi.fassi327@gmail.com,+212 626077579,Kenitra,Université Hassan II Casablanca,Licence,Commercial,23,10652.0,homme,1,2022-11-24
+329,Bennis,Omar,omar.bennis328@gmail.com,+212 654331269,Oujda,Université Sidi Mohammed Ben Abdellah Fès,Bac,Commercial,12,11421.0,homme,1,2022-11-25
+330,Sekkat,Youssef,youssef.sekkat329@outlook.ma,+212 671842137,Oujda,Université Mohammed V Rabat,Doctorat,Informatique,11,,homme,1,2022-11-26
+331,Sekkat,Youssef,youssef.sekkat330@hotmail.com,+212 614854042,Meknès,ENCG Casablanca,Licence,Marketing,5,21727.0,homme,1,2022-11-27
+332,Cherkaoui,Loubna,loubna.cherkaoui331@hotmail.com,+212 674528007,Marrakech,Université Cadi Ayyad Marrakech,Master,Marketing,20,18114.0,femme,1,2022-11-28
+333,Bennis,Anas,anas.bennis332@yahoo.fr,+212 696357458,Rabat,ISCAE Casablanca,,Commercial,3,8358.0,homme,0,2022-11-29
+334,Benali,Rachid,rachid.benali333@yahoo.fr,,Fès,ISCAE Casablanca,,Marketing,18,15543.0,homme,0,2022-11-30
+335,Idrissi,Hamza,hamza.idrissi334@outlook.ma,+212 621951552,Agadir,ISCAE Casablanca,Licence,Commercial,15,22733.0,homme,1,2022-12-01
+336,Fassi,Anas,anas.fassi335@hotmail.com,+212 665685560,Tanger,Université Cadi Ayyad Marrakech,Doctorat,Commercial,12,9699.0,homme,1,2022-12-02
+337,Moussaoui,Loubna,loubna.moussaoui336@hotmail.com,+212 690947292,Oujda,Université Mohammed V Rabat,Doctorat,Finance,3,21625.0,femme,1,2022-12-03
+338,Ziani,Khalid,khalid.ziani337@gmail.com,+212 628130540,Agadir,Université Hassan II Casablanca,Licence,Juridique,22,5125.0,homme,0,2022-12-04
+339,Tazi,Ahmed,ahmed.tazi338@outlook.ma,+212 667084656,Agadir,Université Sidi Mohammed Ben Abdellah Fès,BTS,Finance,16,,homme,0,2022-12-05
+340,Moussaoui,Hamza,hamza.moussaoui339@outlook.ma,+212 646926887,Casablanca,Université Sidi Mohammed Ben Abdellah Fès,,Informatique,22,10764.0,homme,1,2022-12-06
+341,Chraibi,Saad,saad.chraibi340@gmail.com,+212 614268173,Marrakech,Université Cadi Ayyad Marrakech,Doctorat,Juridique,0,16323.0,homme,0,2022-12-07
+342,Tahiri,Karim,karim.tahiri341@outlook.ma,+212 683143586,Tanger,Université Sidi Mohammed Ben Abdellah Fès,Doctorat,RH,17,17031.0,homme,1,2022-12-08
+343,Kettani,Hamza,hamza.kettani342@outlook.ma,+212 652812847,Fès,ISCAE Casablanca,,Informatique,19,18052.0,homme,1,2022-12-09
+344,Chraibi,Nabil,nabil.chraibi343@yahoo.fr,+212 633787347,Kenitra,ENSA Agadir,Master,Logistique,16,16640.0,homme,1,2022-12-10
+345,Alaoui,Khalid,khalid.alaoui344@hotmail.com,,Casablanca,Université Mohammed V Rabat,Bac,Finance,14,11843.0,homme,1,2022-12-11
+346,Rachidi,Khalid,khalid.rachidi345@outlook.ma,+212 681178892,Agadir,Université Hassan II Casablanca,Bac,Marketing,10,18210.0,homme,1,2022-12-12
+347,Alaoui,Mohammed,mohammed.alaoui346@yahoo.fr,+212 634728252,Agadir,ENSA Agadir,BTS,Finance,24,20456.0,homme,1,2022-12-13
+348,Benkirane,Hicham,hicham.benkirane347@hotmail.com,+212 633647205,Tetouan,Université Mohammed V Rabat,Licence,Marketing,21,,homme,1,2022-12-14
+349,Rachidi,Anas,anas.rachidi348@gmail.com,+212 654607536,Tanger,Université Abdelmalek Essaadi Tanger,Master,Juridique,12,,homme,1,2022-12-15
+350,Rachidi,Khalid,khalid.rachidi349@yahoo.fr,+212 642916781,Tanger,ENCG Casablanca,Doctorat,Logistique,0,6472.0,homme,0,2022-12-16
+351,Ouali,Youssef,youssef.ouali350@yahoo.fr,+212 688369648,Tetouan,Université Cadi Ayyad Marrakech,Doctorat,Juridique,16,,homme,0,2022-12-17
+352,Tahiri,Ghita,ghita.tahiri351@hotmail.com,+212 611369277,Tanger,ISCAE Casablanca,BTS,Logistique,5,22188.0,femme,0,2022-12-18
+353,Benali,Mehdi,mehdi.benali352@gmail.com,+212 699408647,Agadir,Université Sidi Mohammed Ben Abdellah Fès,Licence,Finance,3,10704.0,homme,1,2022-12-19
+354,Ghali,Ahmed,ahmed.ghali353@yahoo.fr,+212 633499306,Oujda,Université Abdelmalek Essaadi Tanger,Bac,Marketing,19,7713.0,homme,1,2022-12-20
+355,Chraibi,Nabil,nabil.chraibi354@outlook.ma,+212 610749971,Rabat,Université Sidi Mohammed Ben Abdellah Fès,Licence,Juridique,15,9051.0,homme,1,2022-12-21
+356,Ouali,Karim,karim.ouali355@outlook.ma,+212 671313915,Agadir,ENSA Agadir,Licence,Logistique,14,14756.0,homme,0,2022-12-22
+357,Filali,Anas,anas.filali356@outlook.ma,+212 625711072,Casablanca,Université Hassan II Casablanca,Bac,Commercial,14,6475.0,homme,0,2022-12-23
+358,Ghali,Bilal,bilal.ghali357@gmail.com,+212 614460276,Marrakech,Université Hassan II Casablanca,Licence,Informatique,5,7610.0,homme,1,2022-12-24
+359,Hajji,Khadija,khadija.hajji358@yahoo.fr,+212 651011120,Tetouan,Université Hassan II Casablanca,Master,Informatique,14,8255.0,femme,0,2022-12-25
+360,Tazi,Tariq,tariq.tazi359@outlook.ma,+212 664407485,Fès,ISCAE Casablanca,Master,Juridique,13,18484.0,homme,1,2022-12-26
+361,Tazi,Saad,saad.tazi360@gmail.com,+212 662565354,Kenitra,Université Sidi Mohammed Ben Abdellah Fès,Licence,Marketing,10,5735.0,homme,1,2022-12-27
+362,Amrani,Rachid,rachid.amrani361@outlook.ma,+212 666426293,Fès,Université Abdelmalek Essaadi Tanger,Master,Commercial,6,12258.0,homme,1,2022-12-28
+363,Cherkaoui,Khalid,khalid.cherkaoui362@hotmail.com,+212 627962327,Agadir,Université Hassan II Casablanca,Licence,Juridique,8,11979.0,homme,0,2022-12-29
+364,Berrada,Bilal,bilal.berrada363@yahoo.fr,+212 624226224,Casablanca,Université Abdelmalek Essaadi Tanger,Bac,Finance,15,6428.0,homme,0,2022-12-30
+365,Berrada,Salma,salma.berrada364@yahoo.fr,+212 634509968,Agadir,Université Sidi Mohammed Ben Abdellah Fès,Master,Logistique,4,16345.0,femme,0,2022-12-31
+366,Ziani,Hamza,hamza.ziani365@gmail.com,+212 696278999,Marrakech,ISCAE Casablanca,Master,Finance,24,11426.0,homme,1,2023-01-01
+367,Bouzidi,Khadija,khadija.bouzidi366@gmail.com,+212 611500948,Oujda,ENSA Agadir,Master,Informatique,19,,femme,1,2023-01-02
+368,Alaoui,Nadia,nadia.alaoui367@yahoo.fr,,Kenitra,ISCAE Casablanca,Bac,Logistique,9,9249.0,femme,0,2023-01-03
+369,Berrada,Mohammed,mohammed.berrada368@outlook.ma,+212 630885050,Marrakech,Université Abdelmalek Essaadi Tanger,,Juridique,17,23201.0,homme,1,2023-01-04
+370,Ziani,Hamza,hamza.ziani369@outlook.ma,+212 641834022,Tetouan,ISCAE Casablanca,Master,Finance,2,24258.0,homme,1,2023-01-05
+371,Cherkaoui,Mohammed,mohammed.cherkaoui370@hotmail.com,+212 662740278,Tetouan,ISCAE Casablanca,Master,RH,12,13686.0,homme,0,2023-01-06
+372,Berrada,Saad,saad.berrada371@outlook.ma,+212 692335423,Agadir,ENSA Agadir,Master,Marketing,10,18109.0,homme,1,2023-01-07
+373,Tahiri,Nabil,nabil.tahiri372@gmail.com,+212 673388426,Casablanca,Université Sidi Mohammed Ben Abdellah Fès,Doctorat,Commercial,16,24595.0,homme,1,2023-01-08
+374,Tahiri,Mohammed,mohammed.tahiri373@gmail.com,+212 668426861,Marrakech,Université Sidi Mohammed Ben Abdellah Fès,Master,Commercial,21,4661.0,homme,0,2023-01-09
+375,Filali,Bilal,bilal.filali374@outlook.ma,+212 666251274,Meknès,Université Cadi Ayyad Marrakech,Master,Marketing,12,16075.0,homme,0,2023-01-10
+376,Ghali,Hicham,hicham.ghali375@gmail.com,+212 637870540,Casablanca,ISCAE Casablanca,BTS,RH,5,18788.0,homme,1,2023-01-11
+377,Benjelloun,Salma,salma.benjelloun376@yahoo.fr,,Oujda,Université Sidi Mohammed Ben Abdellah Fès,Master,Informatique,16,14060.0,femme,1,2023-01-12
+378,Tahiri,Rachid,rachid.tahiri377@yahoo.fr,+212 694078592,Tetouan,Université Sidi Mohammed Ben Abdellah Fès,Licence,Logistique,12,,homme,1,2023-01-13
+379,Fassi,Ghita,ghita.fassi378@outlook.ma,+212 673876263,Agadir,Université Mohammed V Rabat,Master,Marketing,18,14526.0,femme,1,2023-01-14
+380,Berrada,Karim,karim.berrada379@yahoo.fr,+212 676907755,Tanger,Université Hassan II Casablanca,Licence,RH,20,7374.0,homme,1,2023-01-15
+381,Bensouda,Nabil,nabil.bensouda380@yahoo.fr,+212 657718418,Tetouan,Université Cadi Ayyad Marrakech,Licence,Juridique,18,4207.0,homme,0,2023-01-16
+382,Bennis,Hamza,hamza.bennis381@hotmail.com,+212 630491595,Kenitra,ENCG Casablanca,Master,Commercial,9,6665.0,homme,1,2023-01-17
+383,Ziani,Tariq,tariq.ziani382@hotmail.com,+212 641175239,Rabat,Université Cadi Ayyad Marrakech,BTS,RH,2,,homme,1,2023-01-18
+384,Ouali,Laila,laila.ouali383@yahoo.fr,+212 615845447,Tanger,Université Cadi Ayyad Marrakech,BTS,Informatique,13,4632.0,femme,0,2023-01-19
+385,Benkirane,Youssef,youssef.benkirane384@outlook.ma,+212 673105980,Agadir,ENCG Casablanca,Licence,Informatique,18,7083.0,homme,1,2023-01-20
+386,Tahiri,Fatima,fatima.tahiri385@hotmail.com,+212 645103852,Meknès,Université Mohammed V Rabat,Master,Finance,4,17711.0,femme,1,2023-01-21
+387,Benjelloun,Khalid,khalid.benjelloun386@gmail.com,+212 670796171,Tanger,ISCAE Casablanca,Licence,Marketing,4,,homme,0,2023-01-22
+388,Cherkaoui,Ahmed,ahmed.cherkaoui387@gmail.com,+212 688846396,Kenitra,ENSA Agadir,,Finance,19,24103.0,homme,1,2023-01-23
+389,Sekkat,Meryem,meryem.sekkat388@gmail.com,+212 676475936,Casablanca,Université Sidi Mohammed Ben Abdellah Fès,BTS,Commercial,16,11123.0,femme,0,2023-01-24
+390,Bensouda,Soukaina,soukaina.bensouda389@outlook.ma,+212 658491820,Meknès,Université Hassan II Casablanca,Master,RH,20,14754.0,femme,0,2023-01-25
+391,Bouzidi,Hafsa,hafsa.bouzidi390@yahoo.fr,+212 685421798,Tetouan,Université Abdelmalek Essaadi Tanger,Doctorat,Logistique,9,5679.0,femme,0,2023-01-26
+392,Ouali,Omar,omar.ouali391@gmail.com,+212 681009243,Meknès,ISCAE Casablanca,Master,Logistique,4,,homme,1,2023-01-27
+393,Ghali,Bilal,bilal.ghali392@outlook.ma,+212 647358841,Marrakech,ENCG Casablanca,Master,Informatique,3,4236.0,homme,1,2023-01-28
+394,Amrani,Samira,samira.amrani393@hotmail.com,+212 621353540,Kenitra,ENSA Agadir,Bac,Logistique,5,11446.0,femme,0,2023-01-29
+395,Ghali,Ahmed,ahmed.ghali394@yahoo.fr,+212 616722055,Tanger,ISCAE Casablanca,Master,Logistique,3,8443.0,homme,1,2023-01-30
+396,Berrada,Btissam,btissam.berrada395@hotmail.com,+212 692164888,Marrakech,ENCG Casablanca,Master,Commercial,6,,femme,0,2023-01-31
+397,Fassi,Meryem,meryem.fassi396@outlook.ma,+212 658968538,Meknès,Université Sidi Mohammed Ben Abdellah Fès,Master,Logistique,6,12555.0,femme,1,2023-02-01
+398,Rachidi,Ahmed,ahmed.rachidi397@gmail.com,+212 619035949,Marrakech,Université Mohammed V Rabat,Licence,RH,17,,homme,1,2023-02-02
+399,Kettani,Nadia,nadia.kettani398@gmail.com,+212 695407062,Fès,ISCAE Casablanca,BTS,Logistique,2,20669.0,femme,1,2023-02-03
+400,Fassi,Fatima,fatima.fassi399@outlook.ma,+212 642672748,Kenitra,ENCG Casablanca,Licence,Juridique,0,4148.0,femme,1,2023-02-04
+401,Filali,Nabil,nabil.filali400@gmail.com,+212 683390510,Oujda,Université Sidi Mohammed Ben Abdellah Fès,Master,Logistique,23,17395.0,homme,0,2023-02-05
+402,Bensouda,Hafsa,hafsa.bensouda401@yahoo.fr,+212 649980720,Casablanca,Université Sidi Mohammed Ben Abdellah Fès,Master,Logistique,24,24421.0,femme,0,2023-02-06
+403,Hajji,Mehdi,mehdi.hajji402@outlook.ma,+212 653144878,Meknès,Université Mohammed V Rabat,Master,Finance,3,8895.0,homme,1,2023-02-07
+404,Tahiri,Fatima,fatima.tahiri403@hotmail.com,+212 638751505,Kenitra,Université Cadi Ayyad Marrakech,Master,RH,5,21396.0,femme,1,2023-02-08
+405,Benjelloun,Mehdi,mehdi.benjelloun404@outlook.ma,+212 699067457,Oujda,ISCAE Casablanca,Licence,Informatique,8,15023.0,homme,0,2023-02-09
+406,Benkirane,Laila,laila.benkirane405@yahoo.fr,+212 648835523,Oujda,ISCAE Casablanca,Licence,Finance,21,14699.0,femme,0,2023-02-10
+407,Sekkat,Nabil,nabil.sekkat406@yahoo.fr,+212 647962717,Agadir,Université Cadi Ayyad Marrakech,Master,Marketing,13,13715.0,homme,0,2023-02-11
+408,Hajji,Anas,anas.hajji407@outlook.ma,+212 692054816,Marrakech,Université Hassan II Casablanca,,RH,11,23169.0,homme,1,2023-02-12
+409,Lahlou,Salma,salma.lahlou408@outlook.ma,+212 690472702,Oujda,Université Hassan II Casablanca,Licence,Juridique,24,24109.0,femme,0,2023-02-13
+410,Fassi,Omar,omar.fassi409@gmail.com,+212 637550115,Fès,Université Cadi Ayyad Marrakech,Master,RH,19,20163.0,homme,1,2023-02-14
+411,Benkirane,Youssef,youssef.benkirane410@yahoo.fr,+212 621044590,Kenitra,ENSA Agadir,Master,Marketing,23,24960.0,homme,1,2023-02-15
+412,Hajji,Ghita,ghita.hajji411@outlook.ma,+212 664536603,Rabat,Université Abdelmalek Essaadi Tanger,Master,Marketing,24,,femme,1,2023-02-16
+413,Rachidi,Loubna,loubna.rachidi412@outlook.ma,+212 688742439,Rabat,Université Sidi Mohammed Ben Abdellah Fès,Doctorat,Marketing,3,,femme,0,2023-02-17
+414,Ziani,Mohammed,mohammed.ziani413@yahoo.fr,+212 615059667,Meknès,Université Abdelmalek Essaadi Tanger,Licence,Commercial,20,20724.0,homme,1,2023-02-18
+415,Bensouda,Rachid,rachid.bensouda414@outlook.ma,+212 646540128,Tetouan,Université Sidi Mohammed Ben Abdellah Fès,Bac,Informatique,23,6817.0,homme,0,2023-02-19
+416,Ouali,Hicham,hicham.ouali415@gmail.com,+212 685935097,Marrakech,Université Cadi Ayyad Marrakech,Master,Logistique,11,,homme,1,2023-02-20
+417,Amrani,Saad,saad.amrani416@yahoo.fr,+212 646855538,Tetouan,Université Hassan II Casablanca,Master,RH,9,22880.0,homme,1,2023-02-21
+418,Benjelloun,Saad,saad.benjelloun417@gmail.com,+212 657336078,Oujda,ENSA Agadir,Master,Commercial,21,9299.0,homme,0,2023-02-22
+419,Amrani,Ahmed,ahmed.amrani418@gmail.com,+212 628149286,Kenitra,Université Hassan II Casablanca,Doctorat,Logistique,6,13917.0,homme,1,2023-02-23
+420,Moussaoui,Ghita,ghita.moussaoui419@gmail.com,,Meknès,Université Abdelmalek Essaadi Tanger,Doctorat,Logistique,2,22073.0,femme,1,2023-02-24
+421,Hajji,Hafsa,hafsa.hajji420@gmail.com,+212 662925374,Tanger,Université Hassan II Casablanca,BTS,Juridique,22,7267.0,femme,1,2023-02-25
+422,Tazi,Meryem,meryem.tazi421@yahoo.fr,+212 688039489,Oujda,Université Cadi Ayyad Marrakech,Master,Marketing,13,8406.0,femme,0,2023-02-26
+423,Amrani,Karim,karim.amrani422@gmail.com,+212 666002354,Marrakech,ENSA Agadir,Master,Informatique,23,21826.0,homme,1,2023-02-27
+424,Filali,Mehdi,mehdi.filali423@gmail.com,+212 631227468,Rabat,Université Abdelmalek Essaadi Tanger,Licence,Juridique,9,14382.0,homme,1,2023-02-28
+425,Hajji,Ahmed,ahmed.hajji424@outlook.ma,,Agadir,ENSA Agadir,,Finance,15,8437.0,homme,1,2023-03-01
+426,Tahiri,Saad,saad.tahiri425@yahoo.fr,+212 619249677,Kenitra,ISCAE Casablanca,Master,Commercial,15,,homme,1,2023-03-02
+427,Lahlou,Youssef,youssef.lahlou426@yahoo.fr,,Casablanca,Université Sidi Mohammed Ben Abdellah Fès,Licence,Commercial,21,8107.0,homme,0,2023-03-03
+428,Bennis,Khadija,khadija.bennis427@hotmail.com,+212 669576882,Tetouan,Université Hassan II Casablanca,,Informatique,9,4560.0,femme,1,2023-03-04
+429,Tazi,Mohammed,mohammed.tazi428@yahoo.fr,+212 640223477,Meknès,ENSA Agadir,Master,Logistique,24,,homme,1,2023-03-05
+430,Berrada,Anas,anas.berrada429@yahoo.fr,+212 690846200,Tetouan,Université Mohammed V Rabat,Master,Commercial,12,5826.0,homme,1,2023-03-06
+431,Kettani,Khalid,khalid.kettani430@hotmail.com,+212 676994946,Kenitra,ISCAE Casablanca,Licence,Informatique,5,15421.0,homme,1,2023-03-07
+432,Alaoui,Samira,samira.alaoui431@yahoo.fr,+212 632432851,Tetouan,Université Hassan II Casablanca,Bac,Commercial,11,16265.0,femme,0,2023-03-08
+433,Tazi,Tariq,tariq.tazi432@yahoo.fr,+212 665306693,Kenitra,Université Sidi Mohammed Ben Abdellah Fès,Bac,Commercial,8,,homme,0,2023-03-09
+434,Cherkaoui,Anas,anas.cherkaoui433@yahoo.fr,+212 626938661,Tetouan,ENSA Agadir,Licence,Marketing,12,12325.0,homme,0,2023-03-10
+435,Chraibi,Karim,karim.chraibi434@yahoo.fr,+212 680943106,Fès,Université Abdelmalek Essaadi Tanger,Bac,Finance,3,23522.0,homme,0,2023-03-11
+436,Ouali,Mehdi,mehdi.ouali435@hotmail.com,+212 621671439,Tanger,Université Sidi Mohammed Ben Abdellah Fès,Master,Marketing,23,11693.0,homme,1,2023-03-12
+437,Benjelloun,Rachid,rachid.benjelloun436@yahoo.fr,+212 683603367,Oujda,Université Mohammed V Rabat,Doctorat,Finance,10,12264.0,homme,0,2023-03-13
+438,Benjelloun,Ghita,ghita.benjelloun437@yahoo.fr,+212 642266497,Oujda,ENSA Agadir,Doctorat,Commercial,19,16686.0,femme,0,2023-03-14
+439,Berrada,Saad,saad.berrada438@hotmail.com,+212 660279504,Marrakech,ENCG Casablanca,Master,Juridique,17,17716.0,homme,1,2023-03-15
+440,Hajji,Hicham,hicham.hajji439@outlook.ma,+212 641707048,Casablanca,ENCG Casablanca,,Logistique,10,10721.0,homme,1,2023-03-16
+441,Fassi,Youssef,youssef.fassi440@gmail.com,+212 677792893,Casablanca,Université Cadi Ayyad Marrakech,Doctorat,Commercial,24,24609.0,homme,1,2023-03-17
+442,Bennis,Hafsa,hafsa.bennis441@outlook.ma,+212 615337355,Marrakech,Université Hassan II Casablanca,Doctorat,Finance,20,,femme,1,2023-03-18
+443,Tahiri,Rachid,rachid.tahiri442@hotmail.com,+212 669230626,Agadir,Université Abdelmalek Essaadi Tanger,Licence,Finance,3,,homme,0,2023-03-19
+444,Idrissi,Rachid,rachid.idrissi443@gmail.com,+212 658761066,Oujda,Université Cadi Ayyad Marrakech,Master,Finance,17,9907.0,homme,1,2023-03-20
+445,Sekkat,Khadija,khadija.sekkat444@hotmail.com,+212 684090304,Agadir,ENSA Agadir,Licence,Commercial,0,20127.0,femme,1,2023-03-21
+446,Ghali,Laila,laila.ghali445@hotmail.com,+212 673135532,Kenitra,ENCG Casablanca,Doctorat,Informatique,6,9656.0,femme,0,2023-03-22
+447,Kettani,Ghita,ghita.kettani446@yahoo.fr,+212 663640153,Kenitra,ENCG Casablanca,BTS,Juridique,5,12984.0,femme,1,2023-03-23
+448,Amrani,Soukaina,soukaina.amrani447@gmail.com,+212 626684388,Rabat,ENCG Casablanca,Bac,Informatique,14,24643.0,femme,1,2023-03-24
+449,Benali,Hicham,hicham.benali448@yahoo.fr,+212 654768534,Tetouan,ENSA Agadir,Doctorat,Logistique,17,12286.0,homme,0,2023-03-25
+450,Bensouda,Hamza,hamza.bensouda449@gmail.com,+212 628138519,Casablanca,ENCG Casablanca,Master,Commercial,23,,homme,0,2023-03-26
+451,Kettani,Imane,imane.kettani450@hotmail.com,+212 630978981,Rabat,Université Sidi Mohammed Ben Abdellah Fès,,Finance,10,8917.0,femme,0,2023-03-27
+452,Filali,Tariq,tariq.filali451@hotmail.com,+212 617964443,Tanger,ISCAE Casablanca,Master,Juridique,19,12429.0,homme,0,2023-03-28
+453,Berrada,Bilal,bilal.berrada452@outlook.ma,,Marrakech,ENSA Agadir,Doctorat,Juridique,23,,homme,1,2023-03-29
+454,Alaoui,Imane,imane.alaoui453@gmail.com,+212 631444021,Marrakech,Université Abdelmalek Essaadi Tanger,Bac,RH,14,19795.0,femme,1,2023-03-30
+455,Benjelloun,Ahmed,ahmed.benjelloun454@yahoo.fr,+212 644751594,Kenitra,ISCAE Casablanca,Licence,Logistique,15,,homme,0,2023-03-31
+456,Tazi,Anas,anas.tazi455@outlook.ma,+212 681797346,Oujda,Université Cadi Ayyad Marrakech,Bac,Juridique,6,6530.0,homme,1,2023-04-01
+457,Filali,Anas,anas.filali456@outlook.ma,+212 674916908,Agadir,Université Abdelmalek Essaadi Tanger,BTS,Commercial,20,22344.0,homme,1,2023-04-02
+458,Alaoui,Omar,omar.alaoui457@outlook.ma,+212 658465992,Casablanca,ISCAE Casablanca,Doctorat,Finance,9,21432.0,homme,1,2023-04-03
+459,Benjelloun,Anas,anas.benjelloun458@yahoo.fr,+212 687277157,Rabat,Université Mohammed V Rabat,Doctorat,Finance,11,9772.0,homme,1,2023-04-04
+460,Kettani,Hicham,hicham.kettani459@outlook.ma,+212 643222265,Agadir,ENCG Casablanca,BTS,Juridique,23,19476.0,homme,0,2023-04-05
+461,Kettani,Youssef,youssef.kettani460@yahoo.fr,+212 648309051,Rabat,Université Mohammed V Rabat,Bac,Informatique,13,22913.0,homme,1,2023-04-06
+462,Amrani,Tariq,tariq.amrani461@outlook.ma,+212 642337259,Tetouan,Université Hassan II Casablanca,Licence,Logistique,24,19751.0,homme,1,2023-04-07
+463,Tazi,Khalid,khalid.tazi462@yahoo.fr,+212 683574241,Tanger,Université Hassan II Casablanca,Bac,Finance,4,,homme,1,2023-04-08
+464,Hajji,Mohammed,mohammed.hajji463@hotmail.com,+212 649683871,Tanger,ISCAE Casablanca,Licence,Juridique,20,11137.0,homme,1,2023-04-09
+465,Lahlou,Houda,houda.lahlou464@hotmail.com,,Agadir,Université Mohammed V Rabat,Licence,Finance,17,21347.0,femme,0,2023-04-10
+466,Moussaoui,Nabil,nabil.moussaoui465@hotmail.com,+212 664216898,Agadir,ENSA Agadir,Master,Juridique,4,20920.0,homme,1,2023-04-11
+467,Tahiri,Nabil,nabil.tahiri466@hotmail.com,+212 669323547,Agadir,Université Abdelmalek Essaadi Tanger,Licence,Logistique,2,17891.0,homme,0,2023-04-12
+468,Benkirane,Fatima,fatima.benkirane467@hotmail.com,+212 682010923,Rabat,Université Mohammed V Rabat,Licence,Juridique,22,11340.0,femme,1,2023-04-13
+469,Berrada,Mehdi,mehdi.berrada468@outlook.ma,+212 654604238,Tetouan,Université Hassan II Casablanca,Licence,RH,4,11967.0,homme,1,2023-04-14
+470,Ghali,Fatima,fatima.ghali469@outlook.ma,+212 650162344,Fès,Université Mohammed V Rabat,Licence,Juridique,23,16415.0,femme,0,2023-04-15
+471,Bensouda,Mohammed,mohammed.bensouda470@outlook.ma,+212 632005782,Agadir,ENSA Agadir,BTS,Juridique,16,15871.0,homme,1,2023-04-16
+472,Bennis,Loubna,loubna.bennis471@yahoo.fr,+212 637345255,Oujda,Université Mohammed V Rabat,Master,Commercial,18,,femme,0,2023-04-17
+473,Berrada,Omar,omar.berrada472@yahoo.fr,+212 672929994,Casablanca,Université Abdelmalek Essaadi Tanger,,Logistique,18,12734.0,homme,1,2023-04-18
+474,Fassi,Zineb,zineb.fassi473@yahoo.fr,+212 694605487,Casablanca,Université Cadi Ayyad Marrakech,Licence,Commercial,24,4845.0,femme,1,2023-04-19
+475,Ghali,Hicham,hicham.ghali474@yahoo.fr,+212 662869791,Rabat,ENSA Agadir,Licence,Juridique,20,23420.0,homme,1,2023-04-20
+476,Filali,Hafsa,hafsa.filali475@hotmail.com,+212 641457080,Agadir,Université Hassan II Casablanca,Master,Logistique,11,6494.0,femme,1,2023-04-21
+477,Ghali,Anas,anas.ghali476@hotmail.com,+212 687678179,Kenitra,Université Abdelmalek Essaadi Tanger,Licence,RH,24,16677.0,homme,1,2023-04-22
+478,Hajji,Anas,anas.hajji477@hotmail.com,+212 687198715,Marrakech,Université Mohammed V Rabat,Licence,Logistique,8,23103.0,homme,1,2023-04-23
+479,Moussaoui,Khadija,khadija.moussaoui478@gmail.com,+212 613887008,Fès,Université Mohammed V Rabat,Licence,Finance,0,22268.0,femme,1,2023-04-24
+480,Cherkaoui,Omar,omar.cherkaoui479@outlook.ma,+212 660171169,Oujda,Université Cadi Ayyad Marrakech,Licence,Commercial,17,,homme,1,2023-04-25
+481,Benali,Youssef,youssef.benali480@yahoo.fr,+212 655570487,Tetouan,Université Hassan II Casablanca,Licence,Logistique,20,24733.0,homme,0,2023-04-26
+482,Tahiri,Khalid,khalid.tahiri481@yahoo.fr,+212 650279707,Kenitra,Université Hassan II Casablanca,Licence,RH,3,9179.0,homme,1,2023-04-27
+483,Tazi,Khalid,khalid.tazi482@hotmail.com,+212 699079814,Tanger,Université Sidi Mohammed Ben Abdellah Fès,Master,Marketing,9,10610.0,homme,0,2023-04-28
+484,Kettani,Youssef,youssef.kettani483@yahoo.fr,+212 685566275,Kenitra,Université Hassan II Casablanca,Bac,Juridique,24,10430.0,homme,1,2023-04-29
+485,Lahlou,Omar,omar.lahlou484@yahoo.fr,+212 668104228,Rabat,Université Cadi Ayyad Marrakech,,Logistique,6,11154.0,homme,0,2023-04-30
+486,Bennis,Khadija,khadija.bennis485@outlook.ma,+212 674841271,Fès,ENCG Casablanca,Doctorat,Juridique,21,17828.0,femme,0,2023-05-01
+487,Amrani,Anas,anas.amrani486@hotmail.com,+212 661139392,Meknès,Université Sidi Mohammed Ben Abdellah Fès,Licence,Informatique,22,14145.0,homme,1,2023-05-02
+488,Idrissi,Bilal,bilal.idrissi487@outlook.ma,+212 619137344,Meknès,Université Sidi Mohammed Ben Abdellah Fès,Licence,Finance,0,10488.0,homme,1,2023-05-03
+489,Amrani,Nadia,nadia.amrani488@gmail.com,+212 649275054,Agadir,Université Mohammed V Rabat,Doctorat,Commercial,16,7850.0,femme,0,2023-05-04
+490,Cherkaoui,Loubna,loubna.cherkaoui489@gmail.com,+212 684042569,Agadir,Université Mohammed V Rabat,Licence,Finance,23,21073.0,femme,0,2023-05-05
+491,Ghali,Nabil,nabil.ghali490@gmail.com,+212 699431483,Rabat,Université Hassan II Casablanca,,Informatique,1,17564.0,homme,1,2023-05-06
+492,Bensouda,Tariq,tariq.bensouda491@hotmail.com,+212 626794513,Tetouan,Université Sidi Mohammed Ben Abdellah Fès,Master,Informatique,10,9078.0,homme,1,2023-05-07
+493,Benali,Mohammed,mohammed.benali492@yahoo.fr,+212 661120091,Agadir,ISCAE Casablanca,Licence,Commercial,8,16168.0,homme,0,2023-05-08
+494,Benkirane,Hamza,hamza.benkirane493@hotmail.com,,Marrakech,Université Mohammed V Rabat,Master,Logistique,6,9448.0,homme,0,2023-05-09
+495,Lahlou,Hicham,hicham.lahlou494@hotmail.com,,Fès,Université Cadi Ayyad Marrakech,Doctorat,Informatique,21,21563.0,homme,1,2023-05-10
+496,Fassi,Omar,omar.fassi495@yahoo.fr,+212 649564766,Rabat,ISCAE Casablanca,,Marketing,16,13074.0,homme,0,2023-05-11
+497,Rachidi,Karim,karim.rachidi496@outlook.ma,+212 654969434,Casablanca,Université Mohammed V Rabat,Master,Juridique,16,10406.0,homme,1,2023-05-12
+498,Fassi,Hamza,hamza.fassi497@gmail.com,+212 624512253,Tanger,ENSA Agadir,Master,Juridique,1,12800.0,homme,1,2023-05-13
+499,Tahiri,Btissam,btissam.tahiri498@outlook.ma,+212 619615754,Rabat,ENSA Agadir,Licence,RH,5,18083.0,femme,1,2023-05-14
+500,Ghali,Salma,salma.ghali499@gmail.com,+212 642254832,Rabat,Université Mohammed V Rabat,Master,Informatique,13,5638.0,femme,0,2023-05-15

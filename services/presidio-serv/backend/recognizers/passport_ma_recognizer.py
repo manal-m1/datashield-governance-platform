@@ -6,22 +6,15 @@ from .moroccan_base_recognizer import MoroccanPatternRecognizer
 
 class MoroccanPassportRecognizer(MoroccanPatternRecognizer):
     """
-    Recognizer for Moroccan Passport Numbers
-    Algorithm 3 Compliant (Weighted Scoring)
+    Passeport biométrique marocain : 2 lettres + exactement 7 chiffres.
     """
     
     PATTERNS = [
-        # Standard passport format
-        Pattern(
-            "PASSPORT_MA",
-            r"\b[A-Z]{2}\d{6,7}\b",
-            0.30 # Lowered to require context
-        ),
+        Pattern("PASSPORT_MA", r"\b[A-Z]{2}\d{7}\b", 0.45),  # ✅ 7 chiffres exact, plus 6-7
     ]
     
-    CONTEXT = [
-        "passeport", "passport", "جواز", "السفر", "voyage", "travel"
-    ]
+    CONTEXT = ["passeport", "passport", "passport number", "passportnumber",
+           "n° passeport", "جواز السفر", "voyage", "travel document"]
     
     def __init__(
         self,
@@ -33,15 +26,14 @@ class MoroccanPassportRecognizer(MoroccanPatternRecognizer):
         patterns = patterns if patterns else self.PATTERNS
         context = context if context else self.CONTEXT
         
-        # Validator: check length and prefix
         def passport_validator(text: str) -> bool:
-            return bool(re.match(r"^[A-Z]{2}\d{6,7}$", text.strip().upper()))
+            return bool(re.match(r"^[A-Z]{2}\d{7}$", text.strip().upper()))
 
         super().__init__(
             supported_entity=supported_entity,
             patterns=patterns,
             context=context,
             supported_language=supported_language,
-            validator=passport_validator
+            validator=passport_validator,
+            context_mandatory=True,   # ✅ désambiguïsation stricte vs CIN
         )
-

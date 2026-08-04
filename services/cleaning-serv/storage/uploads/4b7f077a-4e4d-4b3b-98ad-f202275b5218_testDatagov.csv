@@ -1,0 +1,5 @@
+id,nom,prenom,cin,email,telephone,date_naissance,adresse,ville,profession,salaire,iban,numero_passeport,numero_cnss,numero_permis,plaque_immatriculation,ip_address,commentaire
+1,Ahmed,Benali,AB123456,ahmed.benali@gmail.com,0612345678,1995-04-15,"12 Rue Hassan II",Casablanca,Ingénieur,18000,MA6401151900000123456789012,P1234567,CNSS987654,L123456,12345-A-6,192.168.1.20,"Patient diabétique"
+2,Fatima,El Idrissi,CD987654,fatima.elidrissi@yahoo.fr,0677889900,1992-11-20,"45 Avenue Mohammed V",Rabat,Médecin,25000,MA6401151900000987654321098,P7654321,CNSS456123,L654321,45678-B-1,10.0.0.5,"Allergie aux pénicillines"
+3,Youssef,Alaoui,EF456789,youssef@entreprise.ma,0655443322,1988-07-02,"8 Rue Atlas",Marrakech,Comptable,15000,MA6401151900000456123789456,P1122334,CNSS741852,L741852,78901-C-2,172.16.0.8,"Compte VIP"
+4,Sara,Lahlou,GH852963,sara.lahlou@outlook.com,0622334455,1998-01-12,"77 Boulevard Zerktouni",Fès,Avocate,22000,MA6401151900000789456123456,P9988776,CNSS369258,L852963,96325-D-7,8.8.8.8,"RAS"

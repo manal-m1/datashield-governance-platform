@@ -8,6 +8,7 @@ import os
 import sys
 import json
 import requests
+import httpx
 from datetime import datetime
 import asyncio
 import traceback
@@ -74,6 +75,155 @@ except ImportError as e:
 
 # In-memory cache for high-speed DataFrames (Syncs with DB)
 DATASETS = {}
+def serialize_batch(batch_df):
+    lines = []
+    for _, row in batch_df.iterrows():
+        for col in batch_df.columns:
+            val = row[col]
+            if pd.notna(val):
+                lines.append(f"{col}: {val}")
+    return "\n".join(lines)
+
+def resolve_overlaps(occurrences: list) -> list:
+    if not occurrences:
+        return []
+    sorted_occ = sorted(occurrences, key=lambda d: (d['start'], -d['score']))
+    resolved = []
+    last_end = -1
+    for occ in sorted_occ:
+        if occ['start'] >= last_end:
+            resolved.append(occ)
+            last_end = occ['end']
+        elif occ['score'] > resolved[-1]['score']:
+            resolved[-1] = occ
+            last_end = occ['end']
+    return resolved
+
+async def run_full_pii_scan(dataset_id: str, filename: str):
+    """
+    Tourne en arrière-plan après la réponse HTTP de /upload.
+    Fait tout le travail lourd : Presidio, Taxonomie, Atlas, Ranger.
+    """
+    df = DATASETS[dataset_id]["df"]
+    file_path = DATASETS[dataset_id].get("file_path")
+
+    pii_tags = []
+    pii_occurrences = []
+    taxo_occurrences = []
+    BATCH_SIZE = 50
+    total_rows = len(df)
+    pii_total_count = 0
+
+    async with httpx.AsyncClient() as client:
+        # --- Presidio scan ---
+        try:
+            for start in range(0, total_rows, BATCH_SIZE):
+                batch_df = df.iloc[start:start + BATCH_SIZE]
+                batch_text = serialize_batch(batch_df)
+                if not batch_text.strip():
+                    continue
+
+                presidio_resp = await client.post(f"{PRESIDIO_URL}/analyze", json={
+                    "text": batch_text, "language": "fr", "score_threshold": 0.3
+                }, timeout=30)
+
+                if presidio_resp.status_code == 200:
+                    results = presidio_resp.json().get("detections", [])
+                    pii_occurrences.extend(results)
+                    print(f"  Presidio batch {start}-{start+BATCH_SIZE}: {len(results)} détections")
+                else:
+                    print(f"  ⚠️ Presidio batch {start} failed: {presidio_resp.status_code}")
+
+            pii_occurrences = resolve_overlaps(pii_occurrences)
+            pii_tags = list(set([d['entity_type'] for d in pii_occurrences]))
+            pii_total_count = len(pii_occurrences)
+            print(f"Presidio Detected: {pii_tags} — {pii_total_count} occurrences totales")
+
+        except Exception as e:
+            print(f"Presidio Scan Failed: {e}")
+            pii_total_count = len(pii_occurrences)
+
+        # --- Taxonomie scan ---
+        try:
+            for start in range(0, total_rows, BATCH_SIZE):
+                batch_df = df.iloc[start:start + BATCH_SIZE]
+                batch_text = serialize_batch(batch_df)
+                if not batch_text.strip():
+                    continue
+
+                taxo_resp = await client.post(f"{TAXONOMIE_URL}/analyze", json={
+                    "text": batch_text, "language": "fr", "confidence_threshold": 0.5
+                }, timeout=30)
+
+                if taxo_resp.status_code == 200:
+                    taxo_data = taxo_resp.json()
+                    batch_detections = taxo_data.get("detections", [])
+                    taxo_occurrences.extend(batch_detections)
+                    print(f"  Taxonomie batch {start}-{start+BATCH_SIZE}: {len(batch_detections)} détections")
+                else:
+                    print(f"  ⚠️ Taxonomie batch {start} failed: {taxo_resp.status_code}")
+
+            taxo_tags = [d.get('entity_type', d.get('category', '')) for d in taxo_occurrences]
+            pii_tags = list(set(pii_tags + [t for t in taxo_tags if t]))
+            print(f"Taxonomie Detected: {set(taxo_tags)} — {len(taxo_occurrences)} occurrences totales")
+
+        except Exception as e:
+            print(f"Taxonomie Scan Failed (non-blocking): {e}")
+
+    # --- Atlas registration ---
+    atlas_guid = "mock-guid-fallback"
+    try:
+        if AtlasClient:
+            print("🌍 Registering with Apache Atlas...")
+            atlas_client = AtlasClient()
+            guid = atlas_client.register_dataset_and_get_guid(
+                name=filename,
+                description=f"Uploaded via DataGov Pipeline. PII Detected: {pii_tags}",
+                owner="cleaning-service",
+                file_path=file_path
+            )
+            if guid:
+                atlas_guid = guid
+                for tag in pii_tags:
+                    try:
+                        atlas_client.add_classification(guid, tag)
+                    except Exception as tag_err:
+                        print(f"⚠️ Could not tag {tag}: {tag_err}")
+                print(f"🌍 Registered in Atlas: {atlas_guid}")
+    except Exception as e:
+        print(f"⚠️ Atlas Registration Bypass: {e}")
+
+    # --- Ranger automation ---
+    try:
+        if ranger_client:
+            print("🛡️ Automated Ranger Policy Creation...")
+            for tag in pii_tags:
+                success = ranger_client.create_tag_policy(tag_name=tag)
+                if success:
+                    print(f"🛡️ Auto-generated Ranger Policy for: {tag}")
+                ranger_client.create_masking_policy(tag_name=tag, mask_type="MASK", roles=["labeler"])
+    except Exception as e:
+        print(f"⚠️ Ranger Automation Failed: {e}")
+
+    # --- Update status: scan terminé ---
+    if raw_datasets_col is not None:
+        await raw_datasets_col.update_one(
+            {"dataset_id": dataset_id},
+            {"$set": {
+                "status": "raw",
+                "pii_tags": pii_tags,
+                "pii_total_count": pii_total_count,
+                "atlas_guid": atlas_guid
+            }}
+        )
+        await log_audit_event("INGESTION", f"DATASET_UPLOAD: {filename}", "annotator", "SUCCESS", {"dataset_id": dataset_id})
+
+    if dataset_id in DATASETS:
+        DATASETS[dataset_id]["status"] = "raw"
+        DATASETS[dataset_id]["pii_tags"] = pii_tags
+        DATASETS[dataset_id]["atlas_guid"] = atlas_guid
+
+    print(f"✅ Background scan completed for {dataset_id}")
 
 @router.get("/permissions")
 async def get_ranger_permissions(username: str, role: str):
@@ -109,18 +259,17 @@ async def delete_dataset(dataset_id: str):
     return {"status": "deleted", "id": dataset_id}
 
 @router.post("/upload")
-async def upload_dataset(file: UploadFile = File(...)):
+async def upload_dataset(file: UploadFile = File(...), background_tasks: BackgroundTasks = BackgroundTasks()):
     """
-    US-CLEAN-01: Upload CSV/Excel
+    US-CLEAN-01: Upload CSV/Excel — réponse immédiate, scan PII en arrière-plan
     """
     try:
         content = await file.read()
         dataset_id = str(uuid.uuid4())
         print(f"🚀 Processing Upload: {file.filename} (ID: {dataset_id})")
 
-        # --- PHASE A: SECURE PERSISTENCE (File System + MongoDB) ---
         file_path = os.path.join(UPLOAD_DIR, f"{dataset_id}_{file.filename}")
-        
+
         try:
             print(f"📊 Parsing Dataset: {file.filename}")
             if file.filename.endswith(".csv"):
@@ -141,106 +290,43 @@ async def upload_dataset(file: UploadFile = File(...)):
             print(f"❌ File Persistence Error: {fe}")
             raise HTTPException(500, f"Storage failure: {str(fe)}")
 
-        # --- REMEDIATION STEP 1: PII SCAN (Presidio + Taxonomie) ---
-        pii_tags = []
-        sample_df = df.head(15)
-        if len(df) > 20:
-            sample_df = pd.concat([sample_df, df.sample(5)])
-        sample_text = sample_df.to_string()
-
-        # 1a. Presidio scan
-        try:
-            presidio_resp = requests.post(f"{PRESIDIO_URL}/analyze", json={
-                "text": sample_text, "language": "fr", "score_threshold": 0.3
-            }, timeout=10)
-            if presidio_resp.status_code == 200:
-                results = presidio_resp.json().get("detections", [])
-                pii_tags = list(set([d['entity_type'] for d in results]))
-                print(f"Presidio Detected: {pii_tags}")
-        except Exception as e:
-            print(f"Presidio Scan Failed: {e}")
-
-        # 1b. Taxonomie scan (Moroccan patterns - 47+ patterns)
-        try:
-            taxo_resp = requests.post(f"{TAXONOMIE_URL}/analyze", json={
-                "text": sample_text, "language": "fr", "confidence_threshold": 0.5
-            }, timeout=10)
-            if taxo_resp.status_code == 200:
-                taxo_data = taxo_resp.json()
-                taxo_tags = [d.get('entity_type', d.get('category', '')) for d in taxo_data.get("detections", [])]
-                pii_tags = list(set(pii_tags + [t for t in taxo_tags if t]))
-                print(f"Taxonomie Detected: {taxo_tags}")
-        except Exception as e:
-            print(f"Taxonomie Scan Failed (non-blocking): {e}")
-
-        # --- REMEDIATION STEP 2: ATLAS REGISTRATION ---
-        atlas_guid = "mock-guid-fallback"
-        try:
-            if AtlasClient:
-                print("🌍 Registering with Apache Atlas...")
-                client = AtlasClient()
-                # Added 5s internal timeout for safety
-                guid = client.register_dataset_and_get_guid(
-                    name=file.filename,
-                    description=f"Uploaded via DataGov Pipeline. PII Detected: {pii_tags}",
-                    owner="cleaning-service",
-                    file_path=file_path
-                )
-                if guid:
-                    atlas_guid = guid
-                    # Add PII tags to Atlas
-                    for tag in pii_tags:
-                        try:
-                            client.add_classification(guid, tag)
-                        except Exception as tag_err:
-                            print(f"⚠️ Could not tag {tag}: {tag_err}")
-                    print(f"🌍 Registered in Atlas: {atlas_guid}")
-        except Exception as e:
-             print(f"⚠️ Atlas Registration Bypass: {e}")
-             
-        # --- REMEDIATION STEP 3: RANGER AUTOMATION ---
-        try:
-            if ranger_client:
-                print("🛡️ Automated Ranger Policy Creation...")
-                for tag in pii_tags:
-                    success = ranger_client.create_tag_policy(tag_name=tag)
-                    if success:
-                        print(f"🛡️ Auto-generated Ranger Policy for: {tag}")
-                    
-                    # Add a default masking policy for Labelers
-                    ranger_client.create_masking_policy(tag_name=tag, mask_type="MASK", roles=["labeler"])
-        except Exception as e:
-            print(f"⚠️ Ranger Automation Failed: {e}")
-
-        # Persistent metadata in MongoDB
         dataset_meta = {
             "dataset_id": dataset_id,
-            "name": file.filename, 
-            "status": "raw",
-            "pii_tags": pii_tags,
-            "atlas_guid": atlas_guid,
+            "name": file.filename,
+            "status": "scanning",   # ✅ scan en cours, pas encore terminé
+            "pii_tags": [],
+            "pii_total_count": 0,
+            "atlas_guid": "mock-guid-fallback",
             "file_path": file_path,
             "rows": len(df),
             "columns": len(df.columns),
             "created_at": datetime.now().isoformat()
         }
-        
+
         if raw_datasets_col is not None:
-            print(f"💾 Saving metadata to MongoDB for {dataset_id}...")
+            print(f"💾 Saving initial metadata to MongoDB for {dataset_id}...")
             await raw_datasets_col.insert_one(dataset_meta)
-            await log_audit_event("INGESTION", f"DATASET_UPLOAD: {file.filename}", "annotator", "SUCCESS", {"dataset_id": dataset_id})
         else:
             print("⚠️ Skipping MongoDB save: raw_datasets_col is None")
 
-        # Cache for performance
         DATASETS[dataset_id] = {
-            "df": df, 
-            "name": file.filename, 
-            "status": "raw",
-            "pii_tags": pii_tags,
-            "atlas_guid": atlas_guid
+            "df": df,
+            "name": file.filename,
+            "status": "scanning",
+            "pii_tags": [],
+            "file_path": file_path
         }
-        print(f"✅ Ingestion Chain Completed for {dataset_id}")
+
+        # ✅ le scan lourd tourne en arrière-plan, la réponse part immédiatement
+        background_tasks.add_task(run_full_pii_scan, dataset_id, file.filename)
+
+        print(f"✅ Upload accepted, scan started in background for {dataset_id}")
+        dataset_meta.pop("_id", None)
+        return dataset_meta
+
+    except Exception as e:
+        traceback.print_exc()
+        raise HTTPException(500, f"Critical Ingestion Error: {str(e)}")
         # Remove MongoDB _id for JSON serialization
         dataset_meta.pop("_id", None)
         return dataset_meta
@@ -302,8 +388,18 @@ async def get_dataset_preview(dataset_id: str, rows: int = 5):
     """
     Compatibility alias for previewing datasets.
     """
-    res = await get_dataset_json(dataset_id, sample=True)
+    res = await get_dataset_json(dataset_id, sample=False)
     return {"preview": res["data"][:rows]}
+
+# ✅ nouvelle route à ajouter ici
+@router.get("/datasets/{dataset_id}/full-scan-data")
+async def get_dataset_full(dataset_id: str):
+    """
+    Returns the FULL dataset (no sampling, no row limit).
+    Used by PII Sentinel 'Volume Scan' to scan the entire file, not just 5 rows.
+    """
+    res = await get_dataset_json(dataset_id, sample=False)
+    return {"data": res["data"]}
 
 @router.get("/profile/{dataset_id}", response_class=HTMLResponse)
 async def get_profile(dataset_id: str):

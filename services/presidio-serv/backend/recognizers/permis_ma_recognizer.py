@@ -6,22 +6,16 @@ from .moroccan_base_recognizer import MoroccanPatternRecognizer
 
 class MoroccanPermisRecognizer(MoroccanPatternRecognizer):
     """
-    Recognizer for Moroccan Driving License (Permis de Conduire)
-    Algorithm 3 Compliant (Weighted Scoring)
+    Permis de conduire marocain : numéro purement numérique, 8 à 10 chiffres.
+    Pas de standard public identifiable par regex seul -> contexte OBLIGATOIRE.
     """
     
     PATTERNS = [
-        # Permis code format (alphanumeric 6-12 chars, must contain at least one digit)
-        Pattern(
-            "PERMIS_MA",
-            r"\b(?=[A-Z]*\d)[A-Z0-9]{6,12}\b",
-            0.20 # Very specific context required
-        ),
+        Pattern("PERMIS_MA", r"\b\d{8,10}\b", 0.5),
     ]
     
-    CONTEXT = [
-        "permis", "conduire", "conduite", "رخصة", "القيادة", "driving", "license"
-    ]
+    CONTEXT = ["permis de conduire", "permis", "driving licence", "driving license",
+           "n° permis", "conduite", "رخصة القيادة", "رخصة السياقة"]
     
     def __init__(
         self,
@@ -33,15 +27,15 @@ class MoroccanPermisRecognizer(MoroccanPatternRecognizer):
         patterns = patterns if patterns else self.PATTERNS
         context = context if context else self.CONTEXT
         
-        # Validator for Algorithm 3: check length and alphanumeric format
         def permis_validator(text: str) -> bool:
-            return bool(re.match(r"^[A-Z0-9]{6,12}$", text.strip().upper()))
+            clean = text.strip()
+            return clean.isdigit() and 8 <= len(clean) <= 10
 
         super().__init__(
             supported_entity=supported_entity,
             patterns=patterns,
             context=context,
             supported_language=supported_language,
-            validator=permis_validator
+            validator=permis_validator,
+            context_mandatory=True,   # ✅ élimine "Over18", "brown96", "thomas51"...
         )
-

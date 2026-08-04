@@ -6,21 +6,19 @@ from .moroccan_base_recognizer import MoroccanPatternRecognizer
 
 class MoroccanCNSSRecognizer(MoroccanPatternRecognizer):
     """
-    Recognizer for Moroccan CNSS (Caisse Nationale de Sécurité Sociale)
-    Algorithm 3 Compliant (Weighted Scoring)
+    CNSS marocain : 9 chiffres (immatriculation employé), parfois 12 pour l'employeur.
+    Aucun format n'est distinguable d'un simple entier -> contexte OBLIGATOIRE.
     """
     
     PATTERNS = [
-        Pattern(
-            "CNSS",
-            r"\b\d{9,12}\b",
-            0.05 # Aggressively lowered to MANDATE context (Score w/o context < 0.3)
-        ),
+        Pattern("CNSS_SALARIE", r"\b\d{9}\b", 0.5),
+        Pattern("CNSS_EMPLOYEUR", r"\b\d{12}\b", 0.5),
     ]
     
     CONTEXT = [
         "cnss", "sécurité sociale", "caisse nationale", 
-        "cotisation", "immatriculation", "الضمان", "الاجتماعي", "الصندوق"
+        "immatriculation cnss", "cotisant", "n° cnss",
+        "الضمان الاجتماعي", "الصندوق الوطني"
     ]
     
     def __init__(
@@ -38,4 +36,5 @@ class MoroccanCNSSRecognizer(MoroccanPatternRecognizer):
             patterns=patterns,
             context=context,
             supported_language=supported_language,
+            context_mandatory=True,   # ✅ pas de détection sans le mot "CNSS" à proximité
         )

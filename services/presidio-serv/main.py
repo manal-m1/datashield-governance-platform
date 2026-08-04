@@ -7,12 +7,13 @@ According to Cahier des Charges:
 - Add recognizers: CIN, Phone MA, IBAN MA, CNSS
 - Support French and Arabic
 """
+from spacy import lang
 import uvicorn
 from typing import List, Optional
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
-
+from starlette.concurrency import run_in_threadpool   # ← AJOUTE CETTE LIGNE
 import os
 from motor.motor_asyncio import AsyncIOMotorClient
 _mongo_uri = os.getenv("MONGODB_URI")
@@ -96,8 +97,11 @@ class MoroccanPresidioEngine:
         try:
             # Initialize registry with custom recognizers
             registry = RecognizerRegistry()
-            registry.load_predefined_recognizers()
-            
+            registry.load_predefined_recognizers(languages=["en", "fr"])
+            entities_to_remove = {"US_DRIVER_LICENSE", "MEDICAL_LICENSE", "US_SSN"}
+            for rec in list(registry.recognizers):
+                if entities_to_remove & set(rec.supported_entities):
+                    registry.remove_recognizer(rec.name)
             # Add Moroccan recognizers for multiple languages
             # This ensures they are found when analysis is requested in en, fr, or ar
             for lang in ["en", "fr", "ar"]:
@@ -122,11 +126,23 @@ class MoroccanPresidioEngine:
                 "nlp_engine_name": "spacy",
                 "models": [
                     {"lang_code": "en", "model_name": "en_core_web_sm"},
-                    {"lang_code": "fr", "model_name": "en_core_web_sm"},
-                ]
+                    {"lang_code": "fr", "model_name": "fr_core_news_sm"},
+                ],
+                "ner_model_configuration": {
+                    "model_to_presidio_entity_mapping": {},
+                    "low_confidence_score_multiplier": 0.4,
+                    "low_score_entity_names": []
+                }
             }
             provider = NlpEngineProvider(nlp_configuration=config)
             nlp_engine = provider.create_engine()
+
+            # Désactive les composants spaCy non utilisés par Presidio (gain de vitesse majeur)
+            for lang_code, spacy_nlp in nlp_engine.nlp.items():
+                for pipe_name in ["tagger", "parser", "lemmatizer", "attribute_ruler"]:
+                    if pipe_name in spacy_nlp.pipe_names:
+                        spacy_nlp.disable_pipe(pipe_name)
+                print(f"   ⚡ Pipeline actif pour '{lang_code}': {spacy_nlp.pipe_names}")
             
             self.analyzer = AnalyzerEngine(
                 registry=registry,
@@ -207,7 +223,8 @@ class MoroccanPresidioEngine:
             return {"original": text, "anonymized": text, "count": 0}
         
         # Analyze first
-        results = self.analyzer.analyze(text=text, language=language)
+        lang = "fr" if language in ["fr", "ar"] else "en"
+        results = self.analyzer.analyze(text=text, language=lang)  # ✅ cohérent avec analyze()
         
         # Build operator config
         if operators:
@@ -315,7 +332,10 @@ async def analyze(request: AnalyzeRequest):
             entities = valid_entities
 
     try:
-        detections = engine.analyze(
+        # Exécuté dans un thread séparé pour ne pas bloquer l'event loop
+        # (sinon /health et /entities se figent pendant le calcul)
+        detections = await run_in_threadpool(
+            engine.analyze,
             text=request.text,
             language=request.language,
             entities=entities,
@@ -424,4 +444,4 @@ if __name__ == "__main__":
     print("\n" + "="*60)
     print("🔒 PRESIDIO MOROCCO SERVICE - Tâche 3")
     print("="*60)
-    uvicorn.run("main:app", host="0.0.0.0", port=8003, reload=True)
+    uvicorn.run("main:app", host="0.0.0.0", port=8003, workers=4)

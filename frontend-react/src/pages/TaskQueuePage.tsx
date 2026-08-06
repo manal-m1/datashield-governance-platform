@@ -130,35 +130,39 @@ const TaskQueuePage = () => {
             addToast('Failed to claim task', 'error');
         }
     };
-
     const handleTaskAction = async (taskId: string, isValid: boolean, editedData?: any) => {
-        try {
-            await apiClient.post(`/annotation/tasks/${taskId}/submit`, {
-                annotations: [{
-                    field: "pii_validation",
-                    is_valid: isValid,
-                    label: isValid ? "Validated by Annotator" : "Rejected by Annotator",
-                    confidence: 1.0,
-                    corrected_data: editedData || null
-                }],
-                time_spent_seconds: 0
-            });
+    try {
+        const annotations = (editedData && editedData.length > 0)
+            ? editedData.map((e: any) => ({
+                  field: e.entity_type,
+                  original_value: e.value,
+                  label: e.entity_type,
+                  is_valid: isValid,
+                  confidence: 1.0,
+                  notes: isValid ? 'Validated by Annotator' : 'Rejected by Annotator',
+                  sensitivity_level: e.sensitivity_level || null,
+                  context: e.context || null,
+              }))
+            : [{
+                  field: "pii_validation",
+                  is_valid: isValid,
+                  label: isValid ? "Validated by Annotator" : "Rejected by Annotator",
+                  confidence: 1.0,
+              }];
 
-            // Optimistic update
-            setTasks(prev => prev.filter(t => t.id !== taskId));
+        await apiClient.post(`/annotation/tasks/${taskId}/submit`, {
+            annotations,
+            time_spent_seconds: 0
+        });
 
-            // Notification
-            addToast(isValid ? 'Task Validated Successfully' : 'Task Rejected', isValid ? 'success' : 'info');
-
-            // Close modal if open
-            setIsModalOpen(false);
-
-            // Refresh stats
-            fetchData();
-        } catch (err) {
-            console.error('Failed to submit task action', err);
-            addToast('Failed to submit action. Please try again.', 'error');
-        }
+        setTasks(prev => prev.filter(t => t.id !== taskId));
+        addToast(isValid ? 'Task Validated Successfully' : 'Task Rejected', isValid ? 'success' : 'info');
+        setIsModalOpen(false);
+        fetchData();
+    } catch (err: any) {
+        console.error('Failed to submit task action', err?.response?.data);
+        addToast('Failed to submit action. Please try again.', 'error');
+    }
     };
 
     const handleCorrectionAction = async (correctionId: string, isValid: boolean) => {

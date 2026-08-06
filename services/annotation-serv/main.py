@@ -58,6 +58,8 @@ class Annotation(BaseModel):
     confidence: float = 1.0
     notes: Optional[str] = None
     corrected_data: Optional[Dict[str, Any]] = None
+    sensitivity_level: Optional[str] = None   # NOUVEAU
+    context: Optional[str] = None             # NOUVEAU
 
 class AnnotationTask(BaseModel):
     id: str
@@ -128,8 +130,12 @@ class TaskQueue:
         if db is None: return []
         query = {"assigned_to": user_id}
         if status: query["status"] = status.value
-        cursor = db["tasks"].find(query)
-        return [AnnotationTask(**doc) async for doc in cursor]
+        try:
+            cursor = db["tasks"].find(query)
+            return [AnnotationTask(**doc) async for doc in cursor]
+        except Exception as e:
+            print(f"⚠️ MongoDB query failed in get_user_tasks: {e}")
+            return []
 
     async def get_task(self, task_id: str) -> Optional[AnnotationTask]:
         if db is None: return None

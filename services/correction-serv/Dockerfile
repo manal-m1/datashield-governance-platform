@@ -35,7 +35,8 @@ RUN pip install --no-cache-dir \
     --index-url https://download.pytorch.org/whl/cpu
 
 # Install remaining dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+# Install remaining dependencies
+RUN pip install --no-cache-dir --timeout 300 --retries 5 -r requirements.txt
 
 # -------------------------------
 # Application code

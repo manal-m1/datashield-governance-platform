@@ -53,13 +53,13 @@ class Annotation(BaseModel):
     field: str
     original_value: Optional[Any] = None
     annotated_value: Optional[Any] = None
-    label: Optional[str] = None
+    label: Optional[str] = None                # réservé à la catégorie (rôle Data Labeler, à venir)
     is_valid: Optional[bool] = None
     confidence: float = 1.0
     notes: Optional[str] = None
     corrected_data: Optional[Dict[str, Any]] = None
-    sensitivity_level: Optional[str] = None   # NOUVEAU
-    context: Optional[str] = None             # NOUVEAU
+    sensitivity_level: Optional[str] = None     # "faible" | "moyen" | "eleve" | "critique" (rôle Annotator)
+    context: Optional[str] = None               # contexte libre saisi par l'Annotator
 
 class AnnotationTask(BaseModel):
     id: str
@@ -120,22 +120,25 @@ class TaskQueue:
             await db["tasks"].insert_one(task.dict())
         return task
 
-    async def get_pending_tasks(self) -> List[AnnotationTask]:
+    async def get_pending_tasks(self, limit: int = 50) -> List[AnnotationTask]:
         if db is None: return []
-        cursor = db["tasks"].find({"status": TaskStatus.PENDING.value})
+        cursor = db["tasks"].find({"status": TaskStatus.PENDING.value}).limit(limit)
         tasks = [AnnotationTask(**doc) async for doc in cursor]
         return sorted(tasks, key=lambda x: ({"critical": 0, "high": 1, "medium": 2, "low": 3}.get(x.priority.value, 3), x.created_at))
 
-    async def get_user_tasks(self, user_id: str, status: TaskStatus = None) -> List[AnnotationTask]:
+    async def get_review_tasks(self, limit: int = 50) -> List[AnnotationTask]:
+        """Tâches soumises par un annotator, en attente de validation steward."""
+        if db is None: return []
+        cursor = db["tasks"].find({"status": TaskStatus.REVIEW.value}).limit(limit)
+        tasks = [AnnotationTask(**doc) async for doc in cursor]
+        return sorted(tasks, key=lambda x: x.created_at)
+
+    async def get_user_tasks(self, user_id: str, status: TaskStatus = None, limit: int = 100) -> List[AnnotationTask]:
         if db is None: return []
         query = {"assigned_to": user_id}
         if status: query["status"] = status.value
-        try:
-            cursor = db["tasks"].find(query)
-            return [AnnotationTask(**doc) async for doc in cursor]
-        except Exception as e:
-            print(f"⚠️ MongoDB query failed in get_user_tasks: {e}")
-            return []
+        cursor = db["tasks"].find(query).limit(limit)
+        return [AnnotationTask(**doc) async for doc in cursor]
 
     async def get_task(self, task_id: str) -> Optional[AnnotationTask]:
         if db is None: return None
@@ -207,7 +210,7 @@ class AssignmentManager:
 # APP SETUP
 # ====================================================================
 
-app = FastAPI(title="Annotation Service", version="2.5.0")
+app = FastAPI(title="Annotation Service", version="2.6.0")
 
 # CORS Security - Restricted origins
 ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "http://localhost:8000,http://localhost:3000").split(",")
@@ -253,20 +256,28 @@ async def assign_tasks(config: AssignmentConfig):
     return {"assignments": [{"task_id": t, "user_id": u} for t, u in res]}
 
 @app.get("/tasks/my-queue")
-async def get_my_queue(user_id: str):
+async def get_my_queue(user_id: str, role: str = None):
     """
     US-VALID-04: Allow annotators to consult their pending queue directly.
+    Les Stewards voient en plus les tâches en REVIEW (soumises par les annotators),
+    et NE voient PAS les tâches non-assignées (pending) qui appartiennent aux annotators.
     """
     tasks = await task_queue.get_user_tasks(user_id)
-    # Include tasks assigned to user OR unassigned/pending tasks
-    all_tasks = await task_queue.get_pending_tasks() # Get all unassigned
     pending = [t for t in tasks if t.status in [TaskStatus.ASSIGNED, TaskStatus.IN_PROGRESS]]
-    
-    # Merge unassigned into the view
-    for t in all_tasks:
-        if t.id not in [p.id for p in pending]:
-            pending.append(t)
-            
+
+    is_steward = bool(role) and "steward" in role.lower()
+
+    if is_steward:
+        review_tasks = await task_queue.get_review_tasks()
+        for t in review_tasks:
+            if t.id not in [p.id for p in pending]:
+                pending.append(t)
+    else:
+        all_pending = await task_queue.get_pending_tasks()
+        for t in all_pending:
+            if t.id not in [p.id for p in pending]:
+                pending.append(t)
+
     return {"user_id": user_id, "queue": [t.dict() for t in pending], "count": len(pending)}
 
 @app.post("/assign/{task_id}")
@@ -276,8 +287,19 @@ async def assign_manual(task_id: str, user_id: str):
 
 @app.post("/tasks/{task_id}/submit")
 async def submit_task(task_id: str, request: SubmitAnnotationRequest):
-    await task_queue.update_task(task_id, annotations=request.annotations, status=TaskStatus.COMPLETED, completed_at=datetime.now().isoformat(), time_spent_seconds=request.time_spent_seconds)
-    return {"status": "submitted"}
+    """
+    Soumission par l'annotator (qualification sensibilité/contexte).
+    Ne finalise PAS directement -> passe en REVIEW pour validation par le steward.
+    """
+    await task_queue.update_task(
+        task_id,
+        annotations=request.annotations,
+        status=TaskStatus.REVIEW,
+        time_spent_seconds=request.time_spent_seconds
+        # Pas de completed_at ici : la tâche n'est pas encore terminée,
+        # elle le sera au moment de l'approbation par le steward.
+    )
+    return {"status": "submitted_for_review"}
 
 @app.get("/users/{user_id}/stats")
 async def get_user_stats(user_id: str):
@@ -327,9 +349,12 @@ async def review_task(task_id: str):
 
 @app.post("/tasks/{task_id}/approve")
 async def approve_task(task_id: str):
-    """Figure 6: Approve -> Update DB"""
-    # Logic for 'Update DB' (triggering airflow or similar) could go here
-    await task_queue.update_task(task_id, status=TaskStatus.COMPLETED)
+    """Figure 6: Approve -> Update DB (steward valide la qualification annotator)"""
+    await task_queue.update_task(
+        task_id,
+        status=TaskStatus.COMPLETED,
+        completed_at=datetime.now().isoformat()
+    )
     return {"status": "approved_db_updated"}
 
 @app.post("/tasks/{task_id}/reject")

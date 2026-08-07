@@ -21,7 +21,7 @@ import { Button } from '../components/ui/Button';
 import apiClient from '../services/api';
 import { useAuthStore } from '../store/authStore';
 import { useToast } from '../context/ToastContext';
-import TaskDetailsModal from '../components/TaskDetailsModal';
+import TaskDetailsModal, { type DetectionEnrichment } from '../components/TaskDetailsModal';
 
 const TaskQueuePage = () => {
     const user = useAuthStore((state) => state.user);
@@ -29,7 +29,7 @@ const TaskQueuePage = () => {
     const [tasks, setTasks] = useState<any[]>([]);
     const [stats, setStats] = useState<any>(null);
     const [isLoading, setIsLoading] = useState(false);
-    const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'completed' | 'rejected'>('pending');
+    const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'assigned' | 'review' | 'completed' | 'rejected'>('pending');
     const [priorityFilter, setPriorityFilter] = useState<'all' | 'critical' | 'high' | 'medium' | 'low'>('all');
     const [activeTab, setActiveTab] = useState<'tasks' | 'corrections' | 'exports'>('tasks');
     const [exports, setExports] = useState<any[]>([]);
@@ -39,14 +39,22 @@ const TaskQueuePage = () => {
     const [selectedTask, setSelectedTask] = useState<any>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
 
+    const isSteward = (user?.role || '').toLowerCase().includes('steward');
+
+    // Le steward doit voir en priorité les tâches en review, pas "pending"
+    useEffect(() => {
+        if (isSteward) setStatusFilter('review');
+    }, [isSteward]);
+
     const fetchData = async () => {
         setIsLoading(true);
         try {
             const username = user?.username || localStorage.getItem('username');
+            const role = user?.role || '';
 
-            // US-VALID-04: Utilize user-specific queue
+            // US-VALID-04: Utilize user-specific queue (role transmis pour distinguer annotator/steward)
             const [tasksResp, statsResp] = await Promise.all([
-                apiClient.get(`/annotation/tasks/my-queue?user_id=${username}`),
+                apiClient.get(`/annotation/tasks/my-queue?user_id=${username}&role=${encodeURIComponent(role)}`),
                 username ? apiClient.get(`/annotation/users/${username}/stats`) : Promise.resolve({ data: null })
             ]);
 
@@ -96,7 +104,6 @@ const TaskQueuePage = () => {
 
     const handleDownload = async (filename: string) => {
         try {
-            // Use window.open for direct download if backend supports it or use blob
             const response = await apiClient.get(`/annotation/exports/download/${filename}`, {
                 responseType: 'blob'
             });
@@ -130,55 +137,85 @@ const TaskQueuePage = () => {
             addToast('Failed to claim task', 'error');
         }
     };
-    const handleTaskAction = async (taskId: string, isValid: boolean, editedData?: any) => {
-    try {
-        const annotations = (editedData && editedData.length > 0)
-            ? editedData.map((e: any) => ({
-                  field: e.entity_type,
-                  original_value: e.value,
-                  label: e.entity_type,
-                  is_valid: isValid,
-                  confidence: 1.0,
-                  notes: isValid ? 'Validated by Annotator' : 'Rejected by Annotator',
-                  sensitivity_level: e.sensitivity_level || null,
-                  context: e.context || null,
-              }))
-            : [{
-                  field: "pii_validation",
-                  is_valid: isValid,
-                  label: isValid ? "Validated by Annotator" : "Rejected by Annotator",
-                  confidence: 1.0,
-              }];
 
-        await apiClient.post(`/annotation/tasks/${taskId}/submit`, {
-            annotations,
-            time_spent_seconds: 0
-        });
+    // Soumission Annotator : envoie is_valid global + une annotation par détection qualifiée
+    // (sensitivity_level / context), PAS de correction de valeur ni de catégorie.
+    const handleTaskAction = async (taskId: string, isValid: boolean, enrichments?: DetectionEnrichment[]) => {
+        try {
+            const annotations = [
+                {
+                    field: "pii_validation",
+                    is_valid: isValid,
+                    notes: isValid ? "Validated by Annotator" : "Rejected by Annotator",
+                    confidence: 1.0,
+                    corrected_data: null
+                },
+                ...(enrichments || [])
+                    .filter(e => e.sensitivity_level || e.context) // n'envoie que ce qui a été rempli
+                    .map(e => ({
+                        field: e.entity_type,
+                        original_value: e.value,
+                        sensitivity_level: e.sensitivity_level || null,
+                        context: e.context || null,
+                        is_valid: isValid,
+                        confidence: 1.0
+                    }))
+            ];
 
-        setTasks(prev => prev.filter(t => t.id !== taskId));
-        addToast(isValid ? 'Task Validated Successfully' : 'Task Rejected', isValid ? 'success' : 'info');
-        setIsModalOpen(false);
-        fetchData();
-    } catch (err: any) {
-        console.error('Failed to submit task action', err?.response?.data);
-        addToast('Failed to submit action. Please try again.', 'error');
-    }
+            await apiClient.post(`/annotation/tasks/${taskId}/submit`, {
+                annotations,
+                time_spent_seconds: 0
+            });
+
+            setTasks(prev => prev.filter(t => t.id !== taskId));
+            addToast(isValid ? 'Task submitted for review' : 'Task Rejected', isValid ? 'success' : 'info');
+            setIsModalOpen(false);
+            fetchData();
+        } catch (err: any) {
+            console.error('Failed to submit task action', err?.response?.data || err);
+            addToast('Failed to submit action. Please try again.', 'error');
+        }
+    };
+
+    // Approbation Steward : finalise la tâche (COMPLETED)
+    const handleApproveTask = async (taskId: string) => {
+        try {
+            await apiClient.post(`/annotation/tasks/${taskId}/approve`);
+            setTasks(prev => prev.filter(t => t.id !== taskId));
+            addToast('Task Approved', 'success');
+            setIsModalOpen(false);
+            fetchData();
+        } catch (err) {
+            console.error('Failed to approve task', err);
+            addToast('Failed to approve task', 'error');
+        }
+    };
+
+    // Rejet Steward : renvoie la tâche en pending (aucun annotator assigné)
+    const handleRejectReview = async (taskId: string) => {
+        try {
+            await apiClient.post(`/annotation/tasks/${taskId}/reject`);
+            setTasks(prev => prev.filter(t => t.id !== taskId));
+            addToast('Task sent back to queue', 'info');
+            setIsModalOpen(false);
+            fetchData();
+        } catch (err) {
+            console.error('Failed to reject task', err);
+            addToast('Failed to reject task', 'error');
+        }
     };
 
     const handleCorrectionAction = async (correctionId: string, isValid: boolean) => {
         try {
             await apiClient.post(`/corrections/validate/${correctionId}`, {
                 decision: isValid ? 'ACCEPT' : 'REJECT',
-                final_value: null, // Simple MVP: Accept suggestion or Reject
+                final_value: null,
                 validator_id: user?.username || 'annotator',
                 validator_role: 'data_annotator'
             });
 
-            // Optimistic update
             setCorrections(prev => prev.filter(c => c.id !== correctionId));
             addToast(isValid ? 'Correction Applied' : 'Correction Rejected', isValid ? 'success' : 'info');
-
-            // Refresh
             fetchCorrections();
         } catch (err) {
             console.error('Failed to validate correction', err);
@@ -191,6 +228,25 @@ const TaskQueuePage = () => {
         setIsModalOpen(true);
     };
 
+    // Le modal se comporte différemment selon le rôle :
+    // - annotator : onValidate soumet (-> REVIEW), onReject rejette la détection
+    // - steward   : onValidate approuve (-> COMPLETED), onReject renvoie en pending
+    const handleModalValidate = (id: string, enrichments?: DetectionEnrichment[]) => {
+        if (isSteward) {
+            handleApproveTask(id);
+        } else {
+            handleTaskAction(id, true, enrichments);
+        }
+    };
+
+    const handleModalReject = (id: string) => {
+        if (isSteward) {
+            handleRejectReview(id);
+        } else {
+            handleTaskAction(id, false);
+        }
+    };
+
     return (
         <div className="space-y-10">
             {/* Modal */}
@@ -198,8 +254,8 @@ const TaskQueuePage = () => {
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
                 task={selectedTask}
-                onValidate={(id: string, data?: any) => handleTaskAction(id, true, data)}
-                onReject={(id: string) => handleTaskAction(id, false)}
+                onValidate={handleModalValidate}
+                onReject={handleModalReject}
             />
 
             {/* Sophisticated Performance Header */}
@@ -209,7 +265,7 @@ const TaskQueuePage = () => {
                         <Trophy size={40} />
                     </div>
                     <div>
-                        <h2 className="text-2xl font-bold text-white mb-1">Annotator Command</h2>
+                        <h2 className="text-2xl font-bold text-white mb-1">{isSteward ? 'Steward Command' : 'Annotator Command'}</h2>
                         <p className="text-slate-400 text-sm mb-4 tracking-tight">System Authority: <span className="text-brand-primary font-black uppercase text-[10px]">{user?.role || 'Annotator'}</span></p>
                         <div className="flex gap-4">
                             <div className="flex items-center gap-2">
@@ -287,6 +343,7 @@ const TaskQueuePage = () => {
                                 <option value="all">All Status</option>
                                 <option value="pending">Pending</option>
                                 <option value="assigned">Assigned</option>
+                                <option value="review">Review</option>
                                 <option value="completed">Completed</option>
                             </select>
                         </div>
@@ -358,7 +415,8 @@ const TaskQueuePage = () => {
                                                 <h4 className="text-lg font-bold text-white tracking-tight">{task.annotation_type.replace('_', ' ').toUpperCase()}</h4>
                                                 <span className={`text-[10px] font-black px-2 py-0.5 rounded-lg uppercase ${task.status === 'pending' ? 'bg-slate-500/10 text-slate-500' :
                                                     task.status === 'assigned' ? 'bg-blue-500/10 text-blue-500' :
-                                                        'bg-green-500/10 text-green-500'
+                                                        task.status === 'review' ? 'bg-purple-500/10 text-purple-400' :
+                                                            'bg-green-500/10 text-green-500'
                                                     }`}>
                                                     {task.status}
                                                 </span>
@@ -385,7 +443,7 @@ const TaskQueuePage = () => {
                                             </code>
                                         </div>
                                         <div className="flex items-center gap-2">
-                                            {task.status === 'pending' && (
+                                            {task.status === 'pending' && !isSteward && (
                                                 <Button
                                                     variant="primary"
                                                     className="h-12 px-4 rounded-2xl bg-brand-primary text-white hover:bg-brand-primary/90 transition-transform"
@@ -409,16 +467,16 @@ const TaskQueuePage = () => {
                                                     <Button
                                                         variant="ghost"
                                                         className="h-12 w-12 !p-0 rounded-2xl bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-transform"
-                                                        onClick={() => handleTaskAction(task.id, false)}
-                                                        title="Reject Detection"
+                                                        onClick={() => handleModalReject(task.id)}
+                                                        title={isSteward ? 'Send back' : 'Reject Detection'}
                                                     >
                                                         <X size={20} />
                                                     </Button>
                                                     <Button
                                                         variant="primary"
                                                         className="h-12 w-12 !p-0 rounded-2xl bg-green-500/20 text-green-500 hover:bg-green-500/30 border-green-500/30 transition-transform"
-                                                        onClick={() => handleTaskAction(task.id, true)}
-                                                        title="Validate Detection"
+                                                        onClick={() => handleModalValidate(task.id)}
+                                                        title={isSteward ? 'Approve' : 'Validate Detection'}
                                                     >
                                                         <CheckCircle2 size={20} />
                                                     </Button>

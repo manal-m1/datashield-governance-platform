@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, CheckCircle2, AlertTriangle, Tag, Save, ChevronDown, ChevronRight, Copy } from 'lucide-react';
+import { X, CheckCircle2, AlertTriangle, Tag, ChevronDown, ChevronRight, ShieldCheck, Eye, EyeOff } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '../components/ui/Button';
 import { useAuthStore } from '../store/authStore';
@@ -28,29 +28,69 @@ const SENSITIVITY_OPTIONS: { value: SensitivityLevel; label: string; color: stri
     { value: 'critique', label: 'Critique', color: 'text-red-400 border-red-500/30 bg-red-500/10' },
 ];
 
-const TaskDetailsModal = ({ isOpen, onClose, task, onValidate, onReject }: TaskDetailsModalProps) => {
-    const [isAnnotating, setIsAnnotating] = useState(false);
-    const [isDetectionsOpen, setIsDetectionsOpen] = useState(false);
-    const [enrichments, setEnrichments] = useState<Record<string, DetectionEnrichment & { key: string }>>({});
+// Style du badge pour un niveau de sensibilité donné (utilisé côté Steward)
+const getSensitivityStyle = (level: SensitivityLevel) => {
+    const found = SENSITIVITY_OPTIONS.find(o => o.value === level);
+    return found ? found.color : 'text-slate-500 border-slate-800 bg-slate-900/40';
+};
 
+// Masque une valeur selon la sensibilité proposée par l'Annotator.
+// - critique / eleve : masquage fort (1er + dernier caractère seulement)
+// - moyen : masquage partiel (2 caractères de chaque côté)
+// - faible / non qualifié : affichage en clair
+const maskValueBySensitivity = (value: string, level: SensitivityLevel): string => {
+    if (!value) return '';
+    if (level === 'critique' || level === 'eleve') {
+        if (value.length <= 2) return '•'.repeat(Math.max(value.length, 4));
+        return `${value[0]}${'•'.repeat(Math.max(value.length - 2, 3))}${value[value.length - 1]}`;
+    }
+    if (level === 'moyen') {
+        if (value.length <= 4) return `${value[0]}${'•'.repeat(value.length - 1)}`;
+        return `${value.slice(0, 2)}${'•'.repeat(value.length - 4)}${value.slice(-2)}`;
+    }
+    return value; // 'faible' ou pas encore qualifié -> valeur en clair
+};
+
+const TaskDetailsModal = ({ isOpen, onClose, task, onValidate, onReject }: TaskDetailsModalProps) => {
+    const [isDetectionsOpen, setIsDetectionsOpen] = useState(true);
+    const [enrichments, setEnrichments] = useState<Record<string, DetectionEnrichment & { key: string }>>({});
+    const [revealedKeys, setRevealedKeys] = useState<Record<string, boolean>>({});
+
+    const currentRole = (useAuthStore.getState().user?.role || '').toLowerCase();
     // Seul l'annotator qualifie les détections (sensibilité + contexte)
-    const canAnnotate = (useAuthStore.getState().user?.role || '').toLowerCase().includes('annotator');
+    const canAnnotate = currentRole.includes('annotator');
+    // Le Data Steward consulte la qualification déjà faite par l'Annotator, en lecture seule, avec masquage
+    const canReview = currentRole.includes('steward');
 
     useEffect(() => {
         if (task) {
+            // Les annotations soumises par l'Annotator ont "field" = entity_type (pas de clé unique),
+            // donc on les regroupe par type et on les redistribue DANS L'ORDRE aux détections du même type
+            // (même ordre que celui utilisé lors de la soumission côté TaskQueuePage).
+            const annotationsByField: Record<string, any[]> = {};
+            (task.annotations || []).forEach((a: any) => {
+                if (!a || !a.field) return;
+                if (!annotationsByField[a.field]) annotationsByField[a.field] = [];
+                annotationsByField[a.field].push(a);
+            });
+
             const initial: Record<string, DetectionEnrichment & { key: string }> = {};
             (task.detections || []).forEach((det: any, idx: number) => {
-                const key = `${det.entity_type || 'Unknown'}__${idx}`;
+                const type = det.entity_type || 'Unknown';
+                const key = `${type}__${idx}`;
+                const queue = annotationsByField[type];
+                const matched = queue && queue.length ? queue.shift() : null;
+
                 initial[key] = {
                     key,
-                    entity_type: det.entity_type || 'Unknown',
+                    entity_type: type,
                     value: det.value,
-                    sensitivity_level: '',
-                    context: '',
+                    sensitivity_level: (matched?.sensitivity_level as SensitivityLevel) || '',
+                    context: matched?.context || '',
                 };
             });
             setEnrichments(initial);
-            setIsAnnotating(false);
+            setRevealedKeys({});
         }
     }, [task]);
 
@@ -71,91 +111,15 @@ const TaskDetailsModal = ({ isOpen, onClose, task, onValidate, onReject }: TaskD
         setEnrichments(prev => ({ ...prev, [key]: { ...prev[key], context } }));
     };
 
+    const toggleReveal = (key: string) => {
+        setRevealedKeys(prev => ({ ...prev, [key]: !prev[key] }));
+    };
+
     const buildEnrichmentsList = (): DetectionEnrichment[] =>
         Object.values(enrichments).map(({ key, ...rest }) => rest);
 
     const handleSave = () => {
-        setIsAnnotating(false);
         onValidate(task.id, buildEnrichmentsList());
-    };
-
-    const renderContent = (data: any) => {
-        if (!data) return <p className="text-slate-500 italic">No data content available</p>;
-
-        let contentToRender = data;
-
-        if (typeof data === 'string') {
-            try {
-                contentToRender = JSON.parse(data);
-            } catch {
-                // Keep as string
-            }
-        } else if (data.source_text && typeof data.source_text === 'string') {
-            try {
-                contentToRender = JSON.parse(data.source_text);
-            } catch {
-                // Fallback to wrapper
-            }
-        }
-
-        if (Array.isArray(contentToRender) && contentToRender.length > 0) {
-            const headers = Object.keys(contentToRender[0] || {});
-            return (
-                <div className="overflow-x-auto rounded-lg border border-slate-800">
-                    <table className="w-full text-xs text-left text-slate-400">
-                        <thead className="bg-slate-900 uppercase font-bold text-slate-500">
-                            <tr>
-                                {headers.map(h => (
-                                    <th key={h} className="px-3 py-2 border-b border-slate-800 whitespace-nowrap">{h}</th>
-                                ))}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {contentToRender.map((row: any, i: number) => (
-                                <tr key={i} className={`border-b border-slate-800/50 hover:bg-slate-800/50 transition-colors ${i % 2 === 0 ? 'bg-slate-900/20' : ''}`}>
-                                    {headers.map(h => {
-                                        const val = row[h];
-                                        const isMatch = task.detections?.some((d: any) => d.value === String(val));
-                                        return (
-                                            <td key={h} className="px-3 py-2 max-w-[200px] truncate" title={String(val)}>
-                                                {isMatch ? (
-                                                    <span className="bg-red-500/20 text-red-400 px-1 py-0.5 rounded border border-red-500/30 font-bold">{String(val)}</span>
-                                                ) : (
-                                                    String(val)
-                                                )}
-                                            </td>
-                                        );
-                                    })}
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            );
-        }
-
-        if (typeof contentToRender === 'object' && contentToRender !== null) {
-            return (
-                <div className="grid grid-cols-1 gap-1">
-                    {Object.entries(contentToRender).map(([key, value]) => (
-                        <div key={key} className="flex flex-col sm:flex-row sm:gap-4 p-2 rounded hover:bg-white/5 border border-transparent hover:border-white/5 transition-colors">
-                            <span className="text-slate-500 uppercase font-bold text-[10px] tracking-wider sm:w-32 flex-shrink-0 pt-1">
-                                {key.replace(/_/g, ' ')}
-                            </span>
-                            <div className="text-slate-300 font-mono text-xs break-all">
-                                {typeof value === 'object' ? JSON.stringify(value) : String(value)}
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            );
-        }
-
-        return (
-            <div className="p-3 rounded bg-slate-950/50 border border-slate-800/50 text-slate-300 font-mono text-xs whitespace-pre-wrap">
-                {String(contentToRender)}
-            </div>
-        );
     };
 
     return (
@@ -186,7 +150,7 @@ const TaskDetailsModal = ({ isOpen, onClose, task, onValidate, onReject }: TaskD
                         </div>
 
                         <div className="space-y-6 overflow-y-auto pr-2 custom-scrollbar">
-                            {/* Detections Panel - résumé simple */}
+                            {/* Detections Panel - résumé */}
                             <div className={`rounded-lg border ${isDetectionsOpen ? 'border-red-500/30 bg-red-500/5' : 'border-slate-800 bg-slate-900/50 hover:border-slate-700'} transition-colors overflow-hidden flex-shrink-0`}>
                                 <button
                                     onClick={() => setIsDetectionsOpen(!isDetectionsOpen)}
@@ -230,77 +194,110 @@ const TaskDetailsModal = ({ isOpen, onClose, task, onValidate, onReject }: TaskD
                                 </AnimatePresence>
                             </div>
 
-                            {/* Data Content - toujours en lecture seule pour l'Annotator */}
-                            <div className="space-y-3">
-                                <h4 className="text-slate-500 font-bold text-xs uppercase tracking-wider">Row Content</h4>
-                                <div className="bg-black/20 rounded-xl border border-white/5 p-4 max-h-60 overflow-y-auto font-mono text-sm relative group">
-                                    {renderContent(task.data_sample)}
-                                    <button
-                                        className="absolute top-2 right-2 p-1.5 text-slate-500 hover:text-white bg-slate-900/50 hover:bg-slate-800 rounded opacity-0 group-hover:opacity-100 transition-all"
-                                        title="Copy as JSON"
-                                        onClick={() => navigator.clipboard.writeText(JSON.stringify(task.data_sample, null, 2))}
-                                    >
-                                        <Copy className="w-3.5 h-3.5" />
-                                    </button>
-                                </div>
-                            </div>
-
                             {/* Annotation - sensibilité + contexte par détection (rôle Annotator) */}
                             {canAnnotate && (
                                 <div className="space-y-3">
-                                    <div className="flex justify-between items-center">
+                                    <div className="flex items-center gap-2">
+                                        <Tag size={14} className="text-slate-500" />
                                         <h4 className="text-slate-500 font-bold text-xs uppercase tracking-wider">Qualification des détections</h4>
-                                        <button
-                                            onClick={() => setIsAnnotating(!isAnnotating)}
-                                            className={`text-xs flex items-center gap-1.5 ${isAnnotating ? 'text-brand-primary' : 'text-slate-400 hover:text-white'} transition-colors`}
-                                        >
-                                            <Tag size={12} />
-                                            {isAnnotating ? 'Annotation en cours...' : 'Ajouter Sensibilité & Contexte'}
-                                        </button>
                                     </div>
 
-                                    {isAnnotating && (
-                                        <div className="space-y-3">
-                                            {Object.values(enrichments).length === 0 && (
-                                                <p className="text-xs text-slate-500 italic">Aucune détection à qualifier pour cette tâche.</p>
-                                            )}
-                                            {Object.values(enrichments).map((e) => (
+                                    <div className="space-y-3">
+                                        {Object.values(enrichments).length === 0 && (
+                                            <p className="text-xs text-slate-500 italic">Aucune détection à qualifier pour cette tâche.</p>
+                                        )}
+                                        {Object.values(enrichments).map((e) => (
+                                            <div key={e.key} className="flex flex-col gap-2.5 p-3 bg-slate-900/60 border border-slate-800 rounded-lg">
+                                                <div className="flex items-center justify-between">
+                                                    <span className="font-mono text-[10px] text-white uppercase bg-slate-800 px-1.5 py-0.5 rounded">
+                                                        {e.entity_type}
+                                                    </span>
+                                                    <code className="text-[10px] text-slate-500 truncate max-w-[180px]" title={e.value}>
+                                                        {e.value}
+                                                    </code>
+                                                </div>
+
+                                                <div className="flex gap-2">
+                                                    {SENSITIVITY_OPTIONS.map(opt => (
+                                                        <button
+                                                            key={opt.value}
+                                                            onClick={() => handleSensitivityChange(e.key, opt.value)}
+                                                            className={`flex-1 text-[10px] font-bold py-1.5 rounded border transition-colors ${
+                                                                e.sensitivity_level === opt.value
+                                                                    ? opt.color
+                                                                    : 'text-slate-500 border-slate-800 hover:border-slate-700'
+                                                            }`}
+                                                        >
+                                                            {opt.label}
+                                                        </button>
+                                                    ))}
+                                                </div>
+
+                                                <textarea
+                                                    value={e.context}
+                                                    onChange={(ev) => handleContextChange(e.key, ev.target.value)}
+                                                    placeholder="Contexte (ex: donnée client visible dans un export interne, usage RH...)"
+                                                    className="bg-slate-900 border border-slate-700 rounded px-3 py-2 text-slate-200 focus:border-brand-primary focus:outline-none min-h-[60px] text-xs leading-relaxed"
+                                                />
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Revue Steward - sensibilité + contexte en lecture seule, valeur masquée */}
+                            {canReview && (
+                                <div className="space-y-3">
+                                    <div className="flex items-center gap-2">
+                                        <ShieldCheck size={14} className="text-slate-500" />
+                                        <h4 className="text-slate-500 font-bold text-xs uppercase tracking-wider">Sensibilité proposée par l'Annotator</h4>
+                                    </div>
+
+                                    <div className="space-y-3">
+                                        {Object.values(enrichments).length === 0 && (
+                                            <p className="text-xs text-slate-500 italic">Aucune détection à examiner pour cette tâche.</p>
+                                        )}
+                                        {Object.values(enrichments).map((e) => {
+                                            const isRevealed = !!revealedKeys[e.key];
+                                            const displayValue = isRevealed ? e.value : maskValueBySensitivity(e.value, e.sensitivity_level);
+                                            const notQualified = !e.sensitivity_level;
+
+                                            return (
                                                 <div key={e.key} className="flex flex-col gap-2.5 p-3 bg-slate-900/60 border border-slate-800 rounded-lg">
                                                     <div className="flex items-center justify-between">
-                                                        <span className="font-mono text-[10px] text-white uppercase bg-slate-800 px-1.5 py-0.5 rounded">
-                                                            {e.entity_type}
-                                                        </span>
-                                                        <code className="text-[10px] text-slate-500 truncate max-w-[180px]" title={e.value}>
-                                                            {e.value}
-                                                        </code>
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="font-mono text-[10px] text-white uppercase bg-slate-800 px-1.5 py-0.5 rounded">
+                                                                {e.entity_type}
+                                                            </span>
+                                                            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded border ${getSensitivityStyle(e.sensitivity_level)}`}>
+                                                                {notQualified ? 'Non qualifié' : SENSITIVITY_OPTIONS.find(o => o.value === e.sensitivity_level)?.label}
+                                                            </span>
+                                                        </div>
+                                                        <button
+                                                            onClick={() => toggleReveal(e.key)}
+                                                            className="flex items-center gap-1 text-[10px] text-slate-400 hover:text-slate-200 transition-colors"
+                                                            title={isRevealed ? 'Masquer la valeur' : 'Voir la valeur en clair'}
+                                                        >
+                                                            {isRevealed ? <EyeOff size={12} /> : <Eye size={12} />}
+                                                            {isRevealed ? 'Masquer' : 'Voir'}
+                                                        </button>
                                                     </div>
 
-                                                    <div className="flex gap-2">
-                                                        {SENSITIVITY_OPTIONS.map(opt => (
-                                                            <button
-                                                                key={opt.value}
-                                                                onClick={() => handleSensitivityChange(e.key, opt.value)}
-                                                                className={`flex-1 text-[10px] font-bold py-1.5 rounded border transition-colors ${
-                                                                    e.sensitivity_level === opt.value
-                                                                        ? opt.color
-                                                                        : 'text-slate-500 border-slate-800 hover:border-slate-700'
-                                                                }`}
-                                                            >
-                                                                {opt.label}
-                                                            </button>
-                                                        ))}
-                                                    </div>
+                                                    <code className="text-xs text-slate-300 bg-slate-950/50 px-2 py-1.5 rounded border border-slate-800 break-all">
+                                                        {displayValue}
+                                                    </code>
 
-                                                    <textarea
-                                                        value={e.context}
-                                                        onChange={(ev) => handleContextChange(e.key, ev.target.value)}
-                                                        placeholder="Contexte (ex: donnée client visible dans un export interne, usage RH...)"
-                                                        className="bg-slate-900 border border-slate-700 rounded px-3 py-2 text-slate-200 focus:border-brand-primary focus:outline-none min-h-[60px] text-xs leading-relaxed"
-                                                    />
+                                                    {e.context ? (
+                                                        <p className="text-xs text-slate-400 leading-relaxed italic border-l-2 border-slate-700 pl-2">
+                                                            {e.context}
+                                                        </p>
+                                                    ) : (
+                                                        <p className="text-xs text-slate-600 italic">Aucun contexte renseigné.</p>
+                                                    )}
                                                 </div>
-                                            ))}
-                                        </div>
-                                    )}
+                                            );
+                                        })}
+                                    </div>
                                 </div>
                             )}
                         </div>
@@ -313,28 +310,17 @@ const TaskDetailsModal = ({ isOpen, onClose, task, onValidate, onReject }: TaskD
                                 onClick={() => onReject(task.id)}
                             >
                                 <X size={18} className="mr-2" />
-                                Reject (Not PII)
+                                {canReview ? 'Send Back' : 'Reject (Not PII)'}
                             </Button>
 
-                            {isAnnotating ? (
-                                <Button
-                                    variant="primary"
-                                    className="flex-1 bg-blue-500 hover:bg-blue-600"
-                                    onClick={handleSave}
-                                >
-                                    <Save size={18} className="mr-2" />
-                                    Save & Validate
-                                </Button>
-                            ) : (
-                                <Button
-                                    variant="primary"
-                                    className="flex-1 bg-green-500 hover:bg-green-600 border-green-500"
-                                    onClick={() => onValidate(task.id, buildEnrichmentsList())}
-                                >
-                                    <CheckCircle2 size={18} className="mr-2" />
-                                    Confirm Valid PII
-                                </Button>
-                            )}
+                            <Button
+                                variant="primary"
+                                className="flex-1 bg-green-500 hover:bg-green-600 border-green-500"
+                                onClick={handleSave}
+                            >
+                                <CheckCircle2 size={18} className="mr-2" />
+                                {canReview ? 'Approve' : 'Confirm & Submit'}
+                            </Button>
                         </div>
                     </motion.div>
                 </div>

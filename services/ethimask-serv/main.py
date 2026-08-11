@@ -1,23 +1,12 @@
 """
 EthiMask Service - Tâche 9
 Contextual Data Masking Framework (Mongo Persisted)
-
-Features:
-- Perceptron V0.1 for masking level decision
-- Role-based contextual masking
-- Multiple masking techniques
-- MongoDB Persistence for Audit Logs and Policies
 """
-import hashlib
-import random
-import string
-import uuid
 from datetime import datetime
-from typing import List, Dict, Optional, Any, Tuple
+from typing import List, Dict, Optional, Any
 from enum import Enum
 
 import uvicorn
-import numpy as np
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
@@ -25,15 +14,9 @@ from pydantic import BaseModel, Field
 from backend.database.mongodb import db
 from backend.score_calculator import MaskingPerceptron, UserRole, MaskingLevel
 from backend.masking_techniques import ContextualMasker, MaskingTechnique
-
-# Optional: TenSEAL for homomorphic encryption
-try:
-    import tenseal as ts
-    TENSEAL_AVAILABLE = True
-except ImportError:
-    TENSEAL_AVAILABLE = False
-    print("⚠️ TenSEAL not available. Homomorphic encryption disabled.")
-
+from backend.he_key_manager import he_manager, HEAccessDenied
+from backend.token_vault import TokenVault
+from contextlib import asynccontextmanager
 # ====================================================================
 # MODELS
 # ====================================================================
@@ -46,12 +29,12 @@ class SensitivityLevel(str, Enum):
 
 class MaskingConfig(BaseModel):
     role: UserRole = UserRole.DATA_LABELER
-    context: str = "default"  # Context: analysis, export, display, api
-    purpose: str = "general"  # Purpose: research, compliance, marketing
+    context: str = "default"
+    purpose: str = "general"
     history_stats: Optional[Dict[str, float]] = {
-        "conformity": 0.8, # Hc
-        "frequency": 0.5,  # Hf
-        "violations": 0.0  # Hv
+        "conformity": 0.8,
+        "frequency": 0.5,
+        "violations": 0.0
     }
 
 class Detection(BaseModel):
@@ -78,17 +61,17 @@ class MaskingPolicy(BaseModel):
     level: MaskingLevel
     technique: MaskingTechnique
 
-# ====================================================================
-# CONFIG MANAGER (MONGO PERSISTED)
-# ====================================================================
-
 class ConfigUpdate(BaseModel):
     ws: float = Field(..., ge=-1.0, le=1.0)
     wr: float = Field(..., ge=-1.0, le=1.0)
     wc: float = Field(..., ge=-1.0, le=1.0)
     wp: float = Field(..., ge=-1.0, le=1.0)
     bias: float = Field(0.4, ge=-1.0, le=1.0)
-    alpha: float = Field(0.5, ge=0.0, le=1.0, description="Loss function balance: alpha * Privacy + (1-alpha) * Utility")
+    alpha: float = Field(0.5, ge=0.0, le=1.0)
+
+# ====================================================================
+# CONFIG MANAGER
+# ====================================================================
 
 class ConfigManager:
     DEFAULT_CONFIG = {
@@ -105,7 +88,6 @@ class ConfigManager:
         return self.DEFAULT_CONFIG
 
     async def update_config(self, config: ConfigUpdate):
-        # Map frontend fields to perceptron weights order: [sensitivity, role, context, purpose]
         new_weights = [config.ws, config.wr, config.wc, config.wp]
         if db is not None:
             await db.ethimask_config.update_one(
@@ -113,50 +95,43 @@ class ConfigManager:
                 {"$set": {"weights": new_weights, "bias": config.bias, "alpha": config.alpha}},
                 upsert=True
             )
-        # Update in-memory perceptron
         perceptron.update_weights(new_weights, config.bias)
 
 # ====================================================================
-# POLICY MANAGER (MONGO PERSISTED)
+# POLICY MANAGER
 # ====================================================================
 
 class PolicyManager:
     DEFAULT_POLICIES = [
         {"entity_type": "*", "role": "admin", "level": "none", "technique": "pseudonymization"},
         {"entity_type": "cin", "role": "steward", "level": "partial", "technique": "pseudonymization"},
-        # Changed Labeler to Encrypted to demonstrate HE in Demo
+        {"entity_type": "cin", "role": "labeler", "level": "encrypted", "technique": "fpe"},
+        {"entity_type": "phone", "role": "*", "level": "partial", "technique": "fpe"},
+        {"entity_type": "account_number", "role": "*", "level": "partial", "technique": "fpe"},
         {"entity_type": "*", "role": "labeler", "level": "encrypted", "technique": "encryption"},
-        # Annotator default
         {"entity_type": "*", "role": "annotator", "level": "partial", "technique": "generalization"},
     ]
-    
+
     async def get_policy(self, entity_type: str, role: str) -> Optional[MaskingPolicy]:
         if db is not None:
-            # Look for exact match
             doc = await db.masking_policies.find_one({"entity_type": entity_type, "role": role})
             if not doc:
-                # Wildcard entity
                 doc = await db.masking_policies.find_one({"entity_type": "*", "role": role})
-            
             if doc:
                 return MaskingPolicy(**doc)
-        
-        # Fallback defaults if DB empty or not found
+
         for p in self.DEFAULT_POLICIES:
             if (p["entity_type"] == entity_type or p["entity_type"] == "*") and p["role"] == role:
                 return MaskingPolicy(**p)
-
-        # Default fallback if no policy matches
-        # return MaskingPolicy(entity_type=entity_type, role=role, level=MaskingLevel.FULL, technique=MaskingTechnique.SUPPRESSION)
         return None
 
     async def add_policy(self, policy: MaskingPolicy):
         if db is not None:
-             await db.masking_policies.update_one(
-                 {"entity_type": policy.entity_type, "role": policy.role},
-                 {"$set": policy.dict()},
-                 upsert=True
-             )
+            await db.masking_policies.update_one(
+                {"entity_type": policy.entity_type, "role": policy.role},
+                {"$set": policy.dict()},
+                upsert=True
+            )
 
     async def get_all_policies(self) -> List[MaskingPolicy]:
         if db is not None:
@@ -165,13 +140,75 @@ class PolicyManager:
         return [MaskingPolicy(**p) for p in self.DEFAULT_POLICIES]
 
 # ====================================================================
-# FASTAPI APP
+# AUDIT LOG - SCHÉMA STRICT (aucune valeur brute/masquée ne peut y entrer)
 # ====================================================================
 
+AUDIT_ALLOWED_KEYS = {"field", "entity_type", "sensitivity", "masking_level", "technique", "role", "timestamp"}
+
+def build_audit_entry(field: str, entity_type: str, sensitivity: str, level, technique: str, role) -> dict:
+    entry = {
+        "field": field,
+        "entity_type": entity_type,
+        "sensitivity": sensitivity,
+        "masking_level": level.value if hasattr(level, "value") else level,
+        "technique": technique,
+        "role": role.value if hasattr(role, "value") else role,
+        "timestamp": datetime.now().isoformat()
+    }
+    assert set(entry.keys()) == AUDIT_ALLOWED_KEYS, (
+        f"Audit entry contains unexpected keys: {set(entry.keys()) - AUDIT_ALLOWED_KEYS}"
+    )
+    return entry
+
+# ====================================================================
+# FASTAPI APP
+# ====================================================================
+perceptron = MaskingPerceptron()
+vault = TokenVault(db)
+masker = ContextualMasker(db=db, vault=vault, he_context_provider=he_manager.get_public_context)
+policy_manager = PolicyManager()
+config_manager = ConfigManager()
+async def _verify_technique_coverage():
+    """Empêche toute technique déclarée dans l'enum mais non câblée dans mask()."""
+    test_cases = {
+        MaskingTechnique.PSEUDONYMIZATION: ("test_value", "name"),
+        MaskingTechnique.GENERALIZATION: ("test_value", "age"),
+        MaskingTechnique.SUPPRESSION: ("test_value", "generic"),
+        MaskingTechnique.PERTURBATION: (100.0, "salary"),
+        MaskingTechnique.HASHING: ("test_value", "generic"),
+        MaskingTechnique.ENCRYPTION: (100.0, "generic"),
+        MaskingTechnique.FPE: ("AB123456", "cin"),
+        MaskingTechnique.TOKENIZATION: ("4242424242424242", "card"),
+    }
+    expected = {
+        MaskingTechnique.PSEUDONYMIZATION: "pseudonymization",
+        MaskingTechnique.GENERALIZATION: "generalization",
+        MaskingTechnique.SUPPRESSION: "suppression",
+        MaskingTechnique.PERTURBATION: "differential_privacy_laplace",
+        MaskingTechnique.HASHING: "hashing",
+        MaskingTechnique.ENCRYPTION: "homomorphic_encryption",
+        MaskingTechnique.FPE: "format_preserving_encryption",
+        MaskingTechnique.TOKENIZATION: "tokenization",
+    }
+    for technique, (val, etype) in test_cases.items():
+        _, tech_used = await masker.mask(val, etype, MaskingLevel.PARTIAL, technique)
+        if tech_used != expected[technique] and "fallback" not in tech_used:
+            raise RuntimeError(
+                f"MaskingTechnique.{technique.name} produit '{tech_used}', attendu '{expected[technique]}' — "
+                f"vérifier l'implémentation dans mask()"
+            )
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    config = await config_manager.get_config()
+    perceptron.update_weights(config["weights"], config["bias"])
+    await _verify_technique_coverage()
+
+    yield
 app = FastAPI(
     title="EthiMask Service",
     description="Tâche 9 - Contextual Data Masking Framework (Mongo Persisted)",
-    version="2.1.0"
+    version="2.2.0",
+    lifespan=lifespan
 )
 
 @app.middleware("http")
@@ -179,10 +216,8 @@ async def set_root_path(request: Request, call_next):
     root_path = request.headers.get("x-forwarded-prefix")
     if root_path:
         request.scope["root_path"] = root_path
-    response = await call_next(request)
-    return response
+    return await call_next(request)
 
-# CORS Security - Restricted origins
 import os
 ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "http://localhost:8000,http://localhost:3000").split(",")
 app.add_middleware(
@@ -193,16 +228,10 @@ app.add_middleware(
     allow_headers=["Content-Type", "Authorization"],
 )
 
-perceptron = MaskingPerceptron()
-masker = ContextualMasker()
-policy_manager = PolicyManager()
-config_manager = ConfigManager()
 
-@app.on_event("startup")
-async def startup_event():
-    # Load config from DB on startup
-    config = await config_manager.get_config()
-    perceptron.update_weights(config["weights"], config["bias"])
+# ====================================================================
+# STARTUP - config + garde-fou enum ↔ implémentation
+# ====================================================================
 
 @app.get("/")
 async def root():
@@ -220,55 +249,49 @@ async def root():
 def health_check():
     return {"status": "healthy"}
 
+# ====================================================================
+# MASKING
+# ====================================================================
+
 @app.post("/mask", response_model=MaskResponse)
 async def mask_data(request: MaskRequest):
-    """Apply contextual masking to data with PII detections"""
     masked_data = request.data.copy()
     techniques_used = {}
     audit_logs_batch = []
-    
+
     for detection in request.detections:
         field = detection.field
-        if field not in masked_data: continue
-        
-        # Perceptron Decision
+        if field not in masked_data:
+            continue
+
         level, confidence = perceptron.decide_masking(
-            detection.sensitivity_level, 
-            request.config.role, 
-            request.config.context, 
+            detection.sensitivity_level,
+            request.config.role,
+            request.config.context,
             request.config.purpose,
             history=request.config.history_stats
         )
-        
-        # Policy Override
+
         policy = await policy_manager.get_policy(detection.entity_type, request.config.role.value)
         if policy:
-             level = policy.level
-             technique = policy.technique
+            level = policy.level
+            technique = policy.technique
         else:
-             technique = None
-        
-        masked_val, tech_used = masker.mask(masked_data[field], detection.entity_type, level, technique)
+            technique = None
+
+        masked_val, tech_used = await masker.mask(masked_data[field], detection.entity_type, level, technique)
         masked_data[field] = masked_val
         techniques_used[field] = tech_used
-        
-        audit_logs_batch.append({
-            "field": field,
-            "entity_type": detection.entity_type,
-            "sensitivity": detection.sensitivity_level,
-            "masking_level": level.value,
-            "technique": tech_used,
-            "role": request.config.role.value,
-            "timestamp": datetime.now().isoformat()
-        })
-    
-    # Batch insert audit logs
+
+        audit_logs_batch.append(build_audit_entry(
+            field, detection.entity_type, detection.sensitivity_level, level, tech_used, request.config.role
+        ))
+
     if db is not None and audit_logs_batch:
         result = await db.audit_logs.insert_many(audit_logs_batch)
-        # Add IDs to logs for response but convert to string
         for i, log in enumerate(audit_logs_batch):
             log["_id"] = str(result.inserted_ids[i])
-    
+
     return MaskResponse(
         masked_data=masked_data,
         masking_applied=len([t for t in techniques_used.values() if t != "none"]),
@@ -280,27 +303,31 @@ async def mask_data(request: MaskRequest):
 def get_masking_decision(sensitivity: str, role: UserRole, context: str = "default", purpose: str = "general"):
     return perceptron.get_decision_explanation(sensitivity, role, context, purpose)
 
+# ====================================================================
+# POLICIES
+# ====================================================================
+
 @app.get("/policies")
 async def list_policies():
-    """List all masking policies"""
     policies = await policy_manager.get_all_policies()
     return {"policies": [p.dict() for p in policies]}
 
 @app.post("/policies")
 async def add_policy(policy: MaskingPolicy):
-    """Add or update a masking policy"""
     await policy_manager.add_policy(policy)
     return {"status": "added/updated"}
 
+# ====================================================================
+# CONFIG (doublon purpose_weight corrigé)
+# ====================================================================
+
 @app.get("/config")
 async def get_config():
-    """Get current perceptron configuration"""
     config = await config_manager.get_config()
     return {
         "sensitivity_weight": config["weights"][0],
         "role_weight": config["weights"][1],
         "context_weight": config["weights"][2],
-        "purpose_weight": config["weights"][3],
         "purpose_weight": config["weights"][3],
         "bias": config["bias"],
         "alpha": config["alpha"]
@@ -308,13 +335,15 @@ async def get_config():
 
 @app.post("/config")
 async def update_config(config: ConfigUpdate):
-    """Update perceptron weights and bias"""
     await config_manager.update_config(config)
     return {"status": "configuration saved", "new_config": config}
 
+# ====================================================================
+# AUDIT LOGS
+# ====================================================================
+
 @app.get("/audit-logs")
 async def get_audit_logs(limit: int = 100):
-    """Get recent audit logs"""
     if db is not None:
         cursor = db.audit_logs.find().sort("timestamp", -1).limit(limit)
         logs = []
@@ -325,121 +354,99 @@ async def get_audit_logs(limit: int = 100):
     return {"logs": []}
 
 @app.get("/audit")
-async def get_masking_audit_report(
-    limit: int = 100, 
-    role: Optional[str] = None, 
-    entity_type: Optional[str] = None
-):
-    """
-    US-MASK-04: Specialized Masking Audit Report
-    Filterable by Role and Entity Type to analyze masking decisions.
-    """
+async def get_masking_audit_report(limit: int = 100, role: Optional[str] = None, entity_type: Optional[str] = None):
     if db is None:
         return {"logs": []}
-    
+
     query = {}
     if role:
         query["role"] = role
     if entity_type:
         query["entity_type"] = entity_type
-        
+
     cursor = db.audit_logs.find(query).sort("timestamp", -1).limit(limit)
     logs = []
     async for doc in cursor:
         doc["_id"] = str(doc["_id"])
         logs.append(doc)
-    
+
     return {"count": len(logs), "filters": {"role": role, "entity_type": entity_type}, "logs": logs}
+
+# ====================================================================
+# RETRAIN
+# ====================================================================
 
 @app.post("/retrain")
 async def retrain_on_audit_logs():
-    """
-    US-MASK-06: Automatic Pattern Learning
-    Analyzes historical audit logs to refine weights.
-    High violation counts -> Increase Sensitivity weight.
-    High success rates -> Increase Role Trust.
-    """
     if db is None:
         raise HTTPException(status_code=500, detail="Database not connected")
 
-    # 1. Fetch recent audit logs (last 500)
     cursor = db.audit_logs.find().sort("timestamp", -1).limit(500)
     logs = [doc async for doc in cursor]
 
     if not logs:
         return {"status": "skipped", "message": "No logs available for training"}
 
-    # 2. Simple Heuristic Learning (Simulation of Perceptron update)
-    # Feature influences
     sensitivity_shift = 0.0
     role_shift = 0.0
-    
+
     for log in logs:
         level = log.get("masking_level")
         sens = log.get("sensitivity")
-        
-        # If we are masking a lot of HIGH sensitivity data, we might want to be more cautious
+
         if sens in ["high", "critical"] and level == "none":
-            # Potential false negative (access allowed where it should be masked)
             sensitivity_shift += 0.01
-        
-        # If we are masking LOW sensitivity for ADMIN, we might be too restrictive
         if sens == "low" and log.get("role") == "admin" and level != "none":
             role_shift += 0.01
 
-    # 3. Apply updates to current config
     config = await config_manager.get_config()
     weights = config["weights"]
-    weights[0] = min(1.0, max(-1.0, weights[0] + sensitivity_shift)) # ws
-    weights[1] = min(1.0, max(-1.0, weights[1] + role_shift))        # wr
-    
+    weights[0] = min(1.0, max(-1.0, weights[0] + sensitivity_shift))
+    weights[1] = min(1.0, max(-1.0, weights[1] + role_shift))
+
     new_config = ConfigUpdate(ws=weights[0], wr=weights[1], wc=weights[2], wp=weights[3], bias=config["bias"])
     await config_manager.update_config(new_config)
 
     return {
-        "status": "success", 
+        "status": "success",
         "message": f"Retrained on {len(logs)} samples",
-        "updates": {
-            "sensitivity_weight": weights[0],
-            "role_trust_weight": weights[1]
-        }
+        "updates": {"sensitivity_weight": weights[0], "role_trust_weight": weights[1]}
     }
 
-@app.post("/he/context")
-async def initialize_he_context():
-    """
-    Initialize Homomorphic Encryption Context (TenSEAL)
-    Mandatory Task for Admin to enable HE capabilities.
-    """
-    if not TENSEAL_AVAILABLE:
-        raise HTTPException(
-            status_code=503,
-            detail="TenSEAL library is not installed. Install it with: pip install tenseal>=0.3.0"
-        )
+# ====================================================================
+# HOMOMORPHIC ENCRYPTION - PublicContext / SecretContext séparés
+# ====================================================================
 
+@app.get("/he/public-context")
+async def get_public_context():
+    """Distribuable à n'importe quel service pour chiffrer/calculer. Ne permet jamais de déchiffrer."""
+    return {"public_context": he_manager.get_public_context().serialize().hex()}
+
+@app.post("/he/decrypt")
+async def decrypt_he_value(serialized_hex: str, role: UserRole):
+    """Réservé aux rôles admin/steward — seuls détenteurs implicites du SecretContext."""
     try:
-        # Create a real TenSEAL context
-        context = ts.context(
-            ts.SCHEME_TYPE.CKKS,
-            poly_modulus_degree=8192,
-            coeff_mod_bit_sizes=[60, 40, 40, 60]
-        )
-        context.global_scale = 2**40
-        context.generate_galois_keys()
-        
-        # In a real app, we would persist this context (public keys) to DB or filesystem
-        # For now, we simulate the setup success
-        return {
-            "status": "initialized",
-            "scheme": "CKKS",
-            "poly_modulus_degree": 8192,
-            "security_level": "128-bit"
-        }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to init TenSEAL: {str(e)}")
+        result = he_manager.decrypt(bytes.fromhex(serialized_hex), role.value)
+        return {"decrypted": result}
+    except HEAccessDenied as e:
+        raise HTTPException(status_code=403, detail=str(e))
+
+# ====================================================================
+# TOKEN VAULT
+# ====================================================================
+
+@app.post("/vault/detokenize")
+async def detokenize(token: str, role: UserRole):
+    try:
+        value = await vault.detokenize(token, role.value)
+        return {"value": value}
+    except PermissionError as e:
+        raise HTTPException(status_code=403, detail=str(e))
+    except KeyError:
+        raise HTTPException(status_code=404, detail="Token not found")
 
 if __name__ == "__main__":
-    print(f"\\n" + "="*60)
-    print(f"🔒 ETHIMASK SERVICE (MONGO) - Tâche 9")
-    print(f"="*60)
+    print("\n" + "="*60)
+    print("🔒 ETHIMASK SERVICE (MONGO) - Tâche 9")
+    print("="*60)
     uvicorn.run("main:app", host="0.0.0.0", port=8009, reload=True)

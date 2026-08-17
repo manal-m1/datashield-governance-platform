@@ -1,0 +1,5 @@
+aiokafka==0.11.0
+kafka-python-ng==2.2.3
+faker==26.0.0
+python-dotenv==1.0.1
+pydantic==2.8.2

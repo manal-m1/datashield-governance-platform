@@ -25,6 +25,21 @@ BOOTSTRAP_SERVERS = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092")
 
 VILLES = ["Rabat", "Casablanca", "Salé", "Fès", "Marrakech", "Tanger", "Agadir"]
 
+# Un petit pool de codes postaux réalistes PAR VILLE, partagés par de nombreux
+# habitants -- contrairement à fake.postcode() qui génère un code quasi-unique
+# à chaque appel (cardinalité artificielle bien trop élevée pour un vrai
+# quasi-identifiant, ce qui faisait déclencher une alerte sur pratiquement
+# tout le monde en permanence).
+VILLE_POSTAL_CODES = {
+    "Rabat": ["10000", "10020", "10040", "10090"],
+    "Casablanca": ["20000", "20100", "20200", "20250", "20500"],
+    "Salé": ["11000", "11080", "11100"],
+    "Fès": ["30000", "30020", "30050"],
+    "Marrakech": ["40000", "40020", "40100"],
+    "Tanger": ["90000", "90020", "90050"],
+    "Agadir": ["80000", "80020", "80060"],
+}
+
 # Une poignée de "profils rares" volontairement réutilisés pour créer de vraies
 # combinaisons à faible k(C) -- utile pour valider que la détection (Tâche 2)
 # les retrouve bien.
@@ -42,7 +57,7 @@ def make_record(inject_rare: bool) -> dict:
         ville = random.choice(VILLES)
         profile = {
             "ville": ville,
-            "code_postal": fake.postcode(),
+            "code_postal": random.choice(VILLE_POSTAL_CODES[ville]),
             "sexe": random.choice(["M", "F"]),
             "date_naissance": fake.date_of_birth(minimum_age=18, maximum_age=80).isoformat(),
         }

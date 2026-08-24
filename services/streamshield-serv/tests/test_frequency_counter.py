@@ -83,10 +83,15 @@ class TestComputeUniqueness:
         assert u == 0.0
 
     def test_partial_uniqueness(self):
-        """8 enregistrements communs + 1 unique -> 1/9 sont uniques."""
+        """
+        v2 : Unicité(C) = proportion de GROUPES uniques (classes d'équivalence
+        singleton), pas d'enregistrements. 8 enregistrements Rabat (1 groupe)
+        + 1 enregistrement Agadir (1 groupe singleton) -> 2 groupes au total,
+        dont 1 unique -> Unicité = 1/2 = 0.5.
+        """
         records = [{"ville": "Rabat", "sexe": "M"}] * 8 + [{"ville": "Agadir", "sexe": "F"}]
         u = CombinationAnalyzer.compute_uniqueness(records, ("ville", "sexe"))
-        assert u == pytest.approx(1 / 9)
+        assert u == pytest.approx(0.5)
 
     def test_empty_records_gives_uniqueness_0(self):
         u = CombinationAnalyzer.compute_uniqueness([], ("ville", "sexe"))

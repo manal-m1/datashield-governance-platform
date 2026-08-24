@@ -1,9 +1,21 @@
 """
-StreamShield - Tâche 1
+StreamShield - Tâche 1 + Tâche 2 (v2 - corrigée après revue)
 Consumer d'ingestion : lit en continu le(s) topic(s) raw-<domaine>, avec :
   - commit manuel des offsets APRÈS traitement complet (garantie at-least-once)
   - reprise automatique sans perte ni duplication après un redémarrage
-  - un point d'extension clair pour brancher la fenêtre glissante de la Tâche 2
+  - retry de connexion au démarrage (Kafka pas encore prêt)
+  - déclenchement de détection MIXTE : tous les N messages OU toutes les
+    X secondes, le premier des deux critères atteint (v2)
+
+CHANGEMENTS v2 :
+  - Suppression du double appel à self.consumer.start() (bug résiduel de
+    la fusion avec la logique de retry).
+  - Déclenchement mixte de _run_detection : l'ancien mécanisme (uniquement
+    "tous les detection_interval messages") pouvait créer une latence
+    arbitrairement longue à faible débit -- si une partition ne reçoit que
+    quelques messages par minute, il fallait potentiellement des dizaines
+    de minutes avant la première détection. On ajoute donc un déclenchement
+    par temps écoulé (detection_max_interval_seconds) en complément.
 
 Usage:
     python consumer/main.py --domain clients
@@ -20,11 +32,10 @@ from aiokafka import AIOKafkaConsumer, AIOKafkaProducer
 from aiokafka.errors import KafkaConnectionError
 
 from detection.sliding_window import PartitionedSlidingWindow
-from detection.risk_scorer import RiskScorer
+from detection.fuzzy_risk_scorer import FuzzyRiskScorer
 from detection.apriori_detector import AprioriCombinationDetector, DetectionConfig
 from detection.threshold_manager import ThresholdManager, DEFAULT_THRESHOLD
 from backend.database.mongodb import db
-
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger("streamshield.consumer")
 
@@ -36,17 +47,8 @@ CONSUMER_GROUP_ID = "streamshield-detection"
 class StreamShieldConsumer:
     """
     Consumer group : streamshield-detection (cf. section 2.4 du cahier des charges).
-
-    Le commit manuel après traitement garantit qu'un message n'est jamais marqué
-    comme "lu" tant que son traitement (ici : simple log, demain : mise à jour de
-    la fenêtre glissante de la Tâche 2) n'est pas terminé -- c'est la propriété
-    at-least-once attendue par le KPI "0% de perte de messages" (section 3.6).
     """
 
-    # Champs candidats pour la détection de quasi-identifiants (section 4.4) --
-    # ceux générés par le producer de simulation (nom/cin/email/telephone/salaire
-    # exclus ici : ce sont des identifiants directs ou attributs sensibles,
-    # pas des quasi-identifiants au sens de la doc).
     CANDIDATE_FIELDS = ("ville", "code_postal", "sexe", "date_naissance")
 
     def __init__(
@@ -55,6 +57,8 @@ class StreamShieldConsumer:
         group_id: str = CONSUMER_GROUP_ID,
         window_seconds: int = 60,
         detection_interval: int = 50,
+        detection_max_interval_seconds: int = 15,
+        window_max_size: int = 50_000,
     ):
         self.domain = domain
         self.topic = f"raw-{domain}"
@@ -67,13 +71,14 @@ class StreamShieldConsumer:
         self._messages_since_detection: Dict[int, int] = {}
         self.detection_interval = detection_interval
 
-        # Tâche 2 : fenêtre glissante, une par partition Kafka (section 2.4)
-        self.window = PartitionedSlidingWindow(size_seconds=window_seconds)
+        # v2 : déclenchement mixte -- borne la latence max même à faible débit
+        self.detection_max_interval_seconds = detection_max_interval_seconds
+        self._last_detection_time: Dict[int, float] = {}
 
-        # Tâche 2 : seuil configurable par domaine, persisté MongoDB
-        # (livrable "jeu de règles de seuils configurables")
+        self.window = PartitionedSlidingWindow(size_seconds=window_seconds, max_size=window_max_size)
+
         self.threshold_manager = ThresholdManager(db)
-        self.scorer = RiskScorer(threshold=DEFAULT_THRESHOLD)  # valeur réelle chargée dans start()
+        self.scorer = FuzzyRiskScorer(threshold=DEFAULT_THRESHOLD)
         self.detector = AprioriCombinationDetector(
             self.scorer,
             DetectionConfig(candidate_fields=self.CANDIDATE_FIELDS, prune_threshold=0.15, max_depth=4),
@@ -87,35 +92,36 @@ class StreamShieldConsumer:
             group_id=self.group_id,
             value_deserializer=lambda v: json.loads(v.decode("utf-8")),
             key_deserializer=lambda k: k.decode("utf-8") if k else None,
-            enable_auto_commit=False,       # commit manuel -> contrôle total du at-least-once
-            auto_offset_reset="earliest",   # au premier démarrage, ne pas sauter l'historique
+            enable_auto_commit=False,
+            auto_offset_reset="earliest",
             max_poll_records=500,
         )
+
+        # Retry de connexion -- Kafka peut ne pas être prêt au tout premier
+        # démarrage même avec un healthcheck (fenêtre de course résiduelle).
         max_retries = 10
         for attempt in range(1, max_retries + 1):
             try:
                 await self.consumer.start()
-                break
+                break  # v2 : plus de second appel après la boucle
             except KafkaConnectionError as e:
                 logger.warning(f"Kafka pas encore prêt (tentative {attempt}/{max_retries}): {e}")
                 if attempt == max_retries:
                     raise
                 await asyncio.sleep(3)
-        await self.consumer.start()
 
-        # Tâche 2 : producer dédié à la publication des événements de risque
         self.risk_producer = AIOKafkaProducer(
             bootstrap_servers=BOOTSTRAP_SERVERS,
             value_serializer=lambda v: json.dumps(v).encode("utf-8"),
         )
         await self.risk_producer.start()
 
-        # Charge le vrai seuil configuré pour ce domaine (livrable seuils configurables)
         self.scorer.threshold = await self.threshold_manager.get_threshold(self.domain)
 
         logger.info(
             f"Consumer démarré sur '{self.topic}' (group_id={self.group_id}, "
-            f"seuil de risque={self.scorer.threshold})"
+            f"seuil de risque={self.scorer.threshold}, "
+            f"déclenchement={self.detection_interval} msgs OU {self.detection_max_interval_seconds}s)"
         )
 
     async def stop(self):
@@ -127,22 +133,15 @@ class StreamShieldConsumer:
         logger.info(f"Consumer arrêté proprement. Total traité : {self._processed_count}")
 
     async def process_record(self, record: dict, partition: int, offset: int, kafka_timestamp: int):
-        """
-        Chaque enregistrement alimente la fenêtre glissante de sa partition
-        (Tâche 2) -- c'est ici que le futur calcul de risque de combinaison
-        de quasi-identifiants viendra lire les données accumulées.
-
-        Trace d'audit (user story data steward) : CHAQUE message est journalisé
-        individuellement avec son topic, sa partition, son offset et l'horodatage
-        Kafka -- pas seulement un compteur périodique -- pour rester traçable
-        jusqu'à l'origine exacte en cas d'audit.
-        """
         self._processed_count += 1
-        # Horodatage de TRAITEMENT (pas l'horodatage Kafka) : pendant un rattrapage
-        # de backlog (comme lors des tests de résilience de la Tâche 1), les messages
-        # peuvent avoir un kafka_ts vieux de plusieurs minutes -- la fenêtre doit
-        # refléter "ce qui arrive maintenant", pas l'ancienneté de l'événement source.
-        self.window.add(partition, record)
+
+        # v2 : on enrichit le record avec kafka_timestamp avant de l'ajouter à la
+        # fenêtre, pour pouvoir le retrouver plus tard dans _run_detection (audit
+        # complet -- distinguer "quand l'événement source a eu lieu côté Kafka" de
+        # "quand StreamShield l'a traité"). Le préfixe "_" signale que ce n'est PAS
+        # un champ candidat pour le calcul de risque, juste une métadonnée technique.
+        enriched_record = {**record, "_kafka_timestamp": kafka_timestamp}
+        self.window.add(partition, enriched_record)
 
         logger.info(
             f"AUDIT topic={self.topic} partition={partition} offset={offset} "
@@ -152,25 +151,21 @@ class StreamShieldConsumer:
         if self._processed_count % 100 == 0:
             logger.info(f"[{self.topic}] {self._processed_count} messages traités au total")
 
-        # Tâche 2 : déclenche la détection tous les N messages de CETTE partition
-        # (pas à chaque message -- coûteux inutilement ; pas non plus sur un timer
-        # séparé pour rester simple : la fréquence suit le débit réel du flux).
         self._messages_since_detection[partition] = self._messages_since_detection.get(partition, 0) + 1
-        if self._messages_since_detection[partition] >= self.detection_interval:
+        now = time.time()
+        last_detection = self._last_detection_time.get(partition, 0.0)
+
+        count_trigger = self._messages_since_detection[partition] >= self.detection_interval
+        time_trigger = (now - last_detection) >= self.detection_max_interval_seconds and self.window.window_size(partition) > 0
+
+        if count_trigger or time_trigger:
             self._messages_since_detection[partition] = 0
+            self._last_detection_time[partition] = now
+            reason = "count" if count_trigger else "timeout"
+            logger.debug(f"Détection déclenchée sur partition {partition} (raison={reason})")
             await self._run_detection(partition)
 
     async def _run_detection(self, partition: int):
-        """
-        Exécute le détecteur Apriori sur la fenêtre courante de la partition,
-        et publie chaque combinaison à risque sur risk-scores-<domaine>
-        (section 4.4, point 5 du cahier des charges), en la persistant aussi
-        dans MongoDB pour que l'API puisse l'exposer (user story administrateur
-        : "je veux visualiser les combinaisons jugées à risque").
-        """
-        # Rafraîchit le seuil périodiquement (toutes les 10 détections) --
-        # permet à un ajustement fait via l'API de prendre effet sans
-        # redémarrer le consumer (user story administrateur : ajuster le seuil).
         self._detections_since_threshold_refresh += 1
         if self._detections_since_threshold_refresh >= 10:
             self._detections_since_threshold_refresh = 0
@@ -184,6 +179,12 @@ class StreamShieldConsumer:
 
         if not triggered:
             return
+
+        # v2 : horodatage Kafka le plus récent de la fenêtre -- repère
+        # approximatif de "quand côté source", en plus du timestamp de
+        # traitement déjà utilisé (traçabilité d'audit complète)
+        kafka_timestamps = [r.get("_kafka_timestamp") for r in records if r.get("_kafka_timestamp") is not None]
+        latest_kafka_ts = max(kafka_timestamps) if kafka_timestamps else None
 
         for result in triggered:
             event = {
@@ -199,19 +200,17 @@ class StreamShieldConsumer:
             await self.risk_producer.send_and_wait(self.risk_topic, value=event)
 
             if db is not None:
-                await db.streamshield_risk_events.insert_one({**event, "timestamp": time.time()})
+                await db.streamshield_risk_events.insert_one({
+                    **event,
+                    "processing_timestamp": time.time(),   # v2 : renommé (était "timestamp")
+                    "kafka_timestamp_ms": latest_kafka_ts,  # v2 : nouveau champ d'audit
+                })
 
             logger.warning(
                 f"RISK DETECTED fields={result.fields} score={round(result.score, 3)} "
                 f"k={result.k} partition={partition} -> publié sur '{self.risk_topic}'"
             )
-
     async def run(self):
-        """
-        Boucle principale avec reprise automatique : toute erreur de connexion Kafka
-        est absorbée et la lecture reprend après un court délai, sans crash du process
-        ni perte d'offset (puisque rien n'est commité tant que le message n'est pas traité).
-        """
         await self.start()
         try:
             while not self._stopping.is_set():
@@ -220,7 +219,6 @@ class StreamShieldConsumer:
                     for tp, messages in result.items():
                         for msg in messages:
                             await self.process_record(msg.value, tp.partition, msg.offset, msg.timestamp)
-                        # Commit après traitement complet du lot de cette partition
                         if messages:
                             await self.consumer.commit({tp: messages[-1].offset + 1})
                 except KafkaConnectionError as e:
@@ -229,17 +227,18 @@ class StreamShieldConsumer:
         finally:
             await self.stop()
 
-async def main(domain: str, group_id: str, window_seconds: int, detection_interval: int):
+
+async def main(domain: str, group_id: str, window_seconds: int, detection_interval: int, detection_max_interval_seconds: int):
     consumer = StreamShieldConsumer(
-        domain, group_id=group_id, window_seconds=window_seconds, detection_interval=detection_interval
+        domain, group_id=group_id, window_seconds=window_seconds,
+        detection_interval=detection_interval,
+        detection_max_interval_seconds=detection_max_interval_seconds,
     )
 
     loop = asyncio.get_running_loop()
-    stop_event = asyncio.Event()
 
     def _handle_signal():
         logger.info("Signal d'arrêt reçu, fermeture en cours...")
-        stop_event.set()
         consumer._stopping.set()
 
     for sig in (signal.SIGINT, signal.SIGTERM):
@@ -251,24 +250,16 @@ async def main(domain: str, group_id: str, window_seconds: int, detection_interv
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Consumer d'ingestion StreamShield")
     parser.add_argument("--domain", default="clients")
+    parser.add_argument("--group-id", default=CONSUMER_GROUP_ID)
+    parser.add_argument("--window-seconds", type=int, default=60)
+    parser.add_argument("--detection-interval", type=int, default=50)
     parser.add_argument(
-        "--group-id",
-        default=CONSUMER_GROUP_ID,
-        help="Group ID Kafka -- utilise un nom distinct (ex: streamshield-detection-test) "
-             "pour des tests manuels sans perturber le service persistant.",
-    )
-    parser.add_argument(
-        "--window-seconds",
-        type=int,
-        default=60,
-        help="Taille de la fenêtre glissante en secondes (Tâche 2, section 2.4)",
-    )
-    parser.add_argument(
-        "--detection-interval",
-        type=int,
-        default=50,
-        help="Nombre de messages entre deux exécutions du détecteur, par partition",
+        "--detection-max-interval-seconds", type=int, default=15,
+        help="Déclenche la détection après ce délai même sans atteindre detection-interval (v2)",
     )
     args = parser.parse_args()
 
-    asyncio.run(main(args.domain, args.group_id, args.window_seconds, args.detection_interval))
+    asyncio.run(main(
+        args.domain, args.group_id, args.window_seconds,
+        args.detection_interval, args.detection_max_interval_seconds,
+    ))

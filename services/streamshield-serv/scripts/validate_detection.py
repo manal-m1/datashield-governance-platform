@@ -20,7 +20,7 @@ import string
 from dataclasses import dataclass
 from typing import List
 
-from detection.risk_scorer import RiskScorer
+from detection.fuzzy_risk_scorer import FuzzyRiskScorer
 
 FIELDS = ("ville", "sexe", "date_naissance")
 GROUND_TRUTH_K_THRESHOLD = 5  # k < 5 => réellement risqué (référence indépendante, pas la formule du système)
@@ -86,7 +86,7 @@ class ValidationRow:
 
 
 def run_validation(threshold: float = 0.5) -> List[ValidationRow]:
-    scorer = RiskScorer(threshold=threshold)
+    scorer = FuzzyRiskScorer(threshold=threshold)
     rows = []
 
     for k in TEST_K_VALUES:

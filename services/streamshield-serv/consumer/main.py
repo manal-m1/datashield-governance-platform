@@ -27,13 +27,12 @@ import logging
 import signal
 import time
 from typing import Dict
-
 from aiokafka import AIOKafkaConsumer, AIOKafkaProducer
 from aiokafka.errors import KafkaConnectionError
-
+from detection.field_sensitivity_repository import load_field_sensitivity
 from detection.sliding_window import PartitionedSlidingWindow
 from detection.fuzzy_risk_scorer import FuzzyRiskScorer
-from detection.apriori_detector import AprioriCombinationDetector, DetectionConfig
+from detection.combination_detector import CombinationDetector, DetectionConfig
 from detection.threshold_manager import ThresholdManager, DEFAULT_THRESHOLD
 from backend.database.mongodb import db
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
@@ -49,7 +48,17 @@ class StreamShieldConsumer:
     Consumer group : streamshield-detection (cf. section 2.4 du cahier des charges).
     """
 
-    CANDIDATE_FIELDS = ("ville", "code_postal", "sexe", "date_naissance")
+    CANDIDATE_FIELDS = (
+    "ville",
+    "code_postal",
+    "sexe",
+    "date_naissance",
+    "age",
+    "sex",
+    "race",
+    "native_country",
+    "education",
+)
 
     def __init__(
         self,
@@ -78,10 +87,14 @@ class StreamShieldConsumer:
         self.window = PartitionedSlidingWindow(size_seconds=window_seconds, max_size=window_max_size)
 
         self.threshold_manager = ThresholdManager(db)
-        self.scorer = FuzzyRiskScorer(threshold=DEFAULT_THRESHOLD)
-        self.detector = AprioriCombinationDetector(
+
+        self.field_sensitivity = {}
+        self.scorer = FuzzyRiskScorer(
+            threshold=DEFAULT_THRESHOLD,
+            field_sensitivity=self.field_sensitivity,)
+        self.detector = CombinationDetector(
             self.scorer,
-            DetectionConfig(candidate_fields=self.CANDIDATE_FIELDS, prune_threshold=0.15, max_depth=4),
+            DetectionConfig(candidate_fields=self.CANDIDATE_FIELDS, max_depth=4),
         )
         self._detections_since_threshold_refresh = 0
 
@@ -115,14 +128,23 @@ class StreamShieldConsumer:
             value_serializer=lambda v: json.dumps(v).encode("utf-8"),
         )
         await self.risk_producer.start()
-
-        self.scorer.threshold = await self.threshold_manager.get_threshold(self.domain)
-
-        logger.info(
-            f"Consumer démarré sur '{self.topic}' (group_id={self.group_id}, "
-            f"seuil de risque={self.scorer.threshold}, "
-            f"déclenchement={self.detection_interval} msgs OU {self.detection_max_interval_seconds}s)"
+        self.scorer.threshold = await self.threshold_manager.get_threshold(
+        self.domain
         )
+        self.scorer.field_sensitivity = await load_field_sensitivity()
+        await self.scorer.load_fuzzy_configuration()
+        logger.info(
+            f"Consumer démarré sur '{self.topic}' "
+            f"(group_id={self.group_id}, "
+            f"seuil de risque={self.scorer.threshold}, "
+            f"champs de sensibilité chargés="
+            f"{len(self.scorer.field_sensitivity)}, "
+            f"règles fuzzy chargées={len(self.scorer.fuzzy_rules)}, "
+            f"déclenchement={self.detection_interval} msgs OU "
+            f"{self.detection_max_interval_seconds}s)"
+        )
+        # Chargement de la configuration et des règles fuzzy depuis MongoDB
+        
 
     async def stop(self):
         self._stopping.set()
@@ -151,13 +173,29 @@ class StreamShieldConsumer:
         if self._processed_count % 100 == 0:
             logger.info(f"[{self.topic}] {self._processed_count} messages traités au total")
 
-        self._messages_since_detection[partition] = self._messages_since_detection.get(partition, 0) + 1
+        self._messages_since_detection[partition] = (
+        self._messages_since_detection.get(partition, 0) + 1
+        )
+
         now = time.time()
-        last_detection = self._last_detection_time.get(partition, 0.0)
 
-        count_trigger = self._messages_since_detection[partition] >= self.detection_interval
-        time_trigger = (now - last_detection) >= self.detection_max_interval_seconds and self.window.window_size(partition) > 0
+        # Première réception sur cette partition :
+        # on initialise l'horloge de détection sans déclencher immédiatement.
+        if partition not in self._last_detection_time:
+            self._last_detection_time[partition] = now
 
+        last_detection = self._last_detection_time[partition]
+
+        count_trigger = (
+            self._messages_since_detection[partition]
+            >= self.detection_interval
+        )
+
+        time_trigger =(
+            (now - last_detection)m
+            >= self.detection_max_interval_seconds
+            and self.window.window_size(partition) > 0
+        )
         if count_trigger or time_trigger:
             self._messages_since_detection[partition] = 0
             self._last_detection_time[partition] = now
@@ -174,12 +212,30 @@ class StreamShieldConsumer:
                 logger.info(f"Seuil mis à jour pour '{self.domain}': {self.scorer.threshold} -> {new_threshold}")
                 self.scorer.threshold = new_threshold
 
+        # records = self.window.get_records(partition)
+        # triggered = self.detector.triggered_only(records)
+
+        # if not triggered:
+        #     return
         records = self.window.get_records(partition)
+        logger.info(
+            f"DETECTION | partition={partition} | "
+            f"records={len(records)}"
+        )
+
         triggered = self.detector.triggered_only(records)
 
-        if not triggered:
-            return
+        logger.info(
+            f"DETECTION RESULT | "
+            f"partition={partition} | "
+            f"triggered={len(triggered)}"
+            )
 
+        if not triggered:
+            logger.info(
+                    f"NO RISK DETECTED | partition={partition}"
+                )
+            return
         # v2 : horodatage Kafka le plus récent de la fenêtre -- repère
         # approximatif de "quand côté source", en plus du timestamp de
         # traitement déjà utilisé (traçabilité d'audit complète)

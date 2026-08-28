@@ -1,11 +1,17 @@
 from typing import Dict, Tuple, List
 from detection.frequency_counter import CombinationAnalyzer
+
 from detection.risk_scorer import (
     RiskResult,
     SENSITIVITY_ENCODING,
-    DEFAULT_FIELD_SENSITIVITY,
 )
-
+from detection.fuzzy_config_repository import load_fuzzy_config
+from detection.fuzzy_rule_repository import load_fuzzy_rules
+import logging
+from detection.field_sensitivity_repository import (
+    DEFAULT_SENSITIVITY,
+)
+logger = logging.getLogger("streamshield.fuzzy_risk_scorer")
 # ============================================================================
 # Membership functions
 # ============================================================================
@@ -124,20 +130,15 @@ def _right_shoulder(
 # FUZZIFICATION - K
 # ============================================================================
 
-def fuzzify_k_risk(k: int) -> Dict[str, float]:
+def fuzzify_k_risk(
+    k: int,
+    config: Dict,
+) -> Dict[str, float]:
     """
     Fuzzification du risque associé au k-anonymat.
 
-    Interprétation métier :
-
-        k = 1       -> critique
-        k = 2       -> élevé
-        k = 3       -> élevé / moyen
-        k = 4-5     -> moyen
-        k = 6       -> moyen / faible
-        k >= 7      -> faible
-
-    Le k constitue le signal principal du risque.
+    Les paramètres des fonctions d'appartenance
+    sont chargés depuis MongoDB.
     """
 
     if k <= 0:
@@ -150,147 +151,163 @@ def fuzzify_k_risk(k: int) -> Dict[str, float]:
 
     x = float(k)
 
-    return {
-        # ------------------------------------------------------------
-        # CRITIQUE
-        # k = 1 principalement
-        # ------------------------------------------------------------
-        "critique": _trapezoidal(
-            x,
-            0.5,
-            1.0,
-            1.0,
-            1.8,
-        ),
+    fuzzy_sets = config["k_fuzzy_sets"]
 
-        # ------------------------------------------------------------
-        # ÉLEVÉ
-        # k = 2-3 principalement
-        # ------------------------------------------------------------
-        "eleve": _trapezoidal(
-            x,
-            1.5,
-            2.0,
-            2.5,
-            3.5,
-        ),
+    result = {}
 
-        # ------------------------------------------------------------
-        # MOYEN
-        # k = 3-6
-        # ------------------------------------------------------------
-        "moyen": _trapezoidal(
-            x,
-            2.5,
-            3.5,
-            5.0,
-            6.5,
-        ),
+    for level, definition in fuzzy_sets.items():
 
-        # ------------------------------------------------------------
-        # FAIBLE
-        # k >= 6
-        # ------------------------------------------------------------
-        "faible": _right_shoulder(
-            x,
-            5.5,
-            7.0,
-        ),
-    }
+        membership_type = definition["type"]
+        parameters = definition["parameters"]
 
+        if membership_type == "trapezoidal":
+            result[level] = _trapezoidal(
+                x,
+                *parameters,
+            )
 
+        elif membership_type == "triangular":
+            result[level] = _triangular(
+                x,
+                *parameters,
+            )
+
+        elif membership_type == "left_shoulder":
+            result[level] = _left_shoulder(
+                x,
+                *parameters,
+            )
+
+        elif membership_type == "right_shoulder":
+            result[level] = _right_shoulder(
+                x,
+                *parameters,
+            )
+
+        else:
+            raise ValueError(
+                f"Type de fonction fuzzy inconnu : {membership_type}"
+            )
+
+    return result
 # ============================================================================
 # FUZZIFICATION - UNIQUENESS
 # ============================================================================
-
-def fuzzify_uniqueness(u: float) -> Dict[str, float]:
+def fuzzify_uniqueness(
+    u: float,
+    config: Dict,
+) -> Dict[str, float]:
     """
-    u ∈ [0,1]
+    Fuzzification de l'unicité.
 
-    faible  : faible unicité
-    moyenne : unicité intermédiaire
-    elevee  : forte unicité
+    Les paramètres sont chargés depuis MongoDB.
     """
 
     u = max(0.0, min(1.0, float(u)))
 
-    return {
-        "faible": _trapezoidal(
-            u,
-            0.0,
-            0.0,
-            0.15,
-            0.30,
-        ),
+    fuzzy_sets = config["uniqueness_fuzzy_sets"]
 
-        "moyenne": _triangular(
-            u,
-            0.20,
-            0.50,
-            0.75,
-        ),
+    result = {}
 
-        "elevee": _trapezoidal(
-            u,
-            0.60,
-            0.80,
-            1.0,
-            1.0,
-        ),
-    }
+    for level, definition in fuzzy_sets.items():
 
+        membership_type = definition["type"]
+        parameters = definition["parameters"]
 
+        if membership_type == "trapezoidal":
+            result[level] = _trapezoidal(
+                u,
+                *parameters,
+            )
+
+        elif membership_type == "triangular":
+            result[level] = _triangular(
+                u,
+                *parameters,
+            )
+
+        elif membership_type == "left_shoulder":
+            result[level] = _left_shoulder(
+                u,
+                *parameters,
+            )
+
+        elif membership_type == "right_shoulder":
+            result[level] = _right_shoulder(
+                u,
+                *parameters,
+            )
+
+        else:
+            raise ValueError(
+                f"Type de fonction fuzzy inconnu : {membership_type}"
+            )
+
+    return result
 # ============================================================================
 # FUZZIFICATION - SENSITIVITY
 # ============================================================================
-
-def fuzzify_sensitivity(s: float) -> Dict[str, float]:
+def fuzzify_sensitivity(
+    s: float,
+    config: Dict,
+) -> Dict[str, float]:
     """
-    s ∈ [0,1]
+    Fuzzification de la sensibilité.
 
-    faible
-    moyenne
-    elevee
+    Les paramètres sont chargés depuis MongoDB.
     """
 
     s = max(0.0, min(1.0, float(s)))
 
-    return {
-        "faible": _trapezoidal(
-            s,
-            0.0,
-            0.0,
-            0.25,
-            0.40,
-        ),
+    fuzzy_sets = config["sensitivity_fuzzy_sets"]
 
-        "moyenne": _triangular(
-            s,
-            0.30,
-            0.50,
-            0.70,
-        ),
+    result = {}
 
-        "elevee": _trapezoidal(
-            s,
-            0.60,
-            0.80,
-            1.0,
-            1.0,
-        ),
-    }
+    for level, definition in fuzzy_sets.items():
 
+        membership_type = definition["type"]
+        parameters = definition["parameters"]
 
+        if membership_type == "trapezoidal":
+            result[level] = _trapezoidal(
+                s,
+                *parameters,
+            )
+
+        elif membership_type == "triangular":
+            result[level] = _triangular(
+                s,
+                *parameters,
+            )
+
+        elif membership_type == "left_shoulder":
+            result[level] = _left_shoulder(
+                s,
+                *parameters,
+            )
+
+        elif membership_type == "right_shoulder":
+            result[level] = _right_shoulder(
+                s,
+                *parameters,
+            )
+
+        else:
+            raise ValueError(
+                f"Type de fonction fuzzy inconnu : {membership_type}"
+            )
+
+    return result
 # ============================================================================
 # OUTPUT LEVELS
 # ============================================================================
 
-OUTPUT_LEVELS = {
-    "faible": 0.15,
-    "modere": 0.45,
-    "eleve": 0.70,
-    "critique": 0.92,
-}
+# OUTPUT_LEVELS = {
+#     "faible": 0.15,
+#     "modere": 0.45,
+#     "eleve": 0.70,
+#     "critique": 0.92,
+# }
 
 
 # ============================================================================
@@ -300,6 +317,7 @@ def _apply_rules(
     k_fuzzy: Dict[str, float],
     u_fuzzy: Dict[str, float],
     s_fuzzy: Dict[str, float],
+    rules: List[Dict],
 ) -> Dict[str, float]:
 
     activations = {
@@ -309,284 +327,87 @@ def _apply_rules(
         "critique": 0.0,
     }
 
-    def activate(level: str, degree: float) -> None:
-        degree = max(0.0, min(1.0, degree))
+    fuzzy_variables = {
+        "k": k_fuzzy,
+        "uniqueness": u_fuzzy,
+        "sensitivity": s_fuzzy,
+    }
+
+    def activate(
+        level: str,
+        degree: float,
+    ) -> None:
+
+        if level not in activations:
+            return
+
+        degree = max(
+            0.0,
+            min(1.0, degree),
+        )
+
         activations[level] = max(
             activations[level],
             degree,
         )
 
-    # ================================================================
-    # CRITIQUE
-    # ================================================================
+    for rule in rules:
 
-    # R1 : k critique -> critique
-    activate(
-        "critique",
-        k_fuzzy["critique"],
-    )
+        conditions = rule.get(
+            "conditions",
+            [],
+        )
 
-    # ================================================================
-    # ÉLEVÉ
-    # ================================================================
+        output = rule.get("output")
 
-    # R2 : k élevé -> élevé
-    activate(
-        "eleve",
-        k_fuzzy["eleve"],
-    )
+        if not conditions or not output:
+            continue
 
-    # R3 : k moyen + unicité élevée -> élevé
-    activate(
-        "eleve",
-        min(
-            k_fuzzy["moyen"],
-            u_fuzzy["elevee"],
-        ),
-    )
+        degrees = []
 
-    # R4 : k moyen + sensibilité élevée -> élevé
-    activate(
-        "eleve",
-        min(
-            k_fuzzy["moyen"],
-            s_fuzzy["elevee"],
-        ),
-    )
+        for condition in conditions:
 
-    # ================================================================
-    # MODÉRÉ
-    # ================================================================
+            variable = condition["variable"]
+            fuzzy_set = condition["set"]
 
-    # R5 : k moyen -> modéré
-    activate(
-        "modere",
-        k_fuzzy["moyen"],
-    )
+            variable_values = fuzzy_variables.get(
+                variable
+            )
 
-    # R6 : k moyen + unicité faible -> modéré
-    activate(
-        "modere",
-        min(
-            k_fuzzy["moyen"],
-            u_fuzzy["faible"],
-        ),
-    )
+            if variable_values is None:
+                raise ValueError(
+                    f"Variable fuzzy inconnue : {variable}"
+                )
 
-    # R7 : k moyen + sensibilité faible -> modéré
-    activate(
-        "modere",
-        min(
-            k_fuzzy["moyen"],
-            s_fuzzy["faible"],
-        ),
-    )
+            degree = variable_values.get(
+                fuzzy_set,
+                0.0,
+            )
 
-    # ================================================================
-    # FAIBLE
-    # ================================================================
+            degrees.append(degree)
 
-    # R8 : k faible + unicité faible -> faible
-    activate(
-        "faible",
-        min(
-            k_fuzzy["faible"],
-            u_fuzzy["faible"],
-        ),
-    )
+        if not degrees:
+            continue
 
-    # R9 : k faible + sensibilité faible -> faible
-    activate(
-        "faible",
-        min(
-            k_fuzzy["faible"],
-            s_fuzzy["faible"],
-        ),
-    )
+        # AND fuzzy = minimum
+        rule_activation = min(degrees)
+
+        activate(
+            output,
+            rule_activation,
+        )
 
     return activations
-# def _apply_rules(
-#     k_fuzzy: Dict[str, float],
-#     u_fuzzy: Dict[str, float],
-#     s_fuzzy: Dict[str, float],
-# ) -> Dict[str, float]:
-#     """
-#     Moteur d'inférence fuzzy.
-
-#     Principe :
-
-#     1. Le k-anonymat constitue le facteur structurel principal.
-#     2. L'unicité augmente le risque.
-#     3. La sensibilité augmente le risque.
-#     4. Une absence d'unicité/sensibilité ne doit jamais annuler
-#        le risque déterminé par un k faible.
-#     """
-
-#     activations = {
-#         "faible": 0.0,
-#         "modere": 0.0,
-#         "eleve": 0.0,
-#         "critique": 0.0,
-#     }
-
-#     def activate(
-#         level: str,
-#         degree: float,
-#     ) -> None:
-
-#         degree = max(
-#             0.0,
-#             min(1.0, degree),
-#         )
-
-#         activations[level] = max(
-#             activations[level],
-#             degree,
-#         )
-
-#     # ========================================================================
-#     # 1. CRITIQUE
-#     # ========================================================================
-
-#     # R1 : k critique -> critique
-#     activate(
-#         "critique",
-#         k_fuzzy["critique"],
-#     )
-
-#     # R2 : k élevé + unicité élevée -> critique
-#     activate(
-#         "critique",
-#         min(
-#             k_fuzzy["eleve"],
-#             u_fuzzy["elevee"],
-#         ),
-#     )
-
-#     # R3 : k élevé + sensibilité élevée -> critique
-#     activate(
-#         "critique",
-#         min(
-#             k_fuzzy["eleve"],
-#             s_fuzzy["elevee"],
-#         ),
-#     )
-
-#     # ========================================================================
-#     # 2. ÉLEVÉ
-#     # ========================================================================
-
-#     # R4 : k élevé -> élevé
-#     #
-#     # IMPORTANT :
-#     # cette règle garantit que k=2 ne retourne jamais 0.
-#     activate(
-#         "eleve",
-#         k_fuzzy["eleve"],
-#     )
-
-#     # R5 : k moyen + unicité élevée -> élevé
-#     activate(
-#         "eleve",
-#         min(
-#             k_fuzzy["moyen"],
-#             u_fuzzy["elevee"],
-#         ),
-#     )
-
-#     # R6 : k moyen + sensibilité élevée -> élevé
-#     activate(
-#         "eleve",
-#         min(
-#             k_fuzzy["moyen"],
-#             s_fuzzy["elevee"],
-#         ),
-#     )
-
-#     # R7 : k moyen + unicité moyenne + sensibilité moyenne
-#     activate(
-#         "eleve",
-#         min(
-#             k_fuzzy["moyen"],
-#             u_fuzzy["moyenne"],
-#             s_fuzzy["moyenne"],
-#         ),
-#     )
-
-#     # ========================================================================
-#     # 3. MODÉRÉ
-#     # ========================================================================
-
-#     # R8 : k moyen -> modéré
-#     activate(
-#         "modere",
-#         k_fuzzy["moyen"],
-#     )
-
-#     # R9 : k moyen + unicité faible
-#     activate(
-#         "modere",
-#         min(
-#             k_fuzzy["moyen"],
-#             u_fuzzy["faible"],
-#         ),
-#     )
-
-#     # R10 : k moyen + sensibilité faible
-#     activate(
-#         "modere",
-#         min(
-#             k_fuzzy["moyen"],
-#             s_fuzzy["faible"],
-#         ),
-#     )
-
-#     # ========================================================================
-#     # 4. FAIBLE
-#     # ========================================================================
-
-#     # R11 : k faible + unicité faible
-#     activate(
-#         "faible",
-#         min(
-#             k_fuzzy["faible"],
-#             u_fuzzy["faible"],
-#         ),
-#     )
-
-#     # R12 : k faible + sensibilité faible
-#     activate(
-#         "faible",
-#         min(
-#             k_fuzzy["faible"],
-#             s_fuzzy["faible"],
-#         ),
-#     )
-
-#     # R13 : k faible + unicité moyenne + sensibilité faible
-#     activate(
-#         "faible",
-#         min(
-#             k_fuzzy["faible"],
-#             u_fuzzy["moyenne"],
-#             s_fuzzy["faible"],
-#         ),
-#     )
-
-#     return activations
-
-
 # ============================================================================
 # DEFUZZIFICATION
 # ============================================================================
 
 def _defuzzify(
     activations: Dict[str, float],
+    output_levels: Dict[str, float],
 ) -> float:
     """
     Défuzzification par moyenne pondérée.
-
-    Retourne toujours un score dans [0,1].
     """
 
     total = sum(activations.values())
@@ -595,7 +416,7 @@ def _defuzzify(
         return 0.0
 
     score = sum(
-        OUTPUT_LEVELS[level] * degree
+        output_levels[level] * degree
         for level, degree in activations.items()
     ) / total
 
@@ -612,6 +433,7 @@ def _defuzzify(
 class FuzzyRiskScorer:
 
     MIN_SAMPLE_SIZE_FOR_RELIABLE_SCORE = 20
+
     def __init__(
         self,
         threshold: float = 0.5,
@@ -626,11 +448,7 @@ class FuzzyRiskScorer:
 
         self.threshold = threshold
 
-        self.field_sensitivity = (
-            field_sensitivity
-            if field_sensitivity is not None
-            else DEFAULT_FIELD_SENSITIVITY.copy()
-        )
+        self.field_sensitivity = field_sensitivity or {}
 
         self.min_sample_size = (
             min_sample_size
@@ -638,6 +456,28 @@ class FuzzyRiskScorer:
             else self.MIN_SAMPLE_SIZE_FOR_RELIABLE_SCORE
         )
 
+        # Configuration fuzzy chargée depuis MongoDB
+        self.fuzzy_config = None
+        self.fuzzy_rules = []
+
+    async def load_fuzzy_configuration(self):
+        """
+        Charge la configuration et les règles fuzzy depuis MongoDB.
+        """
+
+        self.fuzzy_config = await load_fuzzy_config()
+        self.fuzzy_rules = await load_fuzzy_rules()
+
+        self.min_sample_size = self.fuzzy_config.get(
+            "min_sample_size",
+            self.MIN_SAMPLE_SIZE_FOR_RELIABLE_SCORE,
+        )
+
+        logger.info(
+            "Configuration fuzzy chargée depuis MongoDB : "
+            f"{len(self.fuzzy_rules)} règles"
+        )    
+    
     def _average_sensitivity(
         self,
         fields: Tuple[str, ...],
@@ -646,24 +486,67 @@ class FuzzyRiskScorer:
         if not fields:
             return 0.0
 
-        values = [
-            SENSITIVITY_ENCODING.get(
-                self.field_sensitivity.get(
-                    field,
-                    "medium",
-                ),
-                0.5,
-            )
-            for field in fields
-        ]
+        values = []
+
+        for field in fields:
+
+            # ------------------------------------------------------------
+            # Sensibilité récupérée depuis MongoDB
+            # ------------------------------------------------------------
+
+            sensitivity_level = self.field_sensitivity.get(field)
+
+            # ------------------------------------------------------------
+            # Champ absent
+            # ------------------------------------------------------------
+
+            if sensitivity_level is None:
+                logger.warning(
+                    f"Champ '{field}' absent de "
+                    "streamshield_field_sensitivity. "
+                    f"Valeur par défaut utilisée : "
+                    f"'{DEFAULT_SENSITIVITY}'."
+                )
+
+                sensitivity_level = DEFAULT_SENSITIVITY
+
+            # ------------------------------------------------------------
+            # Niveau invalide
+            # ------------------------------------------------------------
+
+            if sensitivity_level not in SENSITIVITY_ENCODING:
+
+                logger.warning(
+                    f"Niveau de sensibilité invalide pour "
+                    f"'{field}' : '{sensitivity_level}'. "
+                    f"Valeur par défaut utilisée : "
+                    f"'{DEFAULT_SENSITIVITY}'."
+                )
+
+                sensitivity_level = DEFAULT_SENSITIVITY
+
+            # ------------------------------------------------------------
+            # Conversion niveau -> valeur numérique
+            # SENSITIVITY_ENCODING reste en Python
+            # ------------------------------------------------------------
+
+            sensitivity_value = SENSITIVITY_ENCODING[
+                sensitivity_level
+            ]
+
+            values.append(sensitivity_value)
 
         return sum(values) / len(values)
-
     def score(
         self,
         records: List[dict],
         fields: Tuple[str, ...],
     ) -> RiskResult:
+        logger.info(
+            f"SCORER CALLED | "
+            f"fields={fields} | "
+            f"records={len(records)}"
+        )
 
         # --------------------------------------------------------------------
         # Validation
@@ -725,14 +608,25 @@ class FuzzyRiskScorer:
         # Fuzzification
         # --------------------------------------------------------------------
 
-        k_fuzzy = fuzzify_k_risk(k)
+        if self.fuzzy_config is None:
+            raise RuntimeError(
+                "La configuration fuzzy n'est pas chargée. "
+                "Appelez load_fuzzy_configuration() avant score()."
+            )
+
+        k_fuzzy = fuzzify_k_risk(
+            k,
+            self.fuzzy_config,
+        )
 
         u_fuzzy = fuzzify_uniqueness(
-            uniqueness
+            uniqueness,
+            self.fuzzy_config,
         )
 
         s_fuzzy = fuzzify_sensitivity(
-            avg_sensitivity
+            avg_sensitivity,
+            self.fuzzy_config,
         )
 
         # --------------------------------------------------------------------
@@ -743,6 +637,7 @@ class FuzzyRiskScorer:
             k_fuzzy,
             u_fuzzy,
             s_fuzzy,
+            self.fuzzy_rules,
         )
 
         # --------------------------------------------------------------------
@@ -750,18 +645,28 @@ class FuzzyRiskScorer:
         # --------------------------------------------------------------------
 
         score = _defuzzify(
-            activations
+            activations,
+            self.fuzzy_config["output_levels"],
+        )
+        logger.info(
+            f"FUZZY SCORE | "
+            f"fields={fields} | "
+            f"k={k} | "
+            f"uniqueness={uniqueness:.4f} | "
+            f"avg_sensitivity={avg_sensitivity:.4f} | "
+            f"activations={activations} | "
+            f"score={score:.4f}"
         )
 
         # --------------------------------------------------------------------
         # Final result
         # --------------------------------------------------------------------
         return RiskResult(
-            fields=fields, k=k, uniqueness=uniqueness,
-            avg_sensitivity=avg_sensitivity, score=score,
-            triggered=(score >= self.threshold),   # renommé
+            fields=fields,
+            k=k,
+            uniqueness=uniqueness,
+            avg_sensitivity=avg_sensitivity,
+            score=score,
+            triggered=(score >= self.threshold),
             sample_size=sample_size,
-        )
-if __name__ == "__main__":
-    for k in [1, 2, 3, 4, 5, 6, 7, 8, 10, 20, 50]:
-        print(f"k={k}: {fuzzify_k_risk(k)}")
+)

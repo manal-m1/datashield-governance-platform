@@ -1,0 +1,44 @@
+{
+  "model": "LightGBM",
+  "analysis": "SHAP",
+  "dataset": "UCI Adult",
+  "dataset_split": "TEST",
+  "test_size": 6,
+  "features": [
+    "num_qi",
+    "k",
+    "uniqueness",
+    "avg_sensitivity",
+    "sample_size"
+  ],
+  "global_feature_importance": [
+    {
+      "rank": 1,
+      "feature": "uniqueness",
+      "mean_absolute_shap": 1.2813670008424998
+    },
+    {
+      "rank": 2,
+      "feature": "num_qi",
+      "mean_absolute_shap": 0.3988194767519377
+    },
+    {
+      "rank": 3,
+      "feature": "avg_sensitivity",
+      "mean_absolute_shap": 0.0610479178403488
+    },
+    {
+      "rank": 4,
+      "feature": "k",
+      "mean_absolute_shap": 0.0
+    },
+    {
+      "rank": 5,
+      "feature": "sample_size",
+      "mean_absolute_shap": 0.0
+    }
+  ],
+  "dominant_feature_counts": {
+    "uniqueness": 6
+  }
+}

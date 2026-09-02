@@ -1,0 +1,50 @@
+{
+  "comparison": [
+    {
+      "method": "Fuzzy Risk Score",
+      "dataset": "TEST",
+      "accuracy": 0.5,
+      "precision": 0.4,
+      "recall": 1.0,
+      "specificity": 0.25,
+      "f1": 0.5714285714285715,
+      "youden_j": 0.25,
+      "tp": 2,
+      "tn": 1,
+      "fp": 3,
+      "fn": 0
+    },
+    {
+      "method": "K-anonymity",
+      "dataset": "TEST",
+      "accuracy": 0.3333333333333333,
+      "precision": 0.3333333333333333,
+      "recall": 1.0,
+      "specificity": 0.0,
+      "f1": 0.5,
+      "youden_j": 0.0,
+      "tp": 2,
+      "tn": 0,
+      "fp": 4,
+      "fn": 0
+    },
+    {
+      "method": "LightGBM",
+      "dataset": "TEST",
+      "accuracy": 0.6666666666666666,
+      "precision": 0.5,
+      "recall": 0.5,
+      "specificity": 0.75,
+      "f1": 0.5,
+      "youden_j": 0.25,
+      "tp": 1,
+      "tn": 3,
+      "fp": 1,
+      "fn": 1,
+      "roc_auc": 0.625
+    }
+  ],
+  "fuzzy_threshold": 0.7,
+  "k_anonymity_threshold": 2,
+  "lightgbm_threshold": 0.5
+}

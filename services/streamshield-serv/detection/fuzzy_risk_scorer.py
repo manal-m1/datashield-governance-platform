@@ -313,6 +313,7 @@ def fuzzify_sensitivity(
 # ============================================================================
 # FUZZY INFERENCE
 # ============================================================================
+
 def _apply_rules(
     k_fuzzy: Dict[str, float],
     u_fuzzy: Dict[str, float],
@@ -392,12 +393,28 @@ def _apply_rules(
         # AND fuzzy = minimum
         rule_activation = min(degrees)
 
+        if rule_activation > 0:
+            print(
+                f"[DEBUG RULE] "
+                f"id={rule.get('_id')} | "
+                f"name={rule.get('name')} | "
+                f"activation={rule_activation:.3f} | "
+                f"output={output}"
+            )
+
         activate(
             output,
             rule_activation,
         )
+        # rule_activation = min(degrees)
+
+        # activate(
+        #     output,
+        #     rule_activation,
+        # )
 
     return activations
+    
 # ============================================================================
 # DEFUZZIFICATION
 # ============================================================================
@@ -461,9 +478,6 @@ class FuzzyRiskScorer:
         self.fuzzy_rules = []
 
     async def load_fuzzy_configuration(self):
-        """
-        Charge la configuration et les règles fuzzy depuis MongoDB.
-        """
 
         self.fuzzy_config = await load_fuzzy_config()
         self.fuzzy_rules = await load_fuzzy_rules()
@@ -473,11 +487,19 @@ class FuzzyRiskScorer:
             self.MIN_SAMPLE_SIZE_FOR_RELIABLE_SCORE,
         )
 
+        self.threshold = self.fuzzy_config.get(
+            "threshold",
+            self.threshold,
+        )
+
         logger.info(
             "Configuration fuzzy chargée depuis MongoDB : "
-            f"{len(self.fuzzy_rules)} règles"
-        )    
-    
+            f"{len(self.fuzzy_rules)} règles, "
+            f"threshold={self.threshold}, "
+            f"min_sample_size={self.min_sample_size}"
+        )
+
+
     def _average_sensitivity(
         self,
         fields: Tuple[str, ...],
@@ -581,16 +603,23 @@ class FuzzyRiskScorer:
         # Insufficient data
         # --------------------------------------------------------------------
 
-        if (
-            k <= 0
-            or sample_size < self.min_sample_size
-        ):
-
+        if k <= 0:
             return RiskResult(
                 fields=fields,
                 k=k,
-                uniqueness=0.0,
+                uniqueness=uniqueness,
                 avg_sensitivity=0.0,
+                score=0.0,
+                triggered=False,
+                sample_size=sample_size,
+            )
+
+        if sample_size < self.min_sample_size:
+            return RiskResult(
+                fields=fields,
+                k=k,
+                uniqueness=uniqueness,
+                avg_sensitivity=self._average_sensitivity(fields),
                 score=0.0,
                 triggered=False,
                 sample_size=sample_size,
@@ -628,6 +657,13 @@ class FuzzyRiskScorer:
             avg_sensitivity,
             self.fuzzy_config,
         )
+        logger.info(
+            f"FUZZIFICATION | fields={fields} | "
+            f"k={k} -> {k_fuzzy} | "
+            f"uniqueness={uniqueness:.4f} -> {u_fuzzy} | "
+            f"sensitivity={avg_sensitivity:.4f} -> {s_fuzzy}"
+        )
+    
 
         # --------------------------------------------------------------------
         # Inference
@@ -657,7 +693,13 @@ class FuzzyRiskScorer:
             f"activations={activations} | "
             f"score={score:.4f}"
         )
-
+        # print(
+        #     f"[DEBUG FUZZY] "
+        #     f"k={k} | "
+        #     f"k_fuzzy={k_fuzzy} | "
+        #     f"u_fuzzy={u_fuzzy} | "
+        #     f"s_fuzzy={s_fuzzy}"
+        # )
         # --------------------------------------------------------------------
         # Final result
         # --------------------------------------------------------------------

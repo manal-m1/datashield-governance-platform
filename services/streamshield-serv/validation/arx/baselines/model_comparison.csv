@@ -1,0 +1,4 @@
+model,threshold,accuracy,precision,recall,specificity,f1,youden_j,tp,tn,fp,fn,num_combinations
+FuzzyRiskScorer,0.7,0.5,0.4,1.0,0.25,0.5714285714285715,0.25,2,1,3,0,6
+k-anonymity,1,0.3333333333333333,0.29411764705882354,1.0,0.07692307692307693,0.45454545454545453,0.07692307692307687,5,1,12,0,18
+ARX,0.09,1.0,1.0,1.0,1.0,1.0,1.0,5,13,0,0,18

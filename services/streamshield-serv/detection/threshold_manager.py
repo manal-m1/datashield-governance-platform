@@ -9,7 +9,7 @@ de chaque domaine métier".
 """
 from typing import Optional
 
-DEFAULT_THRESHOLD = 0.5
+DEFAULT_THRESHOLD = 0.70
 
 
 class ThresholdManager:

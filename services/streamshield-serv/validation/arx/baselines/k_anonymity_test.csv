@@ -1,0 +1,7 @@
+id,combination,num_qi,num_records,average_risk,arx_label,k,k_threshold,k_label
+C05,age + native-country,2,32561,0.0393415435643868,0,1,1,1
+C11,age + sex + race,3,32561,0.0167685267651484,0,1,1,1
+C15,age + race + native-country,3,32561,0.0541138171432081,0,1,1,1
+C18,age + marital-status + occupation,3,32561,0.0975092902552133,1,1,1,1
+C24,age + sex + education + occupation,4,32561,0.2381683609225761,1,1,1,1
+C30,sex + race + education + occupation,4,32561,0.0331685144805134,0,1,1,1

@@ -1,0 +1,7 @@
+combination_id,fields,k,uniqueness,avg_sensitivity,fuzzy_score,threshold,reference_label,fuzzy_label,sample_size
+C05,age + native-country,1,0.4418423106947697,0.65,0.81,0.7,0,1,32561
+C11,age + sex + race,1,0.11904761904761904,0.5,0.7,0.7,0,1,32561
+C15,age + race + native-country,1,0.48467650397275824,0.6,0.7,0.7,0,1,32561
+C18,age + marital-status + occupation,1,0.288503937007874,0.5,0.7,0.7,1,1,32561
+C24,age + sex + education + occupation,1,0.44925854287556416,0.35,0.7,0.7,1,1,32561
+C30,sex + race + education + occupation,1,0.27685185185185185,0.27499999999999997,0.45,0.7,0,0,32561

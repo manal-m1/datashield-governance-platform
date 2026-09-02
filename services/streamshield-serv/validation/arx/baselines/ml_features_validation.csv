@@ -1,0 +1,7 @@
+id,combination,num_qi,k,uniqueness,avg_sensitivity,sample_size,label
+C07,sex + education,2,16,0.0,0.2,32561,0
+C08,education + occupation,2,1,0.07373271889400922,0.2,32561,0
+C13,age + sex + occupation,3,1,0.12539184952978055,0.39999999999999997,32561,0
+C23,age + sex + race + native-country,4,1,0.5583543240973972,0.5,32561,0
+C25,age + sex + education + native-country,4,1,0.6027300541303836,0.425,32561,1
+C28,age + education + occupation + native-country,4,1,0.5896433805569126,0.425,32561,1

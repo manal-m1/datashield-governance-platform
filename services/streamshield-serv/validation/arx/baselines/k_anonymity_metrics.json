@@ -1,0 +1,45 @@
+{
+  "model": "K-anonymity",
+  "feature": "k",
+  "rule": "k < threshold => risk",
+  "threshold": 2,
+  "train_size": 18,
+  "validation_size": 6,
+  "test_size": 6,
+  "train": {
+    "accuracy": 0.3333333333333333,
+    "precision": 0.29411764705882354,
+    "recall": 1.0,
+    "specificity": 0.07692307692307693,
+    "f1": 0.45454545454545453,
+    "youden_j": 0.07692307692307687,
+    "tp": 5,
+    "tn": 1,
+    "fp": 12,
+    "fn": 0
+  },
+  "validation": {
+    "accuracy": 0.5,
+    "precision": 0.4,
+    "recall": 1.0,
+    "specificity": 0.25,
+    "f1": 0.5714285714285714,
+    "youden_j": 0.25,
+    "tp": 2,
+    "tn": 1,
+    "fp": 3,
+    "fn": 0
+  },
+  "test": {
+    "accuracy": 0.3333333333333333,
+    "precision": 0.3333333333333333,
+    "recall": 1.0,
+    "specificity": 0.0,
+    "f1": 0.5,
+    "youden_j": 0.0,
+    "tp": 2,
+    "tn": 0,
+    "fp": 4,
+    "fn": 0
+  }
+}

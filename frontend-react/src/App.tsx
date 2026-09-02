@@ -10,6 +10,7 @@ import Shell from './components/layout/Shell';
 import DashboardPage from './pages/DashboardPage';
 import PIIDetectionPage from './pages/PIIDetectionPage';
 import QualityPage from './pages/QualityPage';
+import StreamShieldPage from './pages/StreamShieldPage';
 import SignupPage from './pages/SignupPage';
 import DataPipelinePage from './pages/DataPipelinePage';
 import TaskQueuePage from './pages/TaskQueuePage';
@@ -22,6 +23,7 @@ import { RoleThemeProvider } from './context/RoleThemeContext';
 import { ToastProvider } from './context/ToastContext';
 import { RangerProvider } from './context/RangerContext';
 import RoleGuard from './components/auth/RoleGuard';
+
 
 import { useEffect } from 'react';
 import { updateFavicon } from './utils/dynamicFavicon';
@@ -82,6 +84,14 @@ function App() {
                           element={
                             <RoleGuard allowedRoles={['admin']}>
                               <UsersPage />
+                            </RoleGuard>
+                          }
+                        />
+                        <Route
+                          path="/streamshield"
+                          element={
+                            <RoleGuard allowedRoles={['admin', 'steward']}>
+                              <StreamShieldPage />
                             </RoleGuard>
                           }
                         />

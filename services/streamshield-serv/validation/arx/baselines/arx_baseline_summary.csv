@@ -1,0 +1,4 @@
+dataset,threshold,accuracy,precision,recall,specificity,f1,youden_j,tp,tn,fp,fn,num_combinations
+train,0.09,1.0,1.0,1.0,1.0,1.0,1.0,5,13,0,0,18
+validation,0.09,1.0,1.0,1.0,1.0,1.0,1.0,2,4,0,0,6
+test,0.09,1.0,1.0,1.0,1.0,1.0,1.0,2,4,0,0,6

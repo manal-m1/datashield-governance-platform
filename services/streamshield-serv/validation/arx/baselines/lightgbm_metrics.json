@@ -1,0 +1,40 @@
+{
+  "model": "LightGBM",
+  "features": [
+    "num_qi",
+    "k",
+    "uniqueness",
+    "avg_sensitivity",
+    "sample_size"
+  ],
+  "threshold": 0.5,
+  "train_size": 18,
+  "validation_size": 6,
+  "test_size": 6,
+  "validation": {
+    "accuracy": 0.8333333333333334,
+    "precision": 0.6666666666666666,
+    "recall": 1.0,
+    "specificity": 0.75,
+    "f1": 0.8,
+    "youden_j": 0.75,
+    "tp": 2,
+    "tn": 3,
+    "fp": 1,
+    "fn": 0,
+    "roc_auc": 0.875
+  },
+  "test": {
+    "accuracy": 0.6666666666666666,
+    "precision": 0.5,
+    "recall": 0.5,
+    "specificity": 0.75,
+    "f1": 0.5,
+    "youden_j": 0.25,
+    "tp": 1,
+    "tn": 3,
+    "fp": 1,
+    "fn": 1,
+    "roc_auc": 0.625
+  }
+}

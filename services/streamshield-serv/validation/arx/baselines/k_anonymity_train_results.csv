@@ -1,0 +1,19 @@
+id,combination,num_qi,k,uniqueness,avg_sensitivity,sample_size,label,k_threshold,prediction
+C01,age + sex,2,1,0.0347222222222222,0.5,32561,0,2,1
+C02,age + race,2,1,0.0774410774410774,0.65,32561,0,2,1
+C03,age + education,2,1,0.1139896373056994,0.5,32561,0,2,1
+C04,age + occupation,2,1,0.0996714129244249,0.5,32561,0,2,1
+C06,sex + race,2,109,0.0,0.35,32561,0,2,0
+C09,marital-status + occupation,2,1,0.0416666666666666,0.35,32561,0,2,1
+C10,relationship + occupation,2,1,0.0114942528735632,0.35,32561,0,2,1
+C12,age + sex + education,3,1,0.1720493247210804,0.3999999999999999,32561,0,2,1
+C14,age + sex + native-country,3,1,0.5582857142857143,0.5,32561,0,2,1
+C16,age + education + occupation,3,1,0.3862142476461183,0.3999999999999999,32561,1,2,1
+C17,age + education + sex,3,1,0.1720493247210804,0.3999999999999999,32561,0,2,1
+C19,age + relationship + occupation,3,1,0.2359941944847605,0.5,32561,1,2,1
+C20,sex + race + native-country,3,1,0.2634408602150537,0.3999999999999999,32561,0,2,1
+C21,sex + education + occupation,3,1,0.1246819338422391,0.2,32561,0,2,1
+C22,education + occupation + marital-status,3,1,0.2228033472803347,0.3,32561,0,2,1
+C26,age + sex + marital-status + occupation,4,1,0.358924311429191,0.425,32561,1,2,1
+C27,age + race + education + occupation,4,1,0.516336693793271,0.425,32561,1,2,1
+C29,age + marital-status + relationship + occupation,4,1,0.44203146374829,0.5,32561,1,2,1

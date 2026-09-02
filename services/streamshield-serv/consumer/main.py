@@ -68,6 +68,7 @@ class StreamShieldConsumer:
         detection_interval: int = 50,
         detection_max_interval_seconds: int = 15,
         window_max_size: int = 50_000,
+        # self.min_detection_window_size = 20,
     ):
         self.domain = domain
         self.topic = f"raw-{domain}"
@@ -82,6 +83,7 @@ class StreamShieldConsumer:
 
         # v2 : déclenchement mixte -- borne la latence max même à faible débit
         self.detection_max_interval_seconds = detection_max_interval_seconds
+        self.min_detection_window_size = 20
         self._last_detection_time: Dict[int, float] = {}
 
         self.window = PartitionedSlidingWindow(size_seconds=window_seconds, max_size=window_max_size)
@@ -162,9 +164,18 @@ class StreamShieldConsumer:
         # complet -- distinguer "quand l'événement source a eu lieu côté Kafka" de
         # "quand StreamShield l'a traité"). Le préfixe "_" signale que ce n'est PAS
         # un champ candidat pour le calcul de risque, juste une métadonnée technique.
-        enriched_record = {**record, "_kafka_timestamp": kafka_timestamp}
-        self.window.add(partition, enriched_record)
 
+        # enriched_record = {**record, "_kafka_timestamp": kafka_timestamp}
+        # window_timestamp = kafka_timestamp / 1000.0 if kafka_timestamp else time.time()
+        enriched_record = {
+            **record,
+            "_kafka_timestamp": kafka_timestamp
+        }
+
+        self.window.add(
+            partition,
+            enriched_record
+        )
         logger.info(
             f"AUDIT topic={self.topic} partition={partition} offset={offset} "
             f"kafka_ts={kafka_timestamp} event_id={record.get('event_id', 'n/a')} "
@@ -191,16 +202,24 @@ class StreamShieldConsumer:
             >= self.detection_interval
         )
 
-        time_trigger =(
-            (now - last_detection)m
-            >= self.detection_max_interval_seconds
-            and self.window.window_size(partition) > 0
+        current_window_size = self.window.window_size(partition)
+
+        time_trigger = (
+            (now - last_detection) >= self.detection_max_interval_seconds
+            and current_window_size >= self.min_detection_window_size
         )
+
         if count_trigger or time_trigger:
             self._messages_since_detection[partition] = 0
             self._last_detection_time[partition] = now
+
             reason = "count" if count_trigger else "timeout"
-            logger.debug(f"Détection déclenchée sur partition {partition} (raison={reason})")
+
+            logger.info(
+                f"Détection déclenchée sur partition {partition} "
+                f"(raison={reason}, window_size={current_window_size})"
+            )
+
             await self._run_detection(partition)
 
     async def _run_detection(self, partition: int):
@@ -284,9 +303,17 @@ class StreamShieldConsumer:
             await self.stop()
 
 
-async def main(domain: str, group_id: str, window_seconds: int, detection_interval: int, detection_max_interval_seconds: int):
+async def main(
+    domain: str,
+    group_id: str,
+    window_seconds: int,
+    detection_interval: int,
+    detection_max_interval_seconds: int
+):
     consumer = StreamShieldConsumer(
-        domain, group_id=group_id, window_seconds=window_seconds,
+        domain,
+        group_id=group_id,
+        window_seconds=window_seconds,
         detection_interval=detection_interval,
         detection_max_interval_seconds=detection_max_interval_seconds,
     )

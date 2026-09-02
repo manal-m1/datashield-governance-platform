@@ -233,6 +233,7 @@ services:
       - cleaning-service
       - annotation-service
       - datagov-modern
+      - streamshield-serv 
     networks:
       - datagov-network
     restart: unless-stopped
@@ -282,6 +283,8 @@ services:
     networks:
       - datagov-network
     restart: unless-stopped
+    volumes:
+    - ./services/streamshield-serv:/app
 # NETWORK & VOLUMES
 networks:
   datagov-network:

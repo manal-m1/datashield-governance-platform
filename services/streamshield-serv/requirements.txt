@@ -6,6 +6,12 @@ pydantic>=2.12.5,<3
 pytest>=8.4,<10
 fastapi==0.112.0
 uvicorn==0.30.5
-motor==3.5.1
-pymongo==4.8.0
+motor==3.6.0
+pymongo==4.9.2
+# motor==3.5.1
+# pymongo==4.8.0
 pandas>=2.2.3
+scikit-learn
+lightgbm==4.6.0
+shap
+matplotlib==3.10.6

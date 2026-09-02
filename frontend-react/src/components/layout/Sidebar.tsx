@@ -12,7 +12,8 @@ import {
     FileSearch,
     LogOut,
     ChevronLeft,
-    ChevronRight
+    ChevronRight,
+    Radar //streamshield
 } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 import DynamicLogo from '../ui/DynamicLogo';
@@ -58,11 +59,13 @@ const Sidebar = () => {
     const { user, logout } = useAuthStore();
 
     const role = user?.role || 'labeler';
+    console.log('DEBUG role:', JSON.stringify(role), 'user:', user);
 
     const menuItems = [
         { id: 'dashboard', icon: LayoutDashboard, label: 'Dashboard', path: '/', roles: ['admin', 'steward', 'annotator', 'labeler'] },
         { id: 'datasets', icon: Database, label: 'Data Pipeline', path: '/datasets', roles: ['admin', 'steward', 'annotator'] },
         { id: 'pii', icon: ShieldAlert, label: 'PII Detection', path: '/pii', roles: ['admin', 'steward', 'annotator'] },
+        { id: 'streamshield', icon: Radar, label: 'StreamShield', path: '/streamshield', roles: ['admin', 'steward'] }, //streamshield
         { id: 'discovery', icon: FileSearch, label: 'Data Discovery', path: '/discovery', roles: ['admin', 'steward', 'annotator'] },
         { id: 'quality', icon: CheckCircle2, label: 'Quality Hub', path: '/quality', roles: ['admin', 'steward'] },
         { id: 'tasks', icon: ClipboardList, label: 'Task Queue', path: '/tasks', roles: ['admin', 'steward', 'annotator', 'labeler'] },

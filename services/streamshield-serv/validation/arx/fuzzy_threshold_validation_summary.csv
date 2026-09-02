@@ -1,0 +1,2 @@
+threshold,arx_threshold,accuracy,precision,recall,specificity,f1,youden_j,tp,tn,fp,fn,num_combinations
+0.7,0.09,0.8333333333333334,0.6666666666666666,1.0,0.75,0.8,0.75,2,3,1,0,6

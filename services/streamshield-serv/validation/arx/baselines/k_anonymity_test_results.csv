@@ -1,0 +1,7 @@
+id,combination,num_qi,k,uniqueness,avg_sensitivity,sample_size,label,k_threshold,prediction
+C05,age + native-country,2,1,0.4418423106947697,0.65,32561,0,2,1
+C11,age + sex + race,3,1,0.119047619047619,0.5,32561,0,2,1
+C15,age + race + native-country,3,1,0.4846765039727582,0.6,32561,0,2,1
+C18,age + marital-status + occupation,3,1,0.288503937007874,0.5,32561,1,2,1
+C24,age + sex + education + occupation,4,1,0.4492585428755641,0.35,32561,1,2,1
+C30,sex + race + education + occupation,4,1,0.2768518518518518,0.2749999999999999,32561,0,2,1

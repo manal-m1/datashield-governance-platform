@@ -35,31 +35,45 @@ from detection.fuzzy_risk_scorer import FuzzyRiskScorer
 from detection.combination_detector import CombinationDetector, DetectionConfig
 from detection.threshold_manager import ThresholdManager, DEFAULT_THRESHOLD
 from backend.database.mongodb import db
+from backend.clients.ethimask_client import EthiMaskClient
+from detection.candidate_field_selector import select_candidate_fields
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger("streamshield.consumer")
 
 import os
 BOOTSTRAP_SERVERS = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092")
 CONSUMER_GROUP_ID = "streamshield-detection"
+def safe_json_deserializer(v):
+    """
+    Désérialise un message Kafka JSON sans faire tomber le consumer
+    lorsqu'un message est vide ou invalide.
+    """
+    if v is None:
+        logger.error("MESSAGE KAFKA INVALIDE : valeur None")
+        return None
 
+    try:
+        raw = v.decode("utf-8").strip()
 
+        if not raw:
+            logger.error("MESSAGE KAFKA INVALIDE : valeur vide")
+            return None
+
+        return json.loads(raw)
+
+    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+        logger.error(
+            "MESSAGE KAFKA INVALIDE : %s | contenu=%r",
+            exc,
+            v[:200] if v else v
+        )
+        return None
 class StreamShieldConsumer:
     """
     Consumer group : streamshield-detection (cf. section 2.4 du cahier des charges).
     """
-
-    CANDIDATE_FIELDS = (
-    "ville",
-    "code_postal",
-    "sexe",
-    "date_naissance",
-    "age",
-    "sex",
-    "race",
-    "native_country",
-    "education",
-)
-
+    
+    
     def __init__(
         self,
         domain: str,
@@ -68,7 +82,7 @@ class StreamShieldConsumer:
         detection_interval: int = 50,
         detection_max_interval_seconds: int = 15,
         window_max_size: int = 50_000,
-        # self.min_detection_window_size = 20,
+        
     ):
         self.domain = domain
         self.topic = f"raw-{domain}"
@@ -94,18 +108,16 @@ class StreamShieldConsumer:
         self.scorer = FuzzyRiskScorer(
             threshold=DEFAULT_THRESHOLD,
             field_sensitivity=self.field_sensitivity,)
-        self.detector = CombinationDetector(
-            self.scorer,
-            DetectionConfig(candidate_fields=self.CANDIDATE_FIELDS, max_depth=4),
-        )
+        self.ethimask_client = EthiMaskClient()
         self._detections_since_threshold_refresh = 0
+        
 
     async def start(self):
         self.consumer = AIOKafkaConsumer(
             self.topic,
             bootstrap_servers=BOOTSTRAP_SERVERS,
             group_id=self.group_id,
-            value_deserializer=lambda v: json.loads(v.decode("utf-8")),
+            value_deserializer=safe_json_deserializer,
             key_deserializer=lambda k: k.decode("utf-8") if k else None,
             enable_auto_commit=False,
             auto_offset_reset="earliest",
@@ -145,9 +157,45 @@ class StreamShieldConsumer:
             f"déclenchement={self.detection_interval} msgs OU "
             f"{self.detection_max_interval_seconds}s)"
         )
+        ethimask_available = await self.ethimask_client.health_check()
+
+        if ethimask_available:
+            logger.info("EthiMask disponible")
+        else:
+            logger.warning("EthiMask indisponible")
         # Chargement de la configuration et des règles fuzzy depuis MongoDB
         
+    def _build_ethimask_detections(
+        self,
+        record: Dict,
+        fields,
+    ) -> list:
+        detections = []
 
+        for field in fields:
+            if field not in record:
+                continue
+
+            sensitivity = self.scorer.field_sensitivity.get(field, 0.5)
+
+            if sensitivity >= 0.75:
+                sensitivity_level = "critical"
+            elif sensitivity >= 0.5:
+                sensitivity_level = "high"
+            elif sensitivity >= 0.25:
+                sensitivity_level = "medium"
+            else:
+                sensitivity_level = "low"
+
+            detections.append({
+                "field": field,
+                "value": record[field],
+                "entity_type": field,
+                "sensitivity_level": sensitivity_level,
+                "confidence": 1.0,
+            })
+
+        return detections
     async def stop(self):
         self._stopping.set()
         if self.consumer:
@@ -224,66 +272,208 @@ class StreamShieldConsumer:
 
     async def _run_detection(self, partition: int):
         self._detections_since_threshold_refresh += 1
+
+        # Rafraîchissement périodique du seuil depuis MongoDB
         if self._detections_since_threshold_refresh >= 10:
             self._detections_since_threshold_refresh = 0
-            new_threshold = await self.threshold_manager.get_threshold(self.domain)
+
+            new_threshold = await self.threshold_manager.get_threshold(
+                self.domain
+            )
+
             if new_threshold != self.scorer.threshold:
-                logger.info(f"Seuil mis à jour pour '{self.domain}': {self.scorer.threshold} -> {new_threshold}")
+                logger.info(
+                    f"Seuil mis à jour pour '{self.domain}': "
+                    f"{self.scorer.threshold} -> {new_threshold}"
+                )
                 self.scorer.threshold = new_threshold
 
-        # records = self.window.get_records(partition)
-        # triggered = self.detector.triggered_only(records)
-
-        # if not triggered:
-        #     return
+        # ------------------------------------------------------------------
+        # 1. Récupération de la fenêtre
+        # ------------------------------------------------------------------
         records = self.window.get_records(partition)
-        logger.info(
-            f"DETECTION | partition={partition} | "
-            f"records={len(records)}"
+
+        if not records:
+            logger.warning(
+                "Aucun record disponible pour la détection | partition=%s",
+                partition
+            )
+            return
+
+        # ------------------------------------------------------------------
+        # 2. Sélection des champs candidats
+        # ------------------------------------------------------------------
+        candidate_fields = select_candidate_fields(
+            records,
+            max_candidates=12
         )
 
-        triggered = self.detector.triggered_only(records)
+        logger.info(
+            "CHAMPS CANDIDATS | partition=%s | fields=%s",
+            partition,
+            candidate_fields
+        )
+
+        if not candidate_fields:
+            logger.warning(
+                "Aucun champ QI candidat trouvé | partition=%s",
+                partition
+            )
+            return
+
+        # ------------------------------------------------------------------
+        # 3. Détection des combinaisons à risque
+        # ------------------------------------------------------------------
+        config = DetectionConfig(
+            candidate_fields=candidate_fields,
+            max_depth=2
+        )
+
+        detector = CombinationDetector(
+            scorer=self.scorer,
+            config=config
+        )
+
+        triggered = detector.triggered_only(records)
 
         logger.info(
-            f"DETECTION RESULT | "
-            f"partition={partition} | "
-            f"triggered={len(triggered)}"
-            )
+            "DETECTION RESULT | "
+            "partition=%s | "
+            "records=%s | "
+            "triggered=%s",
+            partition,
+            len(records),
+            len(triggered)
+        )
 
         if not triggered:
             logger.info(
-                    f"NO RISK DETECTED | partition={partition}"
-                )
+                "NO RISK DETECTED | partition=%s",
+                partition
+            )
             return
-        # v2 : horodatage Kafka le plus récent de la fenêtre -- repère
-        # approximatif de "quand côté source", en plus du timestamp de
-        # traitement déjà utilisé (traçabilité d'audit complète)
-        kafka_timestamps = [r.get("_kafka_timestamp") for r in records if r.get("_kafka_timestamp") is not None]
-        latest_kafka_ts = max(kafka_timestamps) if kafka_timestamps else None
 
+        # ------------------------------------------------------------------
+        # 4. Timestamp Kafka pour l'audit
+        # ------------------------------------------------------------------
+        kafka_timestamps = [
+            r.get("_kafka_timestamp")
+            for r in records
+            if r.get("_kafka_timestamp") is not None
+        ]
+
+        latest_kafka_ts = (
+            max(kafka_timestamps)
+            if kafka_timestamps
+            else None
+        )
+
+        # ------------------------------------------------------------------
+        # 5. Traitement des combinaisons à risque
+        # ------------------------------------------------------------------
         for result in triggered:
+
+            risky_fields = list(result.fields)
+
+            logger.warning(
+                "RISQUE DETECTE | partition=%s | fields=%s | "
+                "score=%.4f | k=%s",
+                partition,
+                risky_fields,
+                result.score,
+                result.k
+            )
+
+            # --------------------------------------------------------------
+            # Préparation des données pour EthiMask
+            # --------------------------------------------------------------
+            # Pour l'instant, on prépare les données.
+            # Le véritable appel batch /mask/batch sera ajouté ensuite.
+            #
+            # IMPORTANT :
+            # On ne fait PAS encore un appel EthiMask pour chaque record,
+            # car cela créerait potentiellement des milliers d'appels HTTP.
+            # --------------------------------------------------------------
+
+            ethimask_requests = []
+
+            for record in records:
+
+                detections = self._build_ethimask_detections(
+                    record,
+                    risky_fields
+                )
+
+                if not detections:
+                    continue
+
+                ethimask_requests.append({
+                    "data": record,
+                    "detections": detections,
+                })
+
+            logger.info(
+                "ETHIMASK PREPARATION | partition=%s | "
+                "fields=%s | records=%s",
+                partition,
+                risky_fields,
+                len(ethimask_requests)
+            )
+
+            # ------------------------------------------------------------------
+            # 6. Création de l'événement de risque
+            # ------------------------------------------------------------------
             event = {
                 "domain": self.domain,
                 "partition": partition,
-                "fields": list(result.fields),
+                "fields": risky_fields,
                 "score": round(result.score, 4),
                 "k": result.k,
                 "uniqueness": round(result.uniqueness, 4),
                 "sample_size": result.sample_size,
                 "window_size": len(records),
             }
-            await self.risk_producer.send_and_wait(self.risk_topic, value=event)
 
+            # ------------------------------------------------------------------
+            # 7. Publication du Risk Event
+            # ------------------------------------------------------------------
+            await self.risk_producer.send_and_wait(
+                self.risk_topic,
+                value=event
+            )
+            masked_results = await self.ethimask_client.mask_batch(
+                requests=ethimask_requests,
+                role="labeler",
+                context="streamshield",
+                purpose="risk_mitigation",
+            )
+
+            logger.info(
+                "ETHIMASK BATCH TERMINE | partition=%s | "
+                "fields=%s | demandes=%s | résultats=%s",
+                partition,
+                risky_fields,
+                len(ethimask_requests),
+                len(masked_results),
+            )
+            # ------------------------------------------------------------------
+            # 8. Persistance MongoDB
+            # ------------------------------------------------------------------
             if db is not None:
                 await db.streamshield_risk_events.insert_one({
                     **event,
-                    "processing_timestamp": time.time(),   # v2 : renommé (était "timestamp")
-                    "kafka_timestamp_ms": latest_kafka_ts,  # v2 : nouveau champ d'audit
+                    "processing_timestamp": time.time(),
+                    "kafka_timestamp_ms": latest_kafka_ts,
                 })
 
             logger.warning(
-                f"RISK DETECTED fields={result.fields} score={round(result.score, 3)} "
-                f"k={result.k} partition={partition} -> publié sur '{self.risk_topic}'"
+                "RISK DETECTED fields=%s score=%.3f "
+                "k=%s partition=%s -> publié sur '%s'",
+                result.fields,
+                result.score,
+                result.k,
+                partition,
+                self.risk_topic
             )
     async def run(self):
         await self.start()
@@ -293,9 +483,27 @@ class StreamShieldConsumer:
                     result = await self.consumer.getmany(timeout_ms=1000, max_records=500)
                     for tp, messages in result.items():
                         for msg in messages:
-                            await self.process_record(msg.value, tp.partition, msg.offset, msg.timestamp)
+
+                            if msg.value is None:
+                                logger.error(
+                                    "MESSAGE IGNORE | topic=%s | partition=%s | offset=%s",
+                                    tp.topic,
+                                    tp.partition,
+                                    msg.offset
+                                )
+                                continue
+
+                            await self.process_record(
+                                msg.value,
+                                tp.partition,
+                                msg.offset,
+                                msg.timestamp
+                            )
+
                         if messages:
-                            await self.consumer.commit({tp: messages[-1].offset + 1})
+                            await self.consumer.commit({
+                                tp: messages[-1].offset + 1
+                            })
                 except KafkaConnectionError as e:
                     logger.warning(f"Connexion Kafka perdue ({e}) -- nouvelle tentative dans 5s")
                     await asyncio.sleep(5)

@@ -277,14 +277,27 @@ services:
       - "8010:8010"
     env_file:
       - .env
+    environment:
+      CLEANING_SERVICE_URL: http://cleaning-service:8004
+      CLEANING_TIMEOUT: 30
+      ETHIMASK_SERVICE_URL: http://ethimask-service:8009
     depends_on:
       kafka:
         condition: service_healthy
+      mongo:
+        condition: service_started
+      cleaning-service:
+        condition: service_started
+      ethimask-service:
+        condition: service_started
+
     networks:
       - datagov-network
     restart: unless-stopped
     volumes:
     - ./services/streamshield-serv:/app
+    - ./atlas_integration:/app/atlas_integration   # <- ajouté
+    - ./services/common:/common 
 # NETWORK & VOLUMES
 networks:
   datagov-network:

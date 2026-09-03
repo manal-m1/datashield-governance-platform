@@ -341,3 +341,53 @@ class AtlasClient:
         
         logger.warning(f"⚠️ Could not find Atlas entity GUID for '{name}' (Tried: {candidates})")
         return None
+    def get_dataset_metadata(
+        self,
+        dataset_name: str
+    ) -> Optional[Dict[str, Any]]:
+        """
+        Récupère les métadonnées d'un dataset depuis Apache Atlas.
+        """
+
+        try:
+            guid = self.get_entity_guid(dataset_name)
+
+            if not guid:
+                logger.warning(
+                    f"Dataset '{dataset_name}' introuvable dans Atlas"
+                )
+                return None
+
+            entity = self.get_entity_by_guid(guid)
+
+            if not entity:
+                return None
+
+            entity_data = entity.get("entity", {})
+
+            attributes = entity_data.get(
+                "attributes",
+                {}
+            )
+
+            return {
+                "guid": guid,
+                "name": attributes.get("name", dataset_name),
+                "qualifiedName": attributes.get("qualifiedName"),
+                "description": attributes.get("description"),
+                "owner": attributes.get("owner"),
+                "path": attributes.get("path"),
+                "qualityScore": attributes.get("qualityScore"),
+                "classifications": entity_data.get(
+                    "classifications",
+                    []
+                ),
+                "attributes": attributes,
+            }
+
+        except Exception as e:
+            logger.error(
+                f"Erreur récupération métadonnées Atlas "
+                f"pour '{dataset_name}': {e}"
+            )
+            return None

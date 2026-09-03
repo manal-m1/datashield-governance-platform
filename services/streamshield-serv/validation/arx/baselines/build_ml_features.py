@@ -23,14 +23,6 @@ import asyncio
 # CONFIGURATION DU PATH PYTHON
 # ============================================================================
 
-# Racine du projet
-# /app/validation/arx/baselines/build_ml_features.py
-#                    ↑
-# parents[0] = baselines
-# parents[1] = arx
-# parents[2] = validation
-# parents[3] = /app
-
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 BASE_DIR = PROJECT_ROOT
 

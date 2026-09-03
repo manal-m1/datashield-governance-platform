@@ -13,6 +13,7 @@ CLASSIFICATION_SERVICE_URL = "http://classification-service:8005"
 QUALITY_SERVICE_URL = "http://quality-service:8008"
 ETHIMASK_SERVICE_URL = "http://ethimask-service:8009"
 CORRECTION_SERVICE_URL = "http://correction-service:8006"
+STREAMSHIELD_SERVICE_URL = "http://streamshield-serv:8010"
 
 default_args = {
     'owner': 'datagov',
@@ -112,6 +113,27 @@ def apply_masking(**context):
     # Simulating masking trigger
     
     return dataset_id
+def analyze_streamshield_risk(**context):
+    dataset_id = context['task_instance'].xcom_pull(
+        task_ids='evaluate_quality'
+    )
+
+    if not dataset_id:
+        raise ValueError("No dataset_id received")
+
+    resp = requests.post(
+        f"{STREAMSHIELD_SERVICE_URL}/analyze/{dataset_id}",
+        timeout=300
+    )
+
+    resp.raise_for_status()
+
+    result = resp.json()
+
+    print(f"StreamShield analysis completed for {dataset_id}")
+    print(f"Risk combinations: {result.get('combinations_at_risk', 0)}")
+
+    return dataset_id
 
 # Tasks
 start = DummyOperator(task_id='start', dag=dag)
@@ -145,13 +167,19 @@ t4 = PythonOperator(
 )
 
 t5 = PythonOperator(
-    task_id='apply_masking',
-    python_callable=apply_masking,
+    task_id='analyze_streamshield_risk',
+    python_callable=analyze_streamshield_risk,
     provide_context=True,
     dag=dag
 )
 
+t6 = PythonOperator(
+    task_id='analyze_streamshield_risk',
+    python_callable=analyze_streamshield_risk,
+    provide_context=True,
+    dag=dag
+)
 end = DummyOperator(task_id='end', dag=dag)
 
 # Dependencies
-start >> t1 >> t2 >> t3 >> t4 >> t5 >> end
+start >> t1 >> t2 >> t3 >> t4 >> t6 >> t5 >> end

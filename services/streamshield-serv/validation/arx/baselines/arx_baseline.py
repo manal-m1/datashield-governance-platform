@@ -4,36 +4,6 @@ from typing import Dict, List
 
 
 # ============================================================
-# STREAMSHIELD - BASELINE ARX
-# ============================================================
-#
-# Objectif :
-#   Évaluer une baseline utilisant directement le risque ARX.
-#
-# Principe :
-#
-#       average_risk >= ARX_THRESHOLD
-#                    |
-#                    v
-#              ARX_LABEL = 1
-#
-#       average_risk < ARX_THRESHOLD
-#                    |
-#                    v
-#              ARX_LABEL = 0
-#
-# Protocole :
-#
-#       TRAIN       -> vérification
-#       VALIDATION  -> évaluation
-#       TEST        -> évaluation finale
-#
-# IMPORTANT :
-#   Le seuil ARX = 0.09 est défini par le protocole de référence.
-#   Il n'est PAS recalibré sur le TEST.
-#
-# Cette baseline ne dépend PAS du modèle fuzzy.
-# ============================================================
 
 
 # ============================================================
@@ -54,9 +24,6 @@ TOTAL_SIZE = 30
 # CHEMINS
 # ============================================================
 
-# validation/arx/baselines/arx_baseline.py
-#
-# parents[1] = validation/arx
 #
 BASE_DIR = Path(__file__).resolve().parents[1]
 
@@ -70,14 +37,6 @@ DATASET_FILE = (
     / "processed"
     / "adult_prepared.csv"
 ).resolve()
-# DATASET_FILE = (
-#     BASE_DIR
-#     / "data"
-#     / "validation"
-#     / "uci_adult"
-#     / "processed"
-#     / "adult_prepared.csv"
-# )
 
 TRAIN_FILE = (
     BASE_DIR

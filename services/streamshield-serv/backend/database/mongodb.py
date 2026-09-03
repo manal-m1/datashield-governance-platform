@@ -17,24 +17,23 @@ client = AsyncIOMotorClient(
 db = client[DB_NAME]
 
 # ============================================================================
-# Collections StreamShield
+# Collections StreamShield (propres)
 # ============================================================================
 
 risk_events_collection = db["streamshield_risk_events"]
-
 thresholds_collection = db["streamshield_thresholds"]
+field_sensitivity_collection = db["streamshield_field_sensitivity"]
+fuzzy_config_collection = db["streamshield_fuzzy_config"]
+fuzzy_rules_collection = db["streamshield_fuzzy_rules"]
+risk_scores_collection = db["streamshield_risk_scores"]
 
-field_sensitivity_collection = db[
-    "streamshield_field_sensitivity"
-]
+# ============================================================================
+# Collections partagées avec cleaning-service (même base DataGovDB)
+# Lecture seule — StreamShield ne modifie jamais ces datasets
+# ============================================================================
 
-fuzzy_config_collection = db[
-    "streamshield_fuzzy_config"
-]
-
-fuzzy_rules_collection = db[
-    "streamshield_fuzzy_rules"
-]
+raw_datasets_collection = db["raw_datasets"]
+clean_datasets_collection = db["clean_datasets"]
 
 
 async def ping():

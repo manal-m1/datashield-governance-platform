@@ -298,17 +298,6 @@ def fuzzify_sensitivity(
             )
 
     return result
-# ============================================================================
-# OUTPUT LEVELS
-# ============================================================================
-
-# OUTPUT_LEVELS = {
-#     "faible": 0.15,
-#     "modere": 0.45,
-#     "eleve": 0.70,
-#     "critique": 0.92,
-# }
-
 
 # ============================================================================
 # FUZZY INFERENCE
@@ -406,12 +395,6 @@ def _apply_rules(
             output,
             rule_activation,
         )
-        # rule_activation = min(degrees)
-
-        # activate(
-        #     output,
-        #     rule_activation,
-        # )
 
     return activations
     
@@ -693,13 +676,6 @@ class FuzzyRiskScorer:
             f"activations={activations} | "
             f"score={score:.4f}"
         )
-        # print(
-        #     f"[DEBUG FUZZY] "
-        #     f"k={k} | "
-        #     f"k_fuzzy={k_fuzzy} | "
-        #     f"u_fuzzy={u_fuzzy} | "
-        #     f"s_fuzzy={s_fuzzy}"
-        # )
         # --------------------------------------------------------------------
         # Final result
         # --------------------------------------------------------------------

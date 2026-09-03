@@ -38,16 +38,6 @@ DATASET_FILE = (
     / "adult_prepared.csv"
 )
 
-# IMPORTANT :
-# Ce fichier doit être DISTINCT du fichier utilisé
-# pour calibrer le seuil.
-#
-# Calibration :
-#     validation/arx/java/arx_30_labels.csv
-#
-# Validation indépendante :
-#     validation/arx/java/arx_30_labels_validation.csv
-#
 ARX_LABELS_FILE = (
     BASE_DIR
     / "validation"
@@ -321,17 +311,6 @@ async def compute_fuzzy_scores(
         f"{len(field_sensitivity)}"
     )
 
-    # --------------------------------------------------------
-    # IMPORTANT :
-    #
-    # threshold=0.70 n'est PAS utilisé pour décider des labels
-    # pendant cette validation.
-    #
-    # Les prédictions sont calculées explicitement avec :
-    #
-    #     fuzzy_score >= VALIDATION_THRESHOLD
-    #
-    # --------------------------------------------------------
 
     scorer = FuzzyRiskScorer(
         threshold=VALIDATION_THRESHOLD,

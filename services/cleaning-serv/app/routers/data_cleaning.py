@@ -441,7 +441,17 @@ async def clean_dataset(dataset_id: str,
     # Save cleaned version
     DATASETS[dataset_id]["df"] = clean_df
     DATASETS[dataset_id]["status"] = "cleaned"
-    
+    if raw_datasets_col is not None:
+        await raw_datasets_col.update_one(
+            {"dataset_id": dataset_id},
+            {
+                "$set": {
+                    "status": "cleaned",
+                    "rows": len(clean_df),
+                    "columns": len(clean_df.columns)
+                }
+            }
+        )    
     return {
         "success": True,
         "dataset_id": dataset_id,

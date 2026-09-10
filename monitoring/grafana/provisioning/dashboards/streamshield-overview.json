@@ -1,0 +1,140 @@
+{
+  "uid": "streamshield-overview",
+  "title": "StreamShield - Vue d'ensemble",
+  "tags": ["streamshield", "datagov"],
+  "timezone": "browser",
+  "refresh": "15s",
+  "schemaVersion": 39,
+  "version": 1,
+  "time": { "from": "now-6h", "to": "now" },
+  "panels": [
+    {
+      "id": 1,
+      "type": "timeseries",
+      "title": "Combinaisons à risque détectées par domaine et par heure",
+      "gridPos": { "h": 9, "w": 12, "x": 0, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus_ds" },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus_ds" },
+          "expr": "sum by (domain) (increase(streamshield_risk_combinations_detected_total[1h]))",
+          "legendFormat": "{{domain}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": { "drawStyle": "bars", "fillOpacity": 60 }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": { "displayMode": "table", "placement": "bottom" },
+        "tooltip": { "mode": "multi" }
+      }
+    },
+    {
+      "id": 2,
+      "type": "timeseries",
+      "title": "Latence de protection bout-en-bout (p95)",
+      "gridPos": { "h": 9, "w": 12, "x": 12, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus_ds" },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus_ds" },
+          "expr": "histogram_quantile(0.95, sum(rate(streamshield_analysis_latency_seconds_bucket[5m])) by (le))",
+          "legendFormat": "p95 latence",
+          "refId": "A"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus_ds" },
+          "expr": "histogram_quantile(0.50, sum(rate(streamshield_analysis_latency_seconds_bucket[5m])) by (le))",
+          "legendFormat": "p50 latence",
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "custom": { "drawStyle": "line", "fillOpacity": 15 }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": { "displayMode": "table", "placement": "bottom" },
+        "tooltip": { "mode": "multi" }
+      }
+    },
+    {
+      "id": 3,
+      "type": "timeseries",
+      "title": "Débit de messages traités par topic Kafka",
+      "gridPos": { "h": 9, "w": 12, "x": 0, "y": 9 },
+      "datasource": { "type": "prometheus", "uid": "prometheus_ds" },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus_ds" },
+          "expr": "sum by (topic) (rate(streamshield_kafka_messages_processed_total{job=\"streamshield-consumer\"}[5m]))",
+          "legendFormat": "{{topic}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ops",
+          "custom": { "drawStyle": "line", "fillOpacity": 20 }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": { "displayMode": "table", "placement": "bottom" },
+        "tooltip": { "mode": "multi" }
+      }
+    },
+    {
+      "id": 4,
+      "type": "table",
+      "title": "Historique des alertes déclenchées",
+      "gridPos": { "h": 9, "w": 12, "x": 12, "y": 9 },
+      "datasource": { "type": "yesoreyeram-infinity-datasource", "uid": "infinity_ds" },
+      "targets": [
+        {
+          "datasource": { "type": "yesoreyeram-infinity-datasource", "uid": "infinity_ds" },
+          "type": "json",
+          "source": "url",
+          "url": "http://streamshield-serv:8010/risks?limit=100",
+          "url_options": { "method": "GET" },
+          "root_selector": "risks",
+          "columns": [
+            { "selector": "timestamp", "text": "Horodatage", "type": "timestamp" },
+            { "selector": "domain", "text": "Domaine", "type": "string" },
+            { "selector": "dataset_name", "text": "Dataset", "type": "string" },
+            { "selector": "fields", "text": "Combinaison", "type": "string" },
+            { "selector": "k", "text": "k", "type": "number" },
+            { "selector": "score", "text": "Score", "type": "number" }
+          ],
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "Score" },
+            "properties": [
+              { "id": "unit", "value": "percentunit" },
+              {
+                "id": "custom.cellOptions",
+                "value": { "type": "color-background", "mode": "gradient" }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "sortBy": [{ "displayName": "Horodatage", "desc": true }]
+      }
+    }
+  ]
+}

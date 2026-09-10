@@ -1,0 +1,17 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: "prometheus"
+    static_configs:
+      - targets: ["localhost:9090"]
+
+  - job_name: "streamshield"
+    static_configs:
+      - targets: ["streamshield-serv:8010"]
+    metrics_path: /metrics
+
+  - job_name: "streamshield-consumer"
+    static_configs:
+      - targets: ["streamshield-serv:8012"]
+    metrics_path: /metrics

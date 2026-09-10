@@ -23,7 +23,7 @@ import { RoleThemeProvider } from './context/RoleThemeContext';
 import { ToastProvider } from './context/ToastContext';
 import { RangerProvider } from './context/RangerContext';
 import RoleGuard from './components/auth/RoleGuard';
-
+import MonitoringPage from './pages/MonitoringPage';
 
 import { useEffect } from 'react';
 import { updateFavicon } from './utils/dynamicFavicon';
@@ -108,6 +108,14 @@ function App() {
                           element={
                             <RoleGuard allowedRoles={['admin', 'steward', 'annotator']}>
                               <DiscoveryPage />
+                            </RoleGuard>
+                          }
+                        />
+                        <Route
+                          path="/monitoring"
+                          element={
+                            <RoleGuard allowedRoles={['admin']}>
+                              <MonitoringPage />
                             </RoleGuard>
                           }
                         />

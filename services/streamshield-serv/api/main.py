@@ -13,12 +13,13 @@ Responsabilités :
 
 import os
 import logging
+import time
 from typing import Optional, List, Tuple, Dict, Any
 from datetime import datetime
 
 import requests
 import httpx
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Response
 from pydantic import BaseModel, Field
 from backend.database.mongodb import db
 from bson import ObjectId
@@ -29,7 +30,8 @@ from detection.field_sensitivity_repository import load_field_sensitivity
 
 from atlas_integration.client import AtlasClient
 from detection.candidate_field_selector import select_candidate_fields
-from bson import ObjectId
+from prometheus_client import Counter, Histogram, generate_latest, CONTENT_TYPE_LATEST
+
 # ============================================================================
 # LOGGING
 # ============================================================================
@@ -87,6 +89,32 @@ app = FastAPI(
     ),
     version="1.0.0",
 )
+
+
+# ============================================================================
+# MÉTRIQUES PROMETHEUS
+# Défini une seule fois, ici, juste après la création de `app` — évite tout
+# risque de double-enregistrement (Prometheus refuse deux métriques du même
+# nom dans le même registre) et tout risque d'utiliser `app` avant sa
+# définition.
+# ============================================================================
+
+RISK_COMBINATIONS_DETECTED = Counter(
+    "streamshield_risk_combinations_detected_total",
+    "Nombre de combinaisons à risque détectées",
+    ["domain"]
+)
+
+ANALYSIS_LATENCY = Histogram(
+    "streamshield_analysis_latency_seconds",
+    "Latence bout-en-bout d'une analyse de dataset (récupération + scoring + stockage)",
+    buckets=[0.1, 0.5, 1, 2, 5, 10, 30, 60]
+)
+
+
+@app.get("/metrics")
+async def metrics():
+    return Response(generate_latest(), media_type=CONTENT_TYPE_LATEST)
 
 
 # ============================================================================
@@ -549,6 +577,7 @@ async def analyze_dataset(
     max_depth: int = 2,
     domain: Optional[str] = None
 ):
+    _start_time = time.monotonic()
 
     if db is None:
         raise HTTPException(
@@ -705,6 +734,7 @@ async def analyze_dataset(
 
             "timestamp": datetime.utcnow()
         }
+
         results.append(result_data)
 
     # ========================================================================
@@ -805,7 +835,26 @@ async def analyze_dataset(
         )
 
     # ========================================================================
-    # 11. STATISTIQUES
+    # 11. MÉTRIQUES PROMETHEUS
+    # Placé ici, APRÈS le calcul de triggered_results (section 8) — jamais
+    # avant, sous peine de UnboundLocalError.
+    # ========================================================================
+
+    analysis_duration = time.monotonic() - _start_time
+
+    ANALYSIS_LATENCY.observe(analysis_duration)
+
+    logger.info(
+        "Analyse StreamShield terminée | dataset_id=%s | duration=%.3fs",
+        dataset_id,
+        analysis_duration
+    )
+
+    if triggered_results:
+        RISK_COMBINATIONS_DETECTED.labels(domain=resolved_domain).inc(len(triggered_results))
+
+    # ========================================================================
+    # 12. STATISTIQUES
     # ========================================================================
 
     scores = [
@@ -829,7 +878,7 @@ async def analyze_dataset(
     )
 
     # ========================================================================
-    # 12. RÉPONSE FRONTEND
+    # 13. RÉPONSE FRONTEND
     # ========================================================================
 
     return {

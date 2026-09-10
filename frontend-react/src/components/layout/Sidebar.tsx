@@ -13,7 +13,8 @@ import {
     LogOut,
     ChevronLeft,
     ChevronRight,
-    Radar //streamshield
+    Radar, //streamshield
+    BarChart3
 } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 import DynamicLogo from '../ui/DynamicLogo';
@@ -72,6 +73,7 @@ const Sidebar = () => {
         { id: 'users', icon: Users, label: 'User Control', path: '/users', roles: ['admin'] },
         { id: 'audit', icon: History, label: 'Audit Logs', path: '/audit', roles: ['admin', 'steward'] },
         { id: 'settings', icon: Settings, label: 'Settings', path: '/settings', roles: ['admin'] },
+        { id: 'monitoring', icon: BarChart3, label: 'Monitoring', path: '/monitoring', roles: ['admin'] }
     ];
 
     const filteredItems = menuItems.filter(item => item.roles.includes(role));

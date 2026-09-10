@@ -233,12 +233,12 @@ services:
       - cleaning-service
       - annotation-service
       - datagov-modern
-      - streamshield-serv 
+      - streamshield-serv
     networks:
       - datagov-network
     restart: unless-stopped
+
   # INFRASTRUCTURE: Kafka (mode KRaft, sans Zookeeper)
-  # INFRASTRUCTURE: Kafka (image officielle Apache, mode KRaft)
   kafka:
     image: apache/kafka:latest
     hostname: kafka
@@ -269,12 +269,13 @@ services:
       retries: 10
       start_period: 20s
     restart: unless-stopped
- # SERVICE 10: StreamShield - Real-time Detection & Protection (Port 8010)
-    # SERVICE 10: StreamShield - Real-time Detection & Protection (Port 8010)
+
+  # SERVICE 10: StreamShield - Real-time Detection & Protection (Port 8010)
   streamshield-serv:
     build: ./services/streamshield-serv
     ports:
       - "8010:8010"
+      - "8012:8012"
     env_file:
       - .env
     environment:
@@ -290,14 +291,51 @@ services:
         condition: service_started
       ethimask-service:
         condition: service_started
-
     networks:
       - datagov-network
     restart: unless-stopped
     volumes:
-    - ./services/streamshield-serv:/app
-    - ./atlas_integration:/app/atlas_integration   # <- ajouté
-    - ./services/common:/common 
+      - ./services/streamshield-serv:/app
+      - ./atlas_integration:/app/atlas_integration
+      - ./services/common:/common
+
+  # INFRASTRUCTURE: Prometheus (métriques)
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: datagov-prometheus
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    ports:
+      - "9090:9090"
+    networks:
+      - datagov-network
+    restart: unless-stopped
+
+  # INFRASTRUCTURE: Grafana (dashboards)
+  grafana:
+    image: grafana/grafana:10.4.5 
+    container_name: datagov-grafana
+    environment:           
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Viewer
+      - GF_SECURITY_ALLOW_EMBEDDING=true
+      - GF_SERVER_ROOT_URL=http://localhost:8000/grafana/
+      - GF_SERVER_SERVE_FROM_SUB_PATH=true
+      - GF_INSTALL_PLUGINS=https://github.com/grafana/grafana-infinity-datasource/releases/download/v2.12.2/yesoreyeram-infinity-datasource-2.12.2.zip;yesoreyeram-infinity-datasource
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+    ports:
+      - "3001:3000"
+    depends_on:
+      - prometheus
+    networks:
+      - datagov-network
+    restart: unless-stopped
+
 # NETWORK & VOLUMES
 networks:
   datagov-network:
@@ -306,3 +344,5 @@ networks:
 volumes:
   mongo_data:
   kafka_data:
+  prometheus_data:
+  grafana_data:

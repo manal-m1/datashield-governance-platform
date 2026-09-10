@@ -17,3 +17,4 @@ shap
 matplotlib==3.10.6
 requests
 httpx
+prometheus-client

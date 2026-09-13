@@ -25,6 +25,8 @@ from pydantic import BaseModel, Field
 
 from backend.database.mongodb import db
 
+ETHIMASK_SERVICE_URL = os.getenv("ETHIMASK_SERVICE_URL", "http://ethimask-service:8009")
+
 # ====================================================================
 # MODELS
 # ====================================================================
@@ -53,13 +55,14 @@ class Annotation(BaseModel):
     field: str
     original_value: Optional[Any] = None
     annotated_value: Optional[Any] = None
-    label: Optional[str] = None                # réservé à la catégorie (rôle Data Labeler, à venir)
+    label: Optional[str] = None
     is_valid: Optional[bool] = None
     confidence: float = 1.0
     notes: Optional[str] = None
     corrected_data: Optional[Dict[str, Any]] = None
-    sensitivity_level: Optional[str] = None     # "faible" | "moyen" | "eleve" | "critique" (rôle Annotator)
-    context: Optional[str] = None               # contexte libre saisi par l'Annotator
+    sensitivity_level: Optional[str] = None
+    context: Optional[str] = None
+    corrected_entity_type: Optional[str] = None
 
 class AnnotationTask(BaseModel):
     id: str
@@ -77,6 +80,10 @@ class AnnotationTask(BaseModel):
     completed_at: Optional[str] = None
     time_spent_seconds: Optional[int] = None
     required_skill: Optional[str] = None
+    masked_data: Optional[Dict[str, Any]] = None
+    masking_applied: int = 0
+    masking_techniques: Dict[str, str] = {}
+    masking_audit: List[Dict[str, Any]] = []
 
 class CreateTaskRequest(BaseModel):
     dataset_id: str
@@ -95,6 +102,9 @@ class AssignmentConfig(BaseModel):
 class SubmitAnnotationRequest(BaseModel):
     annotations: List[Annotation]
     time_spent_seconds: Optional[int] = None
+
+class ApprovalRequest(BaseModel):
+    apply_masking: bool = False
 
 # ====================================================================
 # TASK QUEUE MANAGER
@@ -120,24 +130,17 @@ class TaskQueue:
             await db["tasks"].insert_one(task.dict())
         return task
 
-    async def get_pending_tasks(self, limit: int = 50) -> List[AnnotationTask]:
+    async def get_pending_tasks(self) -> List[AnnotationTask]:
         if db is None: return []
-        cursor = db["tasks"].find({"status": TaskStatus.PENDING.value}).limit(limit)
+        cursor = db["tasks"].find({"status": TaskStatus.PENDING.value})
         tasks = [AnnotationTask(**doc) async for doc in cursor]
         return sorted(tasks, key=lambda x: ({"critical": 0, "high": 1, "medium": 2, "low": 3}.get(x.priority.value, 3), x.created_at))
 
-    async def get_review_tasks(self, limit: int = 50) -> List[AnnotationTask]:
-        """Tâches soumises par un annotator, en attente de validation steward."""
-        if db is None: return []
-        cursor = db["tasks"].find({"status": TaskStatus.REVIEW.value}).limit(limit)
-        tasks = [AnnotationTask(**doc) async for doc in cursor]
-        return sorted(tasks, key=lambda x: x.created_at)
-
-    async def get_user_tasks(self, user_id: str, status: TaskStatus = None, limit: int = 100) -> List[AnnotationTask]:
+    async def get_user_tasks(self, user_id: str, status: TaskStatus = None) -> List[AnnotationTask]:
         if db is None: return []
         query = {"assigned_to": user_id}
         if status: query["status"] = status.value
-        cursor = db["tasks"].find(query).limit(limit)
+        cursor = db["tasks"].find(query)
         return [AnnotationTask(**doc) async for doc in cursor]
 
     async def get_task(self, task_id: str) -> Optional[AnnotationTask]:
@@ -210,7 +213,7 @@ class AssignmentManager:
 # APP SETUP
 # ====================================================================
 
-app = FastAPI(title="Annotation Service", version="2.6.0")
+app = FastAPI(title="Annotation Service", version="2.5.0")
 
 # CORS Security - Restricted origins
 ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "http://localhost:8000,http://localhost:3000").split(",")
@@ -257,24 +260,22 @@ async def assign_tasks(config: AssignmentConfig):
 
 @app.get("/tasks/my-queue")
 async def get_my_queue(user_id: str, role: str = None):
-    """
-    US-VALID-04: Allow annotators to consult their pending queue directly.
-    Les Stewards voient en plus les tâches en REVIEW (soumises par les annotators),
-    et NE voient PAS les tâches non-assignées (pending) qui appartiennent aux annotators.
-    """
+    """Return the appropriate queue according to the user's role."""
     tasks = await task_queue.get_user_tasks(user_id)
     pending = [t for t in tasks if t.status in [TaskStatus.ASSIGNED, TaskStatus.IN_PROGRESS]]
 
     is_steward = bool(role) and "steward" in role.lower()
 
     if is_steward:
-        review_tasks = await task_queue.get_review_tasks()
-        for t in review_tasks:
-            if t.id not in [p.id for p in pending]:
-                pending.append(t)
+        if db is not None:
+            cursor = db["tasks"].find({"status": TaskStatus.REVIEW.value})
+            review_tasks = [AnnotationTask(**doc) async for doc in cursor]
+            for t in review_tasks:
+                if t.id not in [p.id for p in pending]:
+                    pending.append(t)
     else:
-        all_pending = await task_queue.get_pending_tasks()
-        for t in all_pending:
+        all_tasks = await task_queue.get_pending_tasks()
+        for t in all_tasks:
             if t.id not in [p.id for p in pending]:
                 pending.append(t)
 
@@ -287,17 +288,11 @@ async def assign_manual(task_id: str, user_id: str):
 
 @app.post("/tasks/{task_id}/submit")
 async def submit_task(task_id: str, request: SubmitAnnotationRequest):
-    """
-    Soumission par l'annotator (qualification sensibilité/contexte).
-    Ne finalise PAS directement -> passe en REVIEW pour validation par le steward.
-    """
     await task_queue.update_task(
         task_id,
         annotations=request.annotations,
         status=TaskStatus.REVIEW,
         time_spent_seconds=request.time_spent_seconds
-        # Pas de completed_at ici : la tâche n'est pas encore terminée,
-        # elle le sera au moment de l'approbation par le steward.
     )
     return {"status": "submitted_for_review"}
 
@@ -347,15 +342,88 @@ async def review_task(task_id: str):
     await task_queue.update_task(task_id, status=TaskStatus.REVIEW)
     return {"status": "in_review"}
 
+async def apply_ethimask(task: AnnotationTask) -> Dict[str, Any]:
+    """Apply EthiMask only after explicit Steward approval."""
+    detections = []
+
+    for annotation in task.annotations:
+        if annotation.is_valid is False or annotation.original_value is None:
+            continue
+
+        entity_type = (annotation.corrected_entity_type or annotation.annotated_value or annotation.field)
+
+        field = None
+        for key, value in task.data_sample.items():
+            if str(value) == str(annotation.original_value):
+                field = key
+                break
+
+        if field is None:
+            continue
+
+        detections.append({
+            "field": field,
+            "value": annotation.original_value,
+            "entity_type": str(entity_type),
+            "sensitivity_level": annotation.sensitivity_level or "medium",
+            "confidence": annotation.confidence
+        })
+
+    if not detections:
+        return {"masked_data": task.data_sample, "masking_applied": 0, "technique_used": {}, "audit_log": []}
+
+    payload = {
+        "data": task.data_sample,
+        "detections": detections,
+        "config": {
+            "role": "steward",
+            "context": "data_governance",
+            "purpose": "privacy_protection"
+        }
+    }
+
+    try:
+        response = requests.post(f"{ETHIMASK_SERVICE_URL}/mask", json=payload, timeout=60)
+    except requests.RequestException as exc:
+        raise HTTPException(status_code=502, detail=f"EthiMask service unavailable: {exc}")
+
+    if response.status_code != 200:
+        raise HTTPException(status_code=502, detail=f"EthiMask masking failed: {response.text}")
+
+    return response.json()
+
+
 @app.post("/tasks/{task_id}/approve")
-async def approve_task(task_id: str):
-    """Figure 6: Approve -> Update DB (steward valide la qualification annotator)"""
-    await task_queue.update_task(
-        task_id,
-        status=TaskStatus.COMPLETED,
-        completed_at=datetime.now().isoformat()
-    )
-    return {"status": "approved_db_updated"}
+async def approve_task(task_id: str, request: ApprovalRequest = Body(...)):
+    """Approve a task; call EthiMask only when masking is requested."""
+    task = await task_queue.get_task(task_id)
+    if not task:
+        raise HTTPException(status_code=404, detail="Task not found")
+
+    masking_result = None
+    if request.apply_masking:
+        masking_result = await apply_ethimask(task)
+
+    updates = {
+        "status": TaskStatus.COMPLETED,
+        "completed_at": datetime.now().isoformat()
+    }
+
+    if masking_result is not None:
+        updates.update({
+            "masked_data": masking_result.get("masked_data"),
+            "masking_applied": masking_result.get("masking_applied", 0),
+            "masking_techniques": masking_result.get("technique_used", {}),
+            "masking_audit": masking_result.get("audit_log", [])
+        })
+
+    await task_queue.update_task(task_id, **updates)
+
+    return {
+        "status": "approved",
+        "masking_requested": request.apply_masking,
+        "masking_applied": masking_result.get("masking_applied", 0) if masking_result else 0
+    }
 
 @app.post("/tasks/{task_id}/reject")
 async def reject_task(task_id: str):

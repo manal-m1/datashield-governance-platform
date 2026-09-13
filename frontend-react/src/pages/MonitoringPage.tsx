@@ -92,10 +92,11 @@ const MonitoringPage = () => {
         query: string
     ): Promise<PrometheusResult[]> => {
         try {
-            const url = `${PROMETHEUS_URL}?query=${encodeURIComponent(query)}`;
+            const url = `${PROMETHEUS_URL}?query=${encodeURIComponent(
+                query
+            )}`;
 
             console.log('[Prometheus] Query:', query);
-            console.log('[Prometheus] URL:', url);
 
             const response = await fetch(url);
 
@@ -105,14 +106,15 @@ const MonitoringPage = () => {
                     response.status,
                     response.statusText
                 );
+
                 return [];
             }
 
             const json = await response.json();
 
             console.log(
-                '[Prometheus] Full Response:',
-                JSON.stringify(json, null, 2)
+                '[Prometheus] Response:',
+                json
             );
 
             if (json.status !== 'success') {
@@ -120,6 +122,7 @@ const MonitoringPage = () => {
                     '[Prometheus] Query failed:',
                     json
                 );
+
                 return [];
             }
 
@@ -129,6 +132,7 @@ const MonitoringPage = () => {
                 '[Prometheus] Connection error:',
                 error
             );
+
             return [];
         }
     };
@@ -168,7 +172,7 @@ const MonitoringPage = () => {
 
         return result.some(
             (item) =>
-                Number(item.value?.[1] || 0) === 1
+                Number(item.value?.[1] ?? 0) === 1
         );
     };
 
@@ -214,11 +218,18 @@ const MonitoringPage = () => {
             // 2. MESSAGES PROCESSED
             // ================================================================
 
+            /*
+             * streamshield_kafka_messages_processed_total
+             * is exposed by the Kafka consumer.
+             *
+             * The application-defined label is "topic".
+             * We therefore avoid depending on the Prometheus "job"
+             * label here.
+             */
+
             const processedResults = await queryPrometheus(`
-                sum by (job) (
-                    streamshield_kafka_messages_processed_total{
-                        job="streamshield-consumer"
-                    }
+                sum(
+                    streamshield_kafka_messages_processed_total
                 )
             `);
 
@@ -245,11 +256,16 @@ const MonitoringPage = () => {
             // 3. RISK ALERTS
             // ================================================================
 
+            /*
+             * streamshield_risk_combinations_detected_total
+             * is associated with the domain label.
+             *
+             * We aggregate all domains for the global monitoring card.
+             */
+
             const riskResults = await queryPrometheus(`
-                sum by (job) (
-                    streamshield_risk_combinations_detected_total{
-                        job="streamshield-consumer"
-                    }
+                sum(
+                    streamshield_risk_combinations_detected_total
                 )
             `);
 
@@ -267,18 +283,27 @@ const MonitoringPage = () => {
                     ? riskValue
                     : 0;
 
+            console.log(
+                '[Risk] Risk Alerts:',
+                riskAlerts
+            );
+
             // ================================================================
             // 4. P95 LATENCY
             // ================================================================
+
+            /*
+             * StreamShield API exposes the latency histogram.
+             *
+             * No hard-coded job label is required here.
+             */
 
             const latencyResults = await queryPrometheus(`
                 histogram_quantile(
                     0.95,
                     sum(
                         rate(
-                            streamshield_analysis_latency_seconds_bucket{
-                                job="streamshield"
-                            }[5m]
+                            streamshield_analysis_latency_seconds_bucket[5m]
                         )
                     ) by (le)
                 )
@@ -298,15 +323,27 @@ const MonitoringPage = () => {
                     ? latencySeconds * 1000
                     : 0;
 
+            console.log(
+                '[Performance] P95:',
+                latencyP95,
+                'ms'
+            );
+
             // ================================================================
             // 5. CONSUMER LAG
             // ================================================================
 
+            /*
+             * The consumer lag metric has:
+             * - topic
+             * - partition
+             *
+             * We aggregate all partitions/topics.
+             */
+
             const lagResults = await queryPrometheus(`
-                sum by (job) (
-                    streamshield_kafka_consumer_lag{
-                        job="streamshield-consumer"
-                    }
+                sum(
+                    streamshield_kafka_consumer_lag
                 )
             `);
 
@@ -323,6 +360,11 @@ const MonitoringPage = () => {
                 Number.isFinite(lagValue)
                     ? lagValue
                     : 0;
+
+            console.log(
+                '[Kafka] Consumer Lag:',
+                consumerLag
+            );
 
             // ================================================================
             // 6. RISKS FROM STREAMSHIELD API
@@ -572,7 +614,7 @@ const MonitoringPage = () => {
                             <tr className="border-b border-white/5 text-slate-500">
 
                                 <th className="text-left py-3">
-                                    Status
+                                    Topic
                                 </th>
 
                                 <th className="text-right py-3">
@@ -812,7 +854,7 @@ const MonitoringPage = () => {
 
                                         const score =
                                             Number(
-                                                risk.score || 0
+                                                risk.score ?? 0
                                             );
 
                                         const scoreClass =
@@ -1005,9 +1047,7 @@ const MonitoringPage = () => {
     // ========================================================================
 
     const renderContent = () => {
-
         switch (activeTab) {
-
             case 'kafka':
                 return <KafkaPanel />;
 
@@ -1160,4 +1200,3 @@ const MonitoringPage = () => {
 };
 
 export default MonitoringPage;
-

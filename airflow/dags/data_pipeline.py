@@ -136,50 +136,46 @@ def analyze_streamshield_risk(**context):
     return dataset_id
 
 # Tasks
-start = DummyOperator(task_id='start', dag=dag)
+# Tasks
+start = DummyOperator(
+    task_id='start',
+    dag=dag
+)
 
 t1 = PythonOperator(
     task_id='ingest_and_clean',
     python_callable=ingest_and_clean,
-    provide_context=True,
     dag=dag
 )
 
 t2 = PythonOperator(
     task_id='analyze_pii',
     python_callable=analyze_pii,
-    provide_context=True,
     dag=dag
 )
 
 t3 = PythonOperator(
     task_id='classify_sensitivity',
     python_callable=classify_sensitivity,
-    provide_context=True,
     dag=dag
 )
 
 t4 = PythonOperator(
     task_id='evaluate_quality',
     python_callable=evaluate_quality,
-    provide_context=True,
     dag=dag
 )
 
 t5 = PythonOperator(
     task_id='analyze_streamshield_risk',
     python_callable=analyze_streamshield_risk,
-    provide_context=True,
     dag=dag
 )
 
-t6 = PythonOperator(
-    task_id='analyze_streamshield_risk',
-    python_callable=analyze_streamshield_risk,
-    provide_context=True,
+end = DummyOperator(
+    task_id='end',
     dag=dag
 )
-end = DummyOperator(task_id='end', dag=dag)
 
 # Dependencies
-start >> t1 >> t2 >> t3 >> t4 >> t6 >> t5 >> end
+start >> t1 >> t2 >> t3 >> t4 >> t5 >> end

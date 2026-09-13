@@ -43,6 +43,7 @@ services:
       - ./airflow/logs:/opt/airflow/logs
       - ./airflow/datasets:/opt/airflow/datasets
       - ./airflow/plugins:/opt/airflow/plugins
+      - ./airflow/config:/opt/airflow/config
 
     command: bash -c "airflow db migrate && airflow users create \
       --username admin --password admin --firstname admin --lastname admin --role Admin --email admin@example.com; \

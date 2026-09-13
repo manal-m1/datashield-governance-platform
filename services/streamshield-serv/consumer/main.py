@@ -1,5 +1,5 @@
 """
-StreamShield - Tâche 1 + Tâche 2 (v2)
+StreamShield - Tâche 1 + Tâche 2 (v3)
 Consumer d'ingestion Kafka.
 
 Fonctionnalités :
@@ -11,7 +11,8 @@ Fonctionnalités :
         * tous les N messages
         * OU toutes les X secondes
   - métriques Prometheus :
-        * messages traités
+        * messages traités depuis le démarrage
+        * offset Kafka validé
         * consumer lag
 """
 
@@ -61,18 +62,31 @@ BOOTSTRAP_SERVERS = os.getenv(
     "localhost:9092"
 )
 
-CONSUMER_GROUP_ID = "streamshield-detection"
+CONSUMER_GROUP_ID = os.getenv(
+    "STREAMSHIELD_CONSUMER_GROUP",
+    "streamshield-detection"
+)
 
 
 # ============================================================================
 # PROMETHEUS METRICS
 # ============================================================================
 
+# Nombre de messages effectivement traités par le processus
 kafka_messages_processed = Counter(
     "streamshield_kafka_messages_processed_total",
     "Nombre de messages Kafka traités avec succès par StreamShield",
     ["topic"]
 )
+
+# Dernier offset Kafka validé par le consumer group
+kafka_consumer_committed_offset = Gauge(
+    "streamshield_kafka_consumer_committed_offset",
+    "Dernier offset Kafka validé par le consumer group StreamShield",
+    ["topic", "partition"]
+)
+
+# Nombre de messages encore en attente
 kafka_consumer_lag = Gauge(
     "streamshield_kafka_consumer_lag",
     "Lag du consumer Kafka StreamShield",
@@ -152,6 +166,7 @@ class StreamShieldConsumer:
 
         self._stopping = asyncio.Event()
 
+        # Compteur local au processus
         self._processed_count = 0
 
         self._messages_since_detection: Dict[int, int] = {}
@@ -294,6 +309,46 @@ class StreamShieldConsumer:
         )
 
         # --------------------------------------------------------------------
+        # Affichage de la position Kafka
+        # --------------------------------------------------------------------
+
+        try:
+
+            assignments = self.consumer.assignment()
+
+            if assignments:
+
+                committed_offsets = {}
+
+                for tp in assignments:
+
+                    committed = await self.consumer.committed(tp)
+
+                    if committed is not None:
+                        committed_offsets[
+                            f"{tp.topic}:{tp.partition}"
+                        ] = committed
+
+                logger.info(
+                    "POSITION KAFKA | group=%s | offsets=%s",
+                    self.group_id,
+                    committed_offsets
+                )
+
+            else:
+
+                logger.info(
+                    "POSITION KAFKA | aucune partition assignée pour le moment"
+                )
+
+        except Exception as exc:
+
+            logger.warning(
+                "Impossible de récupérer la position Kafka au démarrage: %s",
+                exc
+            )
+
+        # --------------------------------------------------------------------
         # EthiMask health check
         # --------------------------------------------------------------------
 
@@ -302,10 +357,13 @@ class StreamShieldConsumer:
         )
 
         if ethimask_available:
+
             logger.info(
                 "EthiMask disponible"
             )
+
         else:
+
             logger.warning(
                 "EthiMask indisponible"
             )
@@ -335,15 +393,19 @@ class StreamShieldConsumer:
             )
 
             if sensitivity >= 0.75:
+
                 sensitivity_level = "critical"
 
             elif sensitivity >= 0.5:
+
                 sensitivity_level = "high"
 
             elif sensitivity >= 0.25:
+
                 sensitivity_level = "medium"
 
             else:
+
                 sensitivity_level = "low"
 
             detections.append({
@@ -359,14 +421,18 @@ class StreamShieldConsumer:
     # ========================================================================
     # UPDATE CONSUMER LAG
     # ========================================================================
+
     async def update_consumer_lag(self):
+
         """
-        Calcule le vrai consumer-group lag :
+        Calcule :
 
-            end_offset - committed_offset
+            lag = end_offset - committed_offset
 
-        Le committed offset correspond à l'offset réellement validé
-        par le consumer group.
+        et expose :
+
+            streamshield_kafka_consumer_committed_offset
+            streamshield_kafka_consumer_lag
         """
 
         if self.consumer is None:
@@ -399,6 +465,19 @@ class StreamShieldConsumer:
                     0,
                     end_offset - committed
                 )
+
+                # ------------------------------------------------------------
+                # Offset validé
+                # ------------------------------------------------------------
+
+                kafka_consumer_committed_offset.labels(
+                    topic=tp.topic,
+                    partition=str(tp.partition)
+                ).set(committed)
+
+                # ------------------------------------------------------------
+                # Lag
+                # ------------------------------------------------------------
 
                 kafka_consumer_lag.labels(
                     topic=tp.topic,
@@ -433,6 +512,7 @@ class StreamShieldConsumer:
         if self.consumer:
 
             try:
+
                 await self.consumer.stop()
 
             except Exception as exc:
@@ -445,6 +525,7 @@ class StreamShieldConsumer:
         if self.risk_producer:
 
             try:
+
                 await self.risk_producer.stop()
 
             except Exception as exc:
@@ -455,7 +536,8 @@ class StreamShieldConsumer:
                 )
 
         logger.info(
-            "Consumer arrêté proprement. Total traité : %s",
+            "Consumer arrêté proprement. "
+            "Total traité depuis le démarrage : %s",
             self._processed_count
         )
 
@@ -497,7 +579,7 @@ class StreamShieldConsumer:
         if self._processed_count % 100 == 0:
 
             logger.info(
-                "[%s] %s messages traités au total",
+                "[%s] %s messages traités au total depuis le démarrage",
                 self.topic,
                 self._processed_count
             )
@@ -763,10 +845,12 @@ class StreamShieldConsumer:
             # Publish risk event
             # ----------------------------------------------------------------
 
-            await self.risk_producer.send_and_wait(
-                self.risk_topic,
-                value=event
-            )
+            if self.risk_producer is not None:
+
+                await self.risk_producer.send_and_wait(
+                    self.risk_topic,
+                    value=event
+                )
 
             # ----------------------------------------------------------------
             # EthiMask
@@ -836,6 +920,9 @@ class StreamShieldConsumer:
 
         await self.start()
 
+        # Mise à jour initiale du lag
+        await self.update_consumer_lag()
+
         try:
 
             while not self._stopping.is_set():
@@ -847,9 +934,41 @@ class StreamShieldConsumer:
                         max_records=500
                     )
 
+                    # --------------------------------------------------------
+                    # Aucun nouveau message
+                    # --------------------------------------------------------
+
+                    if not result:
+
+                        # On continue à surveiller le lag
+                        await self.update_consumer_lag()
+
+                        continue
+
+                    # --------------------------------------------------------
+                    # Messages reçus
+                    # --------------------------------------------------------
+
                     for tp, messages in result.items():
 
+                        if not messages:
+                            continue
+
+                        logger.info(
+                            "KAFKA BATCH | topic=%s | partition=%s | "
+                            "messages=%s | first_offset=%s | last_offset=%s",
+                            tp.topic,
+                            tp.partition,
+                            len(messages),
+                            messages[0].offset,
+                            messages[-1].offset
+                        )
+
                         for msg in messages:
+
+                            # ------------------------------------------------
+                            # Message invalide
+                            # ------------------------------------------------
 
                             if msg.value is None:
 
@@ -861,6 +980,8 @@ class StreamShieldConsumer:
                                     msg.offset
                                 )
 
+                                # IMPORTANT :
+                                # on ne compte pas ce message comme traité.
                                 continue
 
                             # ------------------------------------------------
@@ -886,17 +1007,24 @@ class StreamShieldConsumer:
                         # Commit manuel APRÈS traitement
                         # ----------------------------------------------------
 
-                        if messages:
+                        await self.consumer.commit({
+                            tp: messages[-1].offset + 1
+                        })
 
-                            await self.consumer.commit({
-                                tp: messages[-1].offset + 1
-                            })
+                        logger.info(
+                            "KAFKA COMMIT | topic=%s | partition=%s | "
+                            "committed_offset=%s | processed_total=%s",
+                            tp.topic,
+                            tp.partition,
+                            messages[-1].offset + 1,
+                            self._processed_count
+                        )
 
-                            # ------------------------------------------------
-                            # Mise à jour du lag
-                            # ------------------------------------------------
+                        # ----------------------------------------------------
+                        # Mise à jour du lag
+                        # ----------------------------------------------------
 
-                            await self.update_consumer_lag()
+                        await self.update_consumer_lag()
 
                 except KafkaConnectionError as exc:
 
@@ -960,16 +1088,23 @@ async def main():
     ):
 
         try:
+
             loop.add_signal_handler(
                 sig,
                 handle_signal
             )
+
         except NotImplementedError:
+
             # Windows
             pass
 
     await consumer.run()
 
+
+# ============================================================================
+# ENTRY POINT
+# ============================================================================
 
 if __name__ == "__main__":
 

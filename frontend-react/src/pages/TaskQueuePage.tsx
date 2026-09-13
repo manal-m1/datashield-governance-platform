@@ -153,8 +153,9 @@ const TaskQueuePage = () => {
                 ...(enrichments || [])
                     .filter(e => e.sensitivity_level || e.context) // n'envoie que ce qui a été rempli
                     .map(e => ({
-                        field: e.entity_type,
+                        field: e.original_entity_type,
                         original_value: e.value,
+                        corrected_entity_type: e.entity_type,
                         sensitivity_level: e.sensitivity_level || null,
                         context: e.context || null,
                         is_valid: isValid,
@@ -178,11 +179,11 @@ const TaskQueuePage = () => {
     };
 
     // Approbation Steward : finalise la tâche (COMPLETED)
-    const handleApproveTask = async (taskId: string) => {
+    const handleApproveTask = async (taskId: string, applyMasking: boolean = false) => {
         try {
-            await apiClient.post(`/annotation/tasks/${taskId}/approve`);
+            await apiClient.post(`/annotation/tasks/${taskId}/approve`, { apply_masking: applyMasking });
             setTasks(prev => prev.filter(t => t.id !== taskId));
-            addToast('Task Approved', 'success');
+            addToast(applyMasking ? 'Task Approved and Masked' : 'Task Approved without Masking', 'success');
             setIsModalOpen(false);
             fetchData();
         } catch (err) {
@@ -231,9 +232,13 @@ const TaskQueuePage = () => {
     // Le modal se comporte différemment selon le rôle :
     // - annotator : onValidate soumet (-> REVIEW), onReject rejette la détection
     // - steward   : onValidate approuve (-> COMPLETED), onReject renvoie en pending
-    const handleModalValidate = (id: string, enrichments?: DetectionEnrichment[]) => {
+    const handleModalValidate = (
+        id: string,
+        enrichments?: DetectionEnrichment[],
+        applyMasking: boolean = false
+    ) => {
         if (isSteward) {
-            handleApproveTask(id);
+            handleApproveTask(id, applyMasking);
         } else {
             handleTaskAction(id, true, enrichments);
         }

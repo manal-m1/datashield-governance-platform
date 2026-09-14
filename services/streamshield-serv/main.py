@@ -19,7 +19,7 @@ from consumer.main import StreamShieldConsumer, CONSUMER_GROUP_ID
 from api.main import app
 
 
-logging.basicConfig(s
+logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s"
 )

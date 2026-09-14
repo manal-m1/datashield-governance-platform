@@ -49,71 +49,148 @@ This federated project develops a **complete sensitive data governance system** 
 
 ```mermaid
 graph TB
+
     subgraph "Frontend & Entry"
+
         UI["DataSentinel Dashboard<br/>(Modern UI)"]
+
         Gateway["Nginx Gateway<br/>(Reverse Proxy)"]
+
     end
 
     subgraph "Orchestration"
+
         Airflow["Apache Airflow<br/>(DAG Workflows)"]
+
     end
 
     subgraph "Microservices (FastAPI)"
+
         direction LR
+
         Auth["Auth<br/>(Security)"]
+
         Taxo["Taxonomy<br/>(PII Specs)"]
+
         Presidio["Presidio<br/>(Moroccan PII)"]
+
         Clean["Cleaning<br/>(Profiling)"]
+
         Class["Classification<br/>(ML/BERT)"]
+
         Corr["Correction<br/>(Logic)"]
+
         Anno["Annotation<br/>(Human-in-loop)"]
+
         Qual["Quality<br/>(ISO 25012)"]
+
         Mask["EthiMask<br/>(Contextual)"]
+
+        Stream["StreamShield<br/>(Risk Detection)"]
+
+    end
+
+    subgraph "Streaming & Monitoring"
+
+        Kafka["Apache Kafka<br/>(Real-time Streaming)"]
+
+        Prom["Prometheus<br/>(Metrics)"]
+
+        Grafana["Grafana<br/>(Monitoring Dashboard)"]
+
     end
 
     subgraph "Data & Governance"
+
         DB[("MongoDB<br/>(Persistence)")]
+
         Atlas["Apache Atlas<br/>(Metadata)"]
+
         Ranger["Apache Ranger<br/>(Access Control)"]
+
     end
 
     UI --> Gateway
+
     Gateway --> Auth
+
     Gateway --> Taxo
+
     Gateway --> Presidio
+
     Gateway --> Clean
+
     Gateway --> Class
+
     Gateway --> Anno
+
     Gateway --> Qual
+
     Gateway --> Mask
 
+    Gateway --> Stream
+
     Airflow --> Clean
+
     Airflow --> Class
+
     Airflow --> Qual
 
     Class --> DB
+
     Anno --> DB
+
     Taxo --> DB
+
     Auth --> DB
 
     Qual --> Atlas
+
     Class --> Atlas
+
     Mask --> Ranger
+
+    %% StreamShield Integration
+
+    Stream --> Clean
+
+    Stream --> Kafka
+
+    Kafka --> Stream
+
+    Stream --> DB
+
+    Stream --> Atlas
+
+    Stream --> Prom
+
+    %% Data Protection
+
+    Stream --> Mask
+
+    Mask --> Ranger
+
+    %% Monitoring
+
+    Prom --> Grafana
+
+    Gateway --> Grafana
+
 ```
+### 📦 The 10 Services
 
-### 📦 The 9 Services
-
-| #   | Service               | Port | Task   | User Stories             | Description                                  |
-| --- | --------------------- | ---- | ------ | ------------------------ | -------------------------------------------- |
-| 1   | `auth-serv`           | 8001 | Task 1 | US-AUTH-01, US-AUTH-02   | JWT Authentication + Role management         |
-| 2   | `taxonomie-serv`      | 8002 | Task 2 | US-TAX-01, US-TAX-02     | MongoDB PII Taxonomy + Moroccan patterns     |
-| 3   | `presidio-serv`       | 8003 | Task 3 | US-PII-01, US-PII-03     | Advanced Moroccan Recognizers + Presidio     |
-| 4   | `cleaning-serv`       | 8004 | Task 4 | US-CLEAN-01, US-CLEAN-02 | Data cleaning and profiling                  |
-| 5   | `classification-serv` | 8005 | Task 5 | US-CLASS-01, US-CLASS-02 | **2.0 Ensemble ML (BERT + Active Learning)** |
-| 6   | `correction-serv`     | 8006 | Task 6 | US-CORR-01, US-CORR-04   | Automatic inconsistency correction           |
-| 7   | `annotation-serv`     | 8007 | Task 7 | US-VALID-01, US-ANNO-01  | Human validation workflow (MongoDB)          |
-| 8   | `quality-serv`        | 8008 | Task 8 | US-QUAL-01, US-QUAL-02   | ISO 25012 metrics                            |
-| 9   | `ethimask-serv`       | 8009 | Task 9 | US-MASK-01, US-MASK-02   | Contextual masking (Perceptron)              |
+| #   | Service               | Port | Task    | User Stories               | Description                                  |
+| --- | --------------------- | ---- | ------  | -------------------------  | -------------------------------------------- |
+| 1   | `auth-serv`           | 8001 | Task 1  |  US-AUTH-01, US-AUTH-02    | JWT Authentication + Role management         |
+| 2   | `taxonomie-serv`      | 8002 | Task 2  |  US-TAX-01, US-TAX-02      | MongoDB PII Taxonomy + Moroccan patterns     |
+| 3   | `presidio-serv`       | 8003 | Task 3  |  US-PII-01, US-PII-03      | Advanced Moroccan Recognizers + Presidio     |
+| 4   | `cleaning-serv`       | 8004 | Task 4  |  US-CLEAN-01, US-CLEAN-02  | Data cleaning and profiling                  |
+| 5   | `classification-serv` | 8005 | Task 5  |  US-CLASS-01, US-CLASS-02  | **2.0 Ensemble ML (BERT + Active Learning)** |
+| 6   | `correction-serv`     | 8006 | Task 6  |  US-CORR-01, US-CORR-04    | Automatic inconsistency correction           |
+| 7   | `annotation-serv`     | 8007 | Task 7  |  US-VALID-01, US-ANNO-01   | Human validation workflow (MongoDB)          |
+| 8   | `quality-serv`        | 8008 | Task 8  |  US-QUAL-01, US-QUAL-02    | ISO 25012 metrics                            |
+| 9   | `ethimask-serv`       | 8009 | Task 9  |  US-MASK-01, US-MASK-02    | Contextual masking (Perceptron)              |
+| 10  | `streamshield-serv`   | 8010 | Task 10 | US-STREAM-01, US-STREAM-02 | Real-time sensitive combination and privacy risk detection |
 
 ---
 
@@ -128,8 +205,8 @@ The system defines **4 principal roles** with specific permissions and data acce
 | Aspect               | Details                                                                                                                                     |
 | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
 | **User Stories**     | US-AUTH-01, US-AUTH-02, US-USER-01                                                                                                          |
-| **Responsibilities** | - Full user management (CRUD)<br>- EthiMask policy configuration<br>- Taxonomy definition<br>- Audit log access<br>- System-level approvals |
-| **Frontend Access**  | All pages + User Management + Audit Logs                                                                                                    |
+| **Responsibilities** | - Full user management (CRUD)<br>- EthiMask policy configuration<br>- Taxonomy definition<br>- Audit log access<br>- System-level approvals<br>- StreamShield risk monitoring and configuration |
+| **Frontend Access**  | All pages + User Management + Audit Logs + StreamShield     + Monitoring                                                                                            |
 | **Data Visibility**  | **Clear text** (no masking)                                                                                                                 |
 | **API Permissions**  | All endpoints (read/write)                                                                                                                  |
 
@@ -144,8 +221,8 @@ The system defines **4 principal roles** with specific permissions and data acce
 | Aspect               | Details                                                                                                                                         |
 | -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
 | **User Stories**     | US-VALID-02, US-CORR-04, US-QUAL-01                                                                                                             |
-| **Responsibilities** | - Approve major corrections<br>- Define quality rules<br>- Manage taxonomy<br>- Access governance dashboard<br>- Quality analysis & PDF reports |
-| **Frontend Access**  | Dashboard, Upload, Cleaning, **Quality Analysis**, PII Detection, **EthiMask**, **Approval Queue**                                              |
+| **Responsibilities** | - Approve major corrections<br>- Define quality rules<br>- Manage taxonomy<br>- Access governance dashboard<br>- Quality analysis & PDF reports<br>- StreamShield |
+| **Frontend Access**  | Dashboard, Upload, Cleaning, **Quality Analysis**, PII Detection, **EthiMask**, **Approval Queue** , **Live Risk**, **Summary**                                             |
 | **Data Visibility**  | **Partial masking** (e.g., `+212 6**** ****`, `AB12****`)                                                                                       |
 | **API Permissions**  | Quality (R/W), Approval (R/W), Taxonomy (R), Stats (R)                                                                                          |
 
@@ -316,7 +393,8 @@ DataGovProjetFederateur/
 │   ├── correction-serv/        # Auto-correction
 │   ├── annotation-serv/        # Human Validation
 │   ├── quality-serv/           # ISO Quality
-│   └── ethimask-serv/          # Contextual Masking
+│   |── ethimask-serv/          # Contextual Masking
+│   └── streamshield-serv/      # Sensitive Combination & Privacy Risk Detection  
 ├── frontend/                    # 🎨 Modern Web UI
 │   ├── index.html              # Main dashboard
 │   ├── login.html              # Authentication
@@ -324,6 +402,7 @@ DataGovProjetFederateur/
 ├── airflow/                     # 🔄 DAG Orchestration
 ├── atlas_integration/           # 🗂️ Apache Atlas
 ├── ranger_integration/          # 🔐 Apache Ranger
+├── monitoring/                  # 📊 System Monitoring & Observability
 ├── datasets/                    # 📊 Test Data
 ├── test_data/                   # 🧪 Global Test Datasets
 ├── docs/                        # 📖 Documentation
@@ -352,31 +431,100 @@ The `presidio-serv` includes **custom recognizers** for Moroccan context:
 
 ```mermaid
 sequenceDiagram
+
     autonumber
+
     participant U as 👤 User
+
     participant F as 💻 Frontend
+
     participant S as ⚙️ Microservices
+
     participant D as 🗄️ MongoDB/Atlas/Ranger
 
     U->>F: Upload CSV/Dataset
+
     F->>S: POST /profile & /clean
+
     S-->>D: Store Raw Metadata
+
     S->>S: PII Detection (Presidio)
+
     S->>S: ML Classification (BERT)
+
     S-->>D: Sync to Apache Atlas
+
     U->>F: Access Validation Queue
+
     F->>S: GET /tasks (Annotator)
+
     S->>F: Display Unvalidated Data
+
     U->>F: Confirm/Correct Labels
+
     F->>S: POST /validate
+
     S->>S: Calculate Quality (ISO 25012)
+
     S-->>D: Permanent Metadata Storage
+
     U->>F: Request Masked Export
+
     F->>S: GET /mask (EthiMask)
+
     S->>S: Check Ranger Policies
+
     S->>F: Return Protected Data
+
     F->>U: Download Cleaned/Masked File
+
+    %% StreamShield Integration
+
+    U->>F: Request Real-time Risk Analysis
+
+    F->>S: Trigger StreamShield Analysis
+
+    S->>S: Retrieve Clean Dataset
+
+    S->>S: Cleaning Service (Processed Data)
+
+    S->>S: StreamShield Sensitive Combination Detection
+
+    S->>S: Fuzzy Privacy Risk Scoring
+
+    S-->>D: Store Risk Scores & Risk Events
+
+    S->>D: Retrieve Dataset Metadata from Apache Atlas
+
+    S->>S: Evaluate Risk Thresholds
+
+    S->>F: Return Risk Analysis
+
+    %% Kafka Streaming
+
+    S->>S: Publish / Consume Kafka Messages
+
+    S->>S: Real-time StreamShield Detection
+
+    S-->>D: Store Real-time Risk Events
+
+    %% Protection Integration
+
+    S->>S: Risk-aware Data Protection
+
+    S->>S: EthiMask Contextual Masking
+
+    S->>D: Apply Governance & Access Policies
+
+    %% Monitoring
+
+    S->>S: Expose Prometheus Metrics
+
+    S->>S: Monitor Kafka, Performance & Risk Detection
+
+    S->>F: Display Monitoring Dashboard
 ```
+
 
 ### 📝 Validation State Machine
 
@@ -466,13 +614,14 @@ pytest tests/test_presidio.py -v
 - Glassmorphism Design
 - Responsive Layout
 
-**DevOps:**
-
-- Docker & Docker Compose
-- Apache Airflow
-- Apache Atlas & Ranger
-- Nginx Gateway
-
+**DevOps & Monitoring:**
+ - Docker & Docker Compose
+ - Apache Airflow 
+ - Apache Atlas 
+ - Apache Ranger
+ - Nginx 
+ - Prometheus 
+ - Grafana 
 ---
 
 ## 📜 License

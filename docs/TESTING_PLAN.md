@@ -1,4 +1,4 @@
-# 🧪 Complete Testing Plan - DataGov Project
+# 🧪 Complete Testing Plan - DataShield Project
 
 **Date**: 2026-02-05
 **Status**: Ready for execution
@@ -868,7 +868,7 @@ xdg-open htmlcov/index.html  # Linux
 **File**: `.github/workflows/tests.yml`
 
 ```yaml
-name: DataGov Tests
+name: DataShield Tests
 
 on: [push, pull_request]
 

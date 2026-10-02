@@ -122,7 +122,7 @@ const UsersPage = () => {
                                                 <p className="font-bold text-white">{user.username}</p>
                                                 <p className="text-[10px] text-slate-500 flex items-center gap-1 font-black uppercase">
                                                     <Mail size={10} />
-                                                    {user.username.toLowerCase()}@datagov.ma
+                                                    {user.username.toLowerCase()}@datashield.ma
                                                 </p>
                                             </div>
                                         </div>

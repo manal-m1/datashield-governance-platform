@@ -1,7 +1,7 @@
 {
   "uid": "streamshield-overview",
   "title": "StreamShield - Vue d'ensemble",
-  "tags": ["streamshield", "datagov"],
+  "tags": ["streamshield", "datashield"],
   "timezone": "browser",
   "refresh": "15s",
   "schemaVersion": 39,

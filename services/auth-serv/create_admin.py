@@ -54,7 +54,7 @@ async def create_admin():
             "password": hash_password(admin_password),
             "role": "admin",
             "status": "active",
-            "email": "admin@datagov.ma"
+            "email": "admin@datashield.ma"
         }
         await db["users"].insert_one(admin_user)
         print("Admin user created!")

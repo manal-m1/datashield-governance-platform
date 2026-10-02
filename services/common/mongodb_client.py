@@ -1,5 +1,5 @@
 """
-MongoDB Client for DataGov Services
+MongoDB Client for DataShield Services
 Provides connection to MongoDB Atlas database
 """
 

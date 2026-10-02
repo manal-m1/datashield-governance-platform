@@ -77,7 +77,7 @@ const SignupPage = () => {
             >
                 <div className="text-center mb-8">
                     <h1 className="text-3xl font-bold text-white mb-2">Create Account</h1>
-                    <p className="text-slate-400">Join the DataGov intelligence network</p>
+                    <p className="text-slate-400">Join the DataShield intelligence network</p>
                 </div>
 
                 <form onSubmit={handleSignup} className="glass p-8 rounded-3xl space-y-6">

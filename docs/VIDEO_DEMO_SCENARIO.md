@@ -1,4 +1,4 @@
-# 🎬 DataGov Federation Project - Ultimate Demo Script
+# 🎬 DataShield Federation Project - Ultimate Demo Script
 
 ## 🎯 Objective
 Record a seamless end-to-end flow demonstrating:
@@ -128,4 +128,4 @@ For the demo, you can stay logged in as **Admin** to show everything, or mention
 ---
 
 ## 🏁 Ending
-"And that is how the DataGov Federation Project unifies Governance, Security, and Quality in a single, automated platform."
+"And that is how the DataShield Federation Project unifies Governance, Security, and Quality in a single, automated platform."

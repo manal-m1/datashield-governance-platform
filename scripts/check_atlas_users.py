@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 async def check_users():
     load_dotenv(dotenv_path=".env")
     uri = os.getenv("MONGODB_URI")
-    db_name = os.getenv("DATABASE_NAME", "datagov")
+    db_name = os.getenv("DATABASE_NAME", "datashield")
     
     print(f"Connecting to: {uri[:20]}...")
     client = AsyncIOMotorClient(uri)

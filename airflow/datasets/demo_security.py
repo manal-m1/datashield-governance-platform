@@ -7,7 +7,7 @@
 This script demonstrates how the security policies work
 for each role defined in the project requirements.
 
-RUN THIS: docker exec datagov-airflow python /opt/airflow/datasets/demo_security.py
+RUN THIS: docker exec datashield-airflow python /opt/airflow/datasets/demo_security.py
 """
 
 import requests

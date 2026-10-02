@@ -93,7 +93,7 @@ const Sidebar = () => {
                 </div>
                 {!collapsed && (
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                        <h2 className="text-xl font-bold text-white tracking-tight">DataGov</h2>
+                        <h2 className="text-xl font-bold text-white tracking-tight">DataShield</h2>
                         <p className="text-[10px] text-brand-primary font-bold uppercase tracking-widest">{role}</p>
                     </motion.div>
                 )}

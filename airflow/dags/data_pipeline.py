@@ -16,7 +16,7 @@ CORRECTION_SERVICE_URL = "http://correction-service:8006"
 STREAMSHIELD_SERVICE_URL = "http://streamshield-serv:8010"
 
 default_args = {
-    'owner': 'datagov',
+    'owner': 'datashield',
     'depends_on_past': False,
     'email_on_failure': False,
     'email_on_retry': False,
@@ -30,7 +30,7 @@ dag = DAG(
     description='End-to-end Data Governance Pipeline',
     schedule_interval=None,  # Triggered manually via upload
     start_date=days_ago(1),
-    tags=['datagov'],
+    tags=['datashield'],
     catchup=False
 )
 

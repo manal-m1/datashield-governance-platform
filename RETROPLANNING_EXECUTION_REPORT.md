@@ -1,7 +1,7 @@
 # RETROPLANNING EXECUTION REPORT
-## DataGov Platform Infrastructure Stabilization and HDP Migration
+## DataShield Platform Infrastructure Stabilization and HDP Migration
 
-**Project**: DataGov - Federated Data Governance Platform
+**Project**: DataShield - Federated Data Governance Platform
 **Institution**: ENSIAS 2024-2025
 **Team**: BAZZAOUI Younes, ELGARCH Youssef, IBNOU-KADY Nisrine, TOUZANI Youssef
 **Execution Period**: January - February 2026
@@ -15,7 +15,7 @@
 
 ## EXECUTIVE SUMMARY
 
-This report documents the comprehensive execution of the DataGov platform retroplanning, focusing on infrastructure stabilization through HDP (Hortonworks Data Platform) migration from VMware to Docker. The project faced significant challenges with VMware VM instability, dynamic IP addressing, Ubuntu deployment issues, and Windows WSL configuration problems. Through systematic problem-solving and iterative optimization, the team successfully achieved a 92/100 stability score, exceeding the target of 90/100.
+This report documents the comprehensive execution of the DataShield platform retroplanning, focusing on infrastructure stabilization through HDP (Hortonworks Data Platform) migration from VMware to Docker. The project faced significant challenges with VMware VM instability, dynamic IP addressing, Ubuntu deployment issues, and Windows WSL configuration problems. Through systematic problem-solving and iterative optimization, the team successfully achieved a 92/100 stability score, exceeding the target of 90/100.
 
 **Key Achievements**:
 - Migrated HDP infrastructure from unstable VMware VM to containerized Docker environment
@@ -172,7 +172,7 @@ RANGER_USER=admin
 RANGER_PASSWORD=hortonworks1
 
 # MongoDB
-MONGODB_URI=mongodb+srv://user:pass@cluster.mongodb.net/datagov
+MONGODB_URI=mongodb+srv://user:pass@cluster.mongodb.net/datashield
 
 # Service Configuration
 MOCK_GOVERNANCE=false
@@ -1188,8 +1188,8 @@ volumes:
 ```bash
 # Clone project repository
 cd /opt
-git clone <repository-url> datagov-platform
-cd datagov-platform
+git clone <repository-url> datashield-platform
+cd datashield-platform
 
 # Start HDP services
 docker-compose -f docker-compose.hdp.yml up -d
@@ -1356,7 +1356,7 @@ Response: Policy created successfully
 # Update .env with new HDP_HOST
 export HDP_HOST=<droplet-ip>
 
-# Restart all DataGov services
+# Restart all DataShield services
 docker-compose down
 docker-compose up -d
 
@@ -1564,9 +1564,9 @@ Response: {
 
 ```bash
 #!/bin/bash
-# Monitor DataGov platform health
+# Monitor DataShield platform health
 
-LOG_FILE="/var/log/datagov-health.log"
+LOG_FILE="/var/log/datashield-health.log"
 
 while true; do
   TIMESTAMP=$(date +"%Y-%m-%d %H:%M:%S")
@@ -1597,8 +1597,8 @@ done
 **Deployed as systemd service**:
 
 ```bash
-systemctl enable datagov-monitor.service
-systemctl start datagov-monitor.service
+systemctl enable datashield-monitor.service
+systemctl start datashield-monitor.service
 ```
 
 ---
@@ -1890,7 +1890,7 @@ systemctl start datagov-monitor.service
 
 ### 10.1 Project Success Summary
 
-The DataGov platform retroplanning execution successfully achieved all primary objectives:
+The DataShield platform retroplanning execution successfully achieved all primary objectives:
 
 **Objective 1: Achieve 90/100 Stability Score**
 - Target: 90/100
@@ -1973,7 +1973,7 @@ The retroplanning execution provided valuable insights into:
 
 ### 10.6 Production Readiness Declaration
 
-**As of February 6, 2026, the DataGov platform is PRODUCTION-READY with the following confirmation**:
+**As of February 6, 2026, the DataShield platform is PRODUCTION-READY with the following confirmation**:
 
 - All 9 microservices operational and healthy (100%)
 - HDP infrastructure stable on Docker (99.5% availability)
@@ -1995,7 +1995,7 @@ The retroplanning execution provided valuable insights into:
 
 **Check Service Health**:
 ```bash
-# All DataGov services
+# All DataShield services
 for port in 8001 8002 8003 8004 8005 8006 8007 8008 8009; do
   echo "Port $port: $(curl -s -o /dev/null -w '%{http_code}' http://localhost:$port/health)"
 done
@@ -2007,7 +2007,7 @@ curl -u admin:hortonworks1 http://<droplet-ip>:6080/service/public/v2/api/polici
 
 **Restart Services**:
 ```bash
-# DataGov services
+# DataShield services
 docker-compose down && docker-compose up -d
 
 # HDP services
@@ -2016,7 +2016,7 @@ docker-compose -f docker-compose.hdp.yml restart
 
 **View Logs**:
 ```bash
-# DataGov services
+# DataShield services
 docker-compose logs -f <service-name>
 
 # HDP services
@@ -2026,7 +2026,7 @@ docker-compose -f docker-compose.hdp.yml logs -f atlas
 **Backup Data**:
 ```bash
 # MongoDB backup
-docker exec datagov-mongo mongodump --out /backup
+docker exec datashield-mongo mongodump --out /backup
 
 # HDP volumes backup
 docker run --rm -v hdp_atlas-data:/data -v $(pwd):/backup alpine tar czf /backup/atlas-backup.tar.gz /data
@@ -2064,7 +2064,7 @@ docker-compose -f docker-compose.hdp.yml restart atlas
 
 Diagnosis:
 ```bash
-docker exec datagov-mongo mongosh --eval "db.adminCommand('ping')"
+docker exec datashield-mongo mongosh --eval "db.adminCommand('ping')"
 ```
 
 Solution: Check MONGODB_URI in .env, verify network connectivity
@@ -2074,7 +2074,7 @@ Solution: Check MONGODB_URI in .env, verify network connectivity
 **Configuration Files**:
 - `.env` - Centralized environment configuration
 - `.env.example` - Environment template
-- `docker-compose.yml` - DataGov services orchestration
+- `docker-compose.yml` - DataShield services orchestration
 - `docker-compose.hdp.yml` - HDP services orchestration
 - `.wslconfig` - WSL 2 configuration (Windows development)
 
@@ -2104,7 +2104,7 @@ Solution: Check MONGODB_URI in .env, verify network connectivity
 **Report Version**: 1.0 (Final)
 **Authors**: BAZZAOUI Younes, ELGARCH Youssef, IBNOU-KADY Nisrine, TOUZANI Youssef
 **Institution**: ENSIAS (École Nationale Supérieure d'Informatique et d'Analyse des Systèmes)
-**Project**: DataGov - Federated Data Governance Platform
+**Project**: DataShield - Federated Data Governance Platform
 **Classification**: Technical Execution Report
 
 ---

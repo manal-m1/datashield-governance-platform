@@ -19,7 +19,7 @@ def run_command(cmd, description):
 def main():
     """Run all tests"""
     print("\n" + "="*60)
-    print("📋 DataGov Testing Suite")
+    print("📋 DataShield Testing Suite")
     print("="*60)
     print(f"Started: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 

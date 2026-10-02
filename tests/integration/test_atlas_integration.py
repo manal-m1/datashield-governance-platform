@@ -179,7 +179,7 @@ Test,test@example.com"""
             "attributes": {
                 "name": "test_dataset_" + str(int(time.time())),
                 "description": "Test dataset for Atlas integration",
-                "qualifiedName": f"test_dataset_{int(time.time())}@datagov"
+                "qualifiedName": f"test_dataset_{int(time.time())}@datashield"
             }
         }
 

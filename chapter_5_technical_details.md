@@ -1,6 +1,6 @@
 # CHAPITRE 5 : IMPLÉMENTATION TECHNIQUE ET DÉPLOIEMENT
 
-Ce chapitre détaille l'implémentation technique de la plateforme **DataGov**, depuis l'environnement de développement jusqu'au déploiement des microservices et leur orchestration. Il présente une vue approfondie de l'architecture réelle, validée par l'analyse du code source.
+Ce chapitre détaille l'implémentation technique de la plateforme **DataShield**, depuis l'environnement de développement jusqu'au déploiement des microservices et leur orchestration. Il présente une vue approfondie de l'architecture réelle, validée par l'analyse du code source.
 
 ## 5.1 Environnement de Développement
 
@@ -245,4 +245,4 @@ MongoDB est utilisé comme base de données unifiée pour sa flexibilité de sch
 
 ## 5.7 Conclusion Technique
 
-L'implémentation de DataGov respecte scrupuleusement l'architecture microservices prévue. L'utilisation combinée de **FastAPI** pour la performance backend, **React** pour l'expérience utilisateur, et la stack **Hadoop (Atlas/Ranger)** pour la gouvernance, crée un écosystème robuste. Les mécanismes d'IA (T5, BERT, Perceptron) sont intégrés de manière modulaire, permettant leur évolution sans impacter le cœur du système.
+L'implémentation de DataShield respecte scrupuleusement l'architecture microservices prévue. L'utilisation combinée de **FastAPI** pour la performance backend, **React** pour l'expérience utilisateur, et la stack **Hadoop (Atlas/Ranger)** pour la gouvernance, crée un écosystème robuste. Les mécanismes d'IA (T5, BERT, Perceptron) sont intégrés de manière modulaire, permettant leur évolution sans impacter le cœur du système.

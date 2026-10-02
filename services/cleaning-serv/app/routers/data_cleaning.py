@@ -178,7 +178,7 @@ async def run_full_pii_scan(dataset_id: str, filename: str):
             atlas_client = AtlasClient()
             guid = atlas_client.register_dataset_and_get_guid(
                 name=filename,
-                description=f"Uploaded via DataGov Pipeline. PII Detected: {pii_tags}",
+                description=f"Uploaded via DataShield Pipeline. PII Detected: {pii_tags}",
                 owner="cleaning-service",
                 file_path=file_path
             )

@@ -261,13 +261,13 @@ const DashboardPage = () => {
             <div className="glass p-6 rounded-3xl border border-white/5">
                 <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
                     <ShieldCheck className="text-brand-primary" size={24} />
-                    DataGov - Data Governance Platform
+                    DataShield - Data Governance Platform
                 </h2>
                 <div className="grid md:grid-cols-2 gap-6">
                     <div className="space-y-3">
-                        <h3 className="text-sm font-bold text-slate-400 uppercase">What is DataGov?</h3>
+                        <h3 className="text-sm font-bold text-slate-400 uppercase">What is DataShield?</h3>
                         <p className="text-slate-300 text-sm leading-relaxed">
-                            DataGov is a comprehensive data governance platform designed for Moroccan enterprises.
+                            DataShield is a comprehensive data governance platform designed for Moroccan enterprises.
                             It provides automated PII detection, data quality assessment (ISO 25012), and secure data handling workflows.
                         </p>
                     </div>

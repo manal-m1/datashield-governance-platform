@@ -9,9 +9,9 @@ TAG_SERVICE = "data_gov_tags"
 def create_users():
     """Create users in Ranger for each role"""
     users = [
-        {"name": "steward1", "password": "Password123", "firstName": "Data", "lastName": "Steward", "emailAddress": "steward@datagov.local", "userRoleList": ["ROLE_USER"]},
-        {"name": "annotator1", "password": "Password123", "firstName": "Data", "lastName": "Annotator", "emailAddress": "annotator@datagov.local", "userRoleList": ["ROLE_USER"]},
-        {"name": "labeler1", "password": "Password123", "firstName": "Data", "lastName": "Labeler", "emailAddress": "labeler@datagov.local", "userRoleList": ["ROLE_USER"]},
+        {"name": "steward1", "password": "Password123", "firstName": "Data", "lastName": "Steward", "emailAddress": "steward@datashield.local", "userRoleList": ["ROLE_USER"]},
+        {"name": "annotator1", "password": "Password123", "firstName": "Data", "lastName": "Annotator", "emailAddress": "annotator@datashield.local", "userRoleList": ["ROLE_USER"]},
+        {"name": "labeler1", "password": "Password123", "firstName": "Data", "lastName": "Labeler", "emailAddress": "labeler@datashield.local", "userRoleList": ["ROLE_USER"]},
     ]
     
     print("👤 Creating Users in Ranger...")

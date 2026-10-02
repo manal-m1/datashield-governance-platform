@@ -1,7 +1,7 @@
-# GUIDE DE DEPLOIEMENT COMPLET - Plateforme DataGov
+# GUIDE DE DEPLOIEMENT COMPLET - Plateforme DataShield
 ## Document a destination de l'encadrante - Instructions detaillees pas a pas
 
-**Projet**: DataGov - Plateforme Federee de Gouvernance de Donnees
+**Projet**: DataShield - Plateforme Federee de Gouvernance de Donnees
 **Equipe**: BAZZAOUI Younes, ELGARCH Youssef, IBNOU-KADY Nisrine, TOUZANI Youssef
 **Institution**: ENSIAS 2024-2025
 **Date du document**: 09/02/2026
@@ -266,8 +266,8 @@ Le flag `-d` signifie "detached" : les conteneurs tournent en arriere-plan.
 ```
 [+] Running 13/13
  ✔ Network datagovprojetfederateur_datagov-network  Created
- ✔ Container datagov-mongo                          Started
- ✔ Container datagov-airflow                        Started
+ ✔ Container datashield-mongo                          Started
+ ✔ Container datashield-airflow                        Started
  ✔ Container auth-service                           Started
  ✔ Container taxonomie-service                      Started
  ✔ Container presidio-service                       Started
@@ -277,7 +277,7 @@ Le flag `-d` signifie "detached" : les conteneurs tournent en arriere-plan.
  ✔ Container annotation-service                     Started
  ✔ Container quality-service                        Started
  ✔ Container ethimask-service                       Started
- ✔ Container datagov-modern                         Started
+ ✔ Container datashield-modern                         Started
  ✔ Container nginx-gateway                          Started
 ```
 
@@ -293,8 +293,8 @@ docker compose ps
 
 ```
 NAME                     STATUS          PORTS
-datagov-mongo            Up              0.0.0.0:27017->27017/tcp
-datagov-airflow          Up              0.0.0.0:8081->8080/tcp
+datashield-mongo            Up              0.0.0.0:27017->27017/tcp
+datashield-airflow          Up              0.0.0.0:8081->8080/tcp
 auth-service             Up              0.0.0.0:8001->8001/tcp
 taxonomie-service        Up              0.0.0.0:8002->8002/tcp
 presidio-service         Up              0.0.0.0:8003->8003/tcp
@@ -304,7 +304,7 @@ correction-service       Up              0.0.0.0:8006->8006/tcp
 annotation-service       Up              0.0.0.0:8007->8007/tcp
 quality-service          Up              0.0.0.0:8008->8008/tcp
 ethimask-service         Up              0.0.0.0:8009->8009/tcp
-datagov-modern           Up              0.0.0.0:3000->80/tcp
+datashield-modern           Up              0.0.0.0:3000->80/tcp
 nginx-gateway            Up              0.0.0.0:8000->8000/tcp
 ```
 
@@ -446,7 +446,7 @@ for /L %i in (128,1,254) do @ping -n 1 -w 100 192.168.110.%i | find "Reply"
 
 Le Sandbox HDP demarre par defaut environ 30 services Hadoop. La plupart ne sont pas utilises par notre plateforme et consomment inutilement de la RAM et du CPU. Atlas et Ranger deviennent lents car les ressources sont partagees avec des services inutiles.
 
-**Services NECESSAIRES pour DataGov** (NE PAS ARRETER) :
+**Services NECESSAIRES pour DataShield** (NE PAS ARRETER) :
 - Atlas (port 21000) - Metadonnees et gouvernance
 - Ranger (port 6080) - Politiques d'acces
 - Zookeeper - Dependance Atlas
@@ -465,7 +465,7 @@ Pour chaque service ci-dessous, cliquer dessus dans le menu de gauche, puis cliq
 
 | Service a Arreter | RAM Liberee | Pourquoi on l'arrete |
 |-------------------|------------|---------------------|
-| **Spark2** | ~1.5 Go | Calcul distribue - non utilise par DataGov |
+| **Spark2** | ~1.5 Go | Calcul distribue - non utilise par DataShield |
 | **Oozie** | ~500 Mo | Orchestration Hadoop - nous utilisons Airflow |
 | **MapReduce2** | ~400 Mo | Batch processing - non utilise |
 | **YARN** | ~800 Mo | Gestionnaire de ressources - non utilise |
@@ -616,7 +616,7 @@ Ouvrir un navigateur et acceder aux URLs suivantes :
 
 | Service | URL | Resultat Attendu |
 |---------|-----|-------------------|
-| Gateway Nginx | http://localhost:8000 | Page d'accueil DataGov |
+| Gateway Nginx | http://localhost:8000 | Page d'accueil DataShield |
 | Frontend React | http://localhost:3000 | Interface utilisateur |
 | Auth Service | http://localhost:8001/health | `{"status": "healthy"}` |
 | Taxonomie Service | http://localhost:8002/health | `{"status": "healthy"}` |
@@ -786,8 +786,8 @@ docker logs <nom-du-conteneur>
 
 **Solution** :
 ```powershell
-docker compose build datagov-modern
-docker compose up -d datagov-modern
+docker compose build datashield-modern
+docker compose up -d datashield-modern
 ```
 
 ### 9.5 "Ports already in use"
@@ -1026,15 +1026,15 @@ curl -u admin:admin -i -H 'X-Requested-By: ambari' -X DELETE \
 
 | Service | RAM Heap JVM | Raison de l'arret |
 |---------|-------------|-------------------|
-| Spark2 | 1.5 Go (spark.driver.memory + spark.executor.memory) | Calcul distribue Spark non utilise par DataGov. Notre classification utilise PyTorch en Docker, pas Spark ML |
-| YARN + MapReduce2 | 1.2 Go (yarn.nodemanager.resource.memory-mb) | Gestionnaire de ressources Hadoop pour jobs batch. DataGov utilise des APIs REST, pas des jobs MapReduce |
-| Hive | 600 Mo (hive.heapsize) | SQL-on-Hadoop. DataGov utilise MongoDB, pas Hive |
-| Oozie | 500 Mo (oozie.service.JPAService.pool.maxactive) | Orchestration de workflows Hadoop. DataGov utilise Airflow en Docker |
+| Spark2 | 1.5 Go (spark.driver.memory + spark.executor.memory) | Calcul distribue Spark non utilise par DataShield. Notre classification utilise PyTorch en Docker, pas Spark ML |
+| YARN + MapReduce2 | 1.2 Go (yarn.nodemanager.resource.memory-mb) | Gestionnaire de ressources Hadoop pour jobs batch. DataShield utilise des APIs REST, pas des jobs MapReduce |
+| Hive | 600 Mo (hive.heapsize) | SQL-on-Hadoop. DataShield utilise MongoDB, pas Hive |
+| Oozie | 500 Mo (oozie.service.JPAService.pool.maxactive) | Orchestration de workflows Hadoop. DataShield utilise Airflow en Docker |
 | Tez | 300 Mo | Moteur d'execution DAG pour Hive. Inutile sans Hive |
 | Pig | 200 Mo | Scripting data flow Hadoop. Non utilise |
 | Slider | 200 Mo | YARN app framework. Non utilise |
-| Flume | 200 Mo | Ingestion de donnees streaming. DataGov utilise des uploads CSV |
-| Accumulo | 400 Mo | Base de donnees NoSQL Hadoop. DataGov utilise MongoDB |
+| Flume | 200 Mo | Ingestion de donnees streaming. DataShield utilise des uploads CSV |
+| Accumulo | 400 Mo | Base de donnees NoSQL Hadoop. DataShield utilise MongoDB |
 
 **Total RAM liberee** : environ 5.1 Go
 
@@ -1042,7 +1042,7 @@ curl -u admin:admin -i -H 'X-Requested-By: ambari' -X DELETE \
 
 Comme recommande par la documentation Cloudera : "Navigate to the YARN / Configs / Memory configuration page and edit the Memory Node Setting to at least 7 GB."
 
-Cependant, nous avons completement arrete YARN car DataGov n'utilise pas de jobs MapReduce/Spark.
+Cependant, nous avons completement arrete YARN car DataShield n'utilise pas de jobs MapReduce/Spark.
 
 **Services conserves (OBLIGATOIRES)** :
 
@@ -1118,7 +1118,7 @@ Ce monitoring a reduit les interventions manuelles de 10/semaine a 1/semaine.
 
 ### 11.1 Contexte Initial
 
-La plateforme DataGov avait un score de stabilite de 75/100. Les problemes principaux etaient :
+La plateforme DataShield avait un score de stabilite de 75/100. Les problemes principaux etaient :
 
 1. **IP du HDP qui change** : A chaque redemarrage de la VM, les services Docker ne pouvaient plus communiquer avec Atlas/Ranger
 2. **IP hardcodees dans le code** : 32 adresses IP ecrites en dur dans 8 fichiers differents
@@ -1252,7 +1252,7 @@ docker stats
 
 ---
 
-**Document redige par** : Equipe DataGov - ENSIAS 2024-2025
+**Document redige par** : Equipe DataShield - ENSIAS 2024-2025
 **Date** : 09/02/2026
 **Version** : 1.0
 

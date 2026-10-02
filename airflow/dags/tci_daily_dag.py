@@ -195,7 +195,7 @@ def task_notify(**ctx):
 
 # ── DAG definition ────────────────────────────────────────────────────────────
 default_args = {
-    "owner":            "datagov",
+    "owner":            "datashield",
     "retries":          2,
     "retry_delay":      timedelta(minutes=1),
     "email_on_failure": False,
@@ -208,7 +208,7 @@ with DAG(
     schedule_interval="0 2 * * *",     # exécution planifiée à 02h00 UTC avec valeurs par défaut
     start_date=datetime(2025, 1, 1),
     catchup=False,
-    tags=["tci", "mca", "datagov"],
+    tags=["tci", "mca", "datashield"],
 ) as dag:
 
     health_check = PythonOperator(

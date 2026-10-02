@@ -196,7 +196,7 @@ def fetch_and_export_validated_data(**context):
                             "attributes": {
                                 "qualifiedName": f"dataset@{filename}",
                                 "name": filename,
-                                "description": "Certified golden record export from DataGov",
+                                "description": "Certified golden record export from DataShield",
                                 "owner": "data_governance_team"
                             }
                         }
@@ -223,7 +223,7 @@ def fetch_and_export_validated_data(**context):
                                 "typeName": "Process",
                                 "attributes": {
                                     "qualifiedName": f"process@DataGov_Export_{timestamp}",
-                                    "name": f"DataGov Export Pipeline",
+                                    "name": f"DataShield Export Pipeline",
                                     "description": "Automated export of validated data",
                                     "inputs": [{"typeName": "DataSet", "uniqueAttributes": {"qualifiedName": f"dataset@{source_name}"}}],
                                     "outputs": [{"typeName": "DataSet", "uniqueAttributes": {"qualifiedName": f"dataset@{filename}"}}]

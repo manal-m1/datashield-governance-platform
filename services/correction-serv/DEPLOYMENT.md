@@ -18,7 +18,7 @@
 
 ### Step 1: Clone and Navigate
 ```bash
-cd /path/to/DataGov/services/correction-serv
+cd /path/to/DataShield/services/correction-serv
 ```
 
 ### Step 2: Create Virtual Environment (Recommended)
@@ -51,7 +51,7 @@ This will install:
 Create `.env` file in project root:
 ```env
 MONGODB_URI=mongodb://localhost:27017
-DATABASE_NAME=datagov
+DATABASE_NAME=datashield
 PORT=8006
 ```
 
@@ -64,7 +64,7 @@ mongosh --eval "db.version()"
 
 # Create database
 mongosh
-> use datagov
+> use datashield
 > db.createCollection("correction_validations")
 > db.createCollection("correction_training_data")
 > db.createCollection("correction_kpi_history")
@@ -103,7 +103,7 @@ docker build -t correction-service-v2 .
 docker run -d \
   -p 8006:8006 \
   -e MONGODB_URI=mongodb://host.docker.internal:27017 \
-  -e DATABASE_NAME=datagov \
+  -e DATABASE_NAME=datashield \
   --name correction-service \
   correction-service-v2
 ```
@@ -273,10 +273,10 @@ For high traffic:
 
 ```bash
 # Backup all correction data
-mongodump --db datagov --out /backup/datagov-$(date +%Y%m%d)
+mongodump --db datashield --out /backup/datashield-$(date +%Y%m%d)
 
 # Backup specific collections
-mongodump --db datagov \
+mongodump --db datashield \
   --collection correction_validations \
   --collection correction_training_data \
   --out /backup/corrections-$(date +%Y%m%d)
@@ -293,7 +293,7 @@ tar -czf t5-models-backup-$(date +%Y%m%d).tar.gz ./models/t5_corrector_finetuned
 
 ```bash
 # Restore MongoDB
-mongorestore --db datagov /backup/datagov-20260107/datagov
+mongorestore --db datashield /backup/datashield-20260107/datashield
 
 # Restore models
 tar -xzf t5-models-backup-20260107.tar.gz -C ./models/
@@ -461,7 +461,7 @@ python example_usage.py
 pytest tests/ -v
 
 # Backup data
-mongodump --db datagov --out /backup/correction-data
+mongodump --db datashield --out /backup/correction-data
 
 # Trigger retraining
 curl -X POST http://localhost:8006/learning/retrain

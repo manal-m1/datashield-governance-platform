@@ -1,7 +1,7 @@
 @echo off
 REM Quick test runner for Windows
 echo ========================================
-echo DataGov Testing Suite
+echo DataShield Testing Suite
 echo ========================================
 
 REM Check if Docker services are running

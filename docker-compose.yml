@@ -1,7 +1,7 @@
 version: "3.9"
 
 # ============================================
-# DataGov - Complete Microservices Stack
+# DataShield - Complete Microservices Stack
 # Updated with Persistence & Orchestration
 # ============================================
 
@@ -9,19 +9,19 @@ services:
   # INFRASTRUCTURE: Database (MongoDB)
   mongo:
     image: mongo:latest
-    container_name: datagov-mongo
+    container_name: datashield-mongo
     ports:
       - "27017:27017"
     volumes:
       - mongo_data:/data/db
     networks:
-      - datagov-network
+      - datashield-network
     restart: unless-stopped
 
   # INFRASTRUCTURE: Orchestration (Airflow)
   airflow:
     image: apache/airflow:2.7.1
-    container_name: datagov-airflow
+    container_name: datashield-airflow
 
     environment:
       AIRFLOW__CORE__EXECUTOR: SequentialExecutor
@@ -51,7 +51,7 @@ services:
 
     restart: unless-stopped
     networks:
-      - datagov-network
+      - datashield-network
 
   # SERVICE 1: Authentication (Port 8001)
   auth-service:
@@ -64,7 +64,7 @@ services:
     depends_on:
       - mongo
     networks:
-      - datagov-network
+      - datashield-network
     restart: unless-stopped
 
   # SERVICE 2: Taxonomie PII/SPI (Port 8002)
@@ -78,7 +78,7 @@ services:
     depends_on:
       - mongo
     networks:
-      - datagov-network
+      - datashield-network
     volumes:
       - ./services/taxonomie-serv/backend:/app/backend
       - ./services/common:/common
@@ -95,7 +95,7 @@ services:
     depends_on:
       - mongo
     networks:
-      - datagov-network
+      - datashield-network
     volumes:
       - ./services/presidio-serv:/app
       - ./services/common:/common
@@ -112,7 +112,7 @@ services:
     depends_on:
       - mongo
     networks:
-      - datagov-network
+      - datashield-network
     volumes:
       - ./services/common:/common
       - ./services/cleaning-serv/storage:/app/storage
@@ -132,7 +132,7 @@ services:
     depends_on:
       - mongo
     networks:
-      - datagov-network
+      - datashield-network
     volumes:
       - ./services/common:/common
     restart: unless-stopped
@@ -153,7 +153,7 @@ services:
     depends_on:
       - mongo
     networks:
-      - datagov-network
+      - datashield-network
     volumes:
       - ./services/common:/common
     restart: unless-stopped
@@ -169,7 +169,7 @@ services:
     depends_on:
       - mongo
     networks:
-      - datagov-network
+      - datashield-network
     volumes:
       - ./services/common:/common
       - ./airflow/datasets:/opt/airflow/datasets:ro
@@ -188,7 +188,7 @@ services:
     depends_on:
       - mongo
     networks:
-      - datagov-network
+      - datashield-network
     volumes:
       - ./services/common:/common
     restart: unless-stopped
@@ -207,17 +207,17 @@ services:
     depends_on:
       - mongo
     networks:
-      - datagov-network
+      - datashield-network
     restart: unless-stopped
 
-  # MODERN FRONTEND: DataGov (Port 3000)
-  datagov-modern:
+  # MODERN FRONTEND: DataShield (Port 3000)
+  datashield-modern:
     build: ./frontend-react
-    container_name: datagov-modern
+    container_name: datashield-modern
     ports:
       - "3000:80"
     networks:
-      - datagov-network
+      - datashield-network
     restart: unless-stopped
 
   # NGINX GATEWAY (Port 8000)
@@ -233,17 +233,17 @@ services:
       - taxonomie-service
       - cleaning-service
       - annotation-service
-      - datagov-modern
+      - datashield-modern
       - streamshield-serv
     networks:
-      - datagov-network
+      - datashield-network
     restart: unless-stopped
 
   # INFRASTRUCTURE: Kafka (mode KRaft, sans Zookeeper)
   kafka:
     image: apache/kafka:latest
     hostname: kafka
-    container_name: datagov-kafka
+    container_name: datashield-kafka
     ports:
       - "9092:9092"
     environment:
@@ -262,7 +262,7 @@ services:
     volumes:
       - kafka_data:/var/lib/kafka/data
     networks:
-      - datagov-network
+      - datashield-network
     healthcheck:
       test: ["CMD-SHELL", "/opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:9092 || exit 1"]
       interval: 10s
@@ -293,7 +293,7 @@ services:
       ethimask-service:
         condition: service_started
     networks:
-      - datagov-network
+      - datashield-network
     restart: unless-stopped
     volumes:
       - ./services/streamshield-serv:/app
@@ -303,20 +303,20 @@ services:
   # INFRASTRUCTURE: Prometheus (métriques)
   prometheus:
     image: prom/prometheus:latest
-    container_name: datagov-prometheus
+    container_name: datashield-prometheus
     volumes:
       - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - prometheus_data:/prometheus
     ports:
       - "9090:9090"
     networks:
-      - datagov-network
+      - datashield-network
     restart: unless-stopped
 
   # INFRASTRUCTURE: Grafana (dashboards)
   grafana:
     image: grafana/grafana:10.4.5 
-    container_name: datagov-grafana
+    container_name: datashield-grafana
     environment:           
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
@@ -334,12 +334,12 @@ services:
     depends_on:
       - prometheus
     networks:
-      - datagov-network
+      - datashield-network
     restart: unless-stopped
 
 # NETWORK & VOLUMES
 networks:
-  datagov-network:
+  datashield-network:
     driver: bridge
 
 volumes:

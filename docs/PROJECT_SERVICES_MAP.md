@@ -1,4 +1,4 @@
-# 🗺️ DataGov - Project Services Map
+# 🗺️ DataShield - Project Services Map
 
 This document centralizes all internal and external service links, ports, and default credentials used in the **DataSentinel** project.
 
@@ -64,4 +64,4 @@ This document centralizes all internal and external service links, ports, and de
 - **Local Docker:** All services including HDP run in Docker on `localhost` with fixed ports.
 - **HDP Services:** Running in **Docker container** - no more IP address changes!
 - **MOCK Mode:** If `MOCK_GOVERNANCE=true` in `.env`, the system will use simulated responses instead of calling Atlas/Ranger.
-- **Network Access:** Services in `datagov-network` can access HDP by container name or via localhost from host machine.
+- **Network Access:** Services in `datashield-network` can access HDP by container name or via localhost from host machine.

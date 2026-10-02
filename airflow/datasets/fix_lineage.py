@@ -61,7 +61,7 @@ def register_lineage():
             "typeName": "Process",
             "attributes": {
                 "qualifiedName": f"process@DataGov_Repaired_{EXPORT_FILENAME}",
-                "name": "DataGov Export Pipeline (Repaired)",
+                "name": "DataShield Export Pipeline (Repaired)",
                 "description": "Automated export of validated data",
                 "inputs": [{"typeName": "DataSet", "uniqueAttributes": {"qualifiedName": f"dataset@{source_dataset_id}"}}],
                 "outputs": [{"typeName": "DataSet", "uniqueAttributes": {"qualifiedName": f"dataset@{EXPORT_FILENAME}"}}]

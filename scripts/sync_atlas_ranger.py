@@ -96,7 +96,7 @@ def sync_pii_policies(atlas_client):
     for dataset, columns in schema_map.items():
         policy = build_masking_policy(
             policy_name=f"auto_pii_{dataset}",
-            database="datagov", # Default DB
+            database="datashield", # Default DB
             table=dataset,
             columns=columns,
             users=["public", "analyst"], # Apply to these users

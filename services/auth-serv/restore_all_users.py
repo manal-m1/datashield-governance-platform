@@ -38,10 +38,10 @@ async def restore_users():
     users_col = db["users"]
 
     users_to_create = [
-        {"username": "admin", "password": admin_pw, "role": "admin", "email": "admin@datagov.ma"},
-        {"username": "labeler_user", "password": os.getenv("LABELER_PASSWORD", admin_pw), "role": "labeler", "email": "labeler@datagov.ma"},
-        {"username": "annotator_user", "password": os.getenv("ANNOTATOR_PASSWORD", admin_pw), "role": "annotator", "email": "annotator@datagov.ma"},
-        {"username": "steward_user", "password": os.getenv("STEWARD_PASSWORD", admin_pw), "role": "steward", "email": "steward@datagov.ma"}
+        {"username": "admin", "password": admin_pw, "role": "admin", "email": "admin@datashield.ma"},
+        {"username": "labeler_user", "password": os.getenv("LABELER_PASSWORD", admin_pw), "role": "labeler", "email": "labeler@datashield.ma"},
+        {"username": "annotator_user", "password": os.getenv("ANNOTATOR_PASSWORD", admin_pw), "role": "annotator", "email": "annotator@datashield.ma"},
+        {"username": "steward_user", "password": os.getenv("STEWARD_PASSWORD", admin_pw), "role": "steward", "email": "steward@datashield.ma"}
     ]
 
     print("\nRestoring users...")

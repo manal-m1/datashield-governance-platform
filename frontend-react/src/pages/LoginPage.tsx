@@ -73,7 +73,7 @@ const LoginPage = () => {
                     >
                         <DynamicLogo role="default" size={96} animate={true} />
                     </motion.div>
-                    <h1 className="text-4xl font-bold tracking-tight text-white mb-2">DataGov</h1>
+                    <h1 className="text-4xl font-bold tracking-tight text-white mb-2">DataShield</h1>
                     <p className="text-slate-400">Expert Data Intelligence & Governance</p>
                 </div>
 

@@ -1,7 +1,7 @@
 # ANALYSE CRITIQUE HONNETE DU PROJET DATAGOV
 
 **Date**: 9 Février 2026
-**Branche**: `production-datagov`
+**Branche**: `production-datashield`
 **Methode**: Analyse statique exhaustive de tout le code source (frontend + backend + services + airflow)
 
 ---

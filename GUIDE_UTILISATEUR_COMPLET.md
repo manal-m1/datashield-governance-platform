@@ -1,4 +1,4 @@
-# Guide d'Utilisation Complet - Plateforme DataGov
+# Guide d'Utilisation Complet - Plateforme DataShield
 
 ## Projet Federateur ENSIAS - Data Governance Platform
 
@@ -28,7 +28,7 @@
 
 ## 1. Presentation Generale
 
-DataGov est une plateforme de gouvernance des donnees concue pour les entreprises marocaines. Elle permet :
+DataShield est une plateforme de gouvernance des donnees concue pour les entreprises marocaines. Elle permet :
 
 - La detection automatique des donnees personnelles sensibles (PII/SPI) : CIN, Telephone, IBAN, Email, CNSS, Passeport
 - L'evaluation de la qualite des donnees selon la norme ISO 25012
@@ -90,7 +90,7 @@ Quand vous ouvrez `http://localhost:3000` sans etre connecte, vous arrivez sur l
 **URL** : `http://localhost:3000/login`
 
 **Ce que vous voyez :**
-- Le logo anime DataGov au centre
+- Le logo anime DataShield au centre
 - Un formulaire avec deux champs :
   - "Access ID" (nom d'utilisateur) avec icone utilisateur
   - "Secure Token" (mot de passe) avec icone cadenas
@@ -186,7 +186,7 @@ Le logo dans la barre laterale et le favicon du navigateur changent egalement se
   - "Operational Status" --> reste sur le dashboard
 
 #### Section Informations Projet
-- Description de DataGov et ses fonctionnalites cles (PII Detection, ISO 25012, RBAC, Secure Data Pipeline)
+- Description de DataShield et ses fonctionnalites cles (PII Detection, ISO 25012, RBAC, Secure Data Pipeline)
 
 #### Panneau "System Benchmarks" (exclusif Admin)
 - Graphique a barres animees montrant le debit du systeme
@@ -546,7 +546,7 @@ Le Data Steward voit les elements suivants dans le menu lateral :
 
 #### En-tete
 - Titre "Ingestion Engine"
-- Description "Securely upload and register datasets into the DataGov ecosystem"
+- Description "Securely upload and register datasets into the DataShield ecosystem"
 
 #### Zone d'Upload (Annotator uniquement)
 - Zone de glisser-deposer (Drag & Drop) avec :
@@ -961,7 +961,7 @@ Ce workflow illustre le parcours complet d'un dataset depuis l'upload jusqu'a la
 
 La barre laterale est presente sur toutes les pages apres connexion. Elle contient :
 
-- **Logo DataGov** en haut avec le role affiche en sous-titre
+- **Logo DataShield** en haut avec le role affiche en sous-titre
 - **Menu de navigation** : Adapte au role (voir sections 5.5, 6.5, 7.5, 8.3)
 - **Bouton Collapse** : Reduit la barre laterale en mode icones uniquement
 - **Bouton Logout** : Deconnexion (rouge)
@@ -1067,7 +1067,7 @@ Plusieurs pages utilisent des modales (fenetres superposees) :
 | quality-service | 8008 | Evaluation qualite ISO 25012 |
 | ethimask-service | 8009 | Masquage ethique contextuel |
 | nginx-gateway | 8000 | Passerelle API reverse proxy |
-| datagov-modern | 3000 | Frontend React |
+| datashield-modern | 3000 | Frontend React |
 | airflow | 8081 | Orchestration Apache Airflow |
 | mongo | 27017 | Base de donnees MongoDB |
 
@@ -1103,5 +1103,5 @@ Plusieurs pages utilisent des modales (fenetres superposees) :
 
 ---
 
-*Document genere pour le projet DataGov - ENSIAS 2025/2026*
+*Document genere pour le projet DataShield - ENSIAS 2025/2026*
 *Ce guide couvre l'integralite des interfaces et fonctionnalites de la plateforme pour chaque role utilisateur.*

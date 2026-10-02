@@ -1,9 +1,9 @@
 @echo off
-REM Quick rebuild script for DataGov services (optimized for speed)
+REM Quick rebuild script for DataShield services (optimized for speed)
 REM CPU-only builds - no NVIDIA/CUDA dependencies
 
 echo ========================================
-echo DataGov Quick Build (CPU-Only)
+echo DataShield Quick Build (CPU-Only)
 echo ========================================
 echo.
 

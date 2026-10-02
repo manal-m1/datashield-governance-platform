@@ -191,7 +191,7 @@ const DataPipelinePage = () => {
         <div className="space-y-10 max-w-6xl mx-auto">
             <header className="text-center">
                 <h1 className="text-4xl font-bold text-white mb-4">Ingestion Engine</h1>
-                <p className="text-slate-400">Securely upload and register datasets into the DataGov ecosystem</p>
+                <p className="text-slate-400">Securely upload and register datasets into the DataShield ecosystem</p>
             </header>
 
             {/* Upload Section */}

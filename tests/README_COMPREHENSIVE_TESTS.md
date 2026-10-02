@@ -2,7 +2,7 @@
 
 ## Overview
 
-This test suite provides **real functional validation** of the DataGov platform against the Cahier des Charges requirements.
+This test suite provides **real functional validation** of the DataShield platform against the Cahier des Charges requirements.
 
 **Unlike basic health checks**, these tests verify:
 ✅ ML models actually work (BERT, T5)

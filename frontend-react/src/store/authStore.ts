@@ -25,7 +25,7 @@ export const useAuthStore = create<AuthState>()(
             },
         }),
         {
-            name: 'datagov-auth-storage',
+            name: 'datashield-auth-storage',
         }
     )
 );

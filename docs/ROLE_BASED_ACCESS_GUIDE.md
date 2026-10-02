@@ -1,4 +1,4 @@
-# 📋 DataGov - Role-Based Access Control (RBAC) Guide
+# 📋 DataShield - Role-Based Access Control (RBAC) Guide
 
 ## 📌 Complete System Documentation for User Roles & Workflows
 
@@ -23,7 +23,7 @@
 
 ## 1. System Overview
 
-The DataGov platform implements a **hierarchical role-based access control system** for data governance and sensitive data protection. The system ensures:
+The DataShield platform implements a **hierarchical role-based access control system** for data governance and sensitive data protection. The system ensures:
 
 - **GDPR & Law 09-08 (Morocco) Compliance**
 - **ISO 25012 Data Quality Standards**
@@ -485,7 +485,7 @@ Quality Score = 0.5 × Accuracy + 0.3 × Kappa + 0.2 × Speed
 
 ## 📝 Summary
 
-The DataGov RBAC system ensures:
+The DataShield RBAC system ensures:
 
 1. **Principle of Least Privilege**: Users only access what they need
 2. **Defense in Depth**: Multiple layers of access control

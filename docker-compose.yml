@@ -172,7 +172,7 @@ services:
       - datashield-network
     volumes:
       - ./services/common:/common
-      - ./airflow/datasets:/opt/airflow/datasets:ro
+      - ./airflow/datasets:/opt/airflow/datasets
     restart: unless-stopped
 
   # SERVICE 8: Quality ISO 25012 (Port 8008)

@@ -1,0 +1,3 @@
+method,available,number_distinct_scores,f1,note
+weighted_average_current,True,7,0.6206896551724138,Current production defuzzification using output_levels and weighted average.
+centroid,False,,,Not computable from the current configuration: output linguistic terms have singleton numerical values but no output membership functions.

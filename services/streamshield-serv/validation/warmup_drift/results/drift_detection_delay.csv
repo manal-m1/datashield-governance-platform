@@ -1,0 +1,6 @@
+run_id,drift_detected,detection_reason,delay_seconds
+1,True,count,0.5623786000069231
+2,True,count,0.53835839999374
+3,True,count,0.520253699971363
+4,True,count,0.5497581999807153
+5,True,count,0.5508680999919306

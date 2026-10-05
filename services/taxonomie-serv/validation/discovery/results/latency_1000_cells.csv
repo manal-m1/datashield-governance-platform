@@ -1,0 +1,3 @@
+method,cells,successful_calls,total_time_s,mean_ms_per_cell
+Regex / Taxonomy,1000,1000,13.631881500012241,13.631881500012241
+Presidio + Moroccan,1000,1000,19.90385950001655,19.90385950001655

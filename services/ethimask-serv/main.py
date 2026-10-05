@@ -91,12 +91,15 @@ class MaskingPolicy(BaseModel):
 
 
 class ConfigUpdate(BaseModel):
-    ws: float = Field(..., ge=-1.0, le=1.0)
-    wr: float = Field(..., ge=-1.0, le=1.0)
-    wc: float = Field(..., ge=-1.0, le=1.0)
-    wp: float = Field(..., ge=-1.0, le=1.0)
-    bias: float = Field(0.4, ge=-1.0, le=1.0)
-    alpha: float = Field(0.5, ge=0.0, le=1.0)
+    ws: float
+    wr: float
+    wc: float
+    wp: float
+    whc: float
+    whf: float
+    whv: float
+    bias: float = 0.2
+    alpha: float = 0.5
 
 
 # ====================================================================
@@ -106,8 +109,16 @@ class ConfigUpdate(BaseModel):
 class ConfigManager:
 
     DEFAULT_CONFIG = {
-        "weights": [0.35, -0.30, 0.20, 0.15],
-        "bias": 0.4,
+        "weights": [
+            0.4,
+            0.5,
+            0.1,
+            0.1,
+            0.1,
+            -0.1,
+            -0.2
+        ],
+        "bias": 0.2,
         "alpha": 0.5
     }
 
@@ -124,7 +135,7 @@ class ConfigManager:
                     "alpha": doc.get("alpha", 0.5)
                 }
 
-        return self.DEFAULT_CONFIG
+        return self.DEFAULT_CONFIG.copy()
 
     async def update_config(self, config: ConfigUpdate):
 
@@ -132,7 +143,10 @@ class ConfigManager:
             config.ws,
             config.wr,
             config.wc,
-            config.wp
+            config.wp,
+            config.whc,
+            config.whf,
+            config.whv
         ]
 
         if db is not None:
@@ -152,7 +166,6 @@ class ConfigManager:
             new_weights,
             config.bias
         )
-
 
 # ====================================================================
 # POLICY MANAGER
@@ -448,7 +461,6 @@ async def lifespan(app: FastAPI):
     await _verify_technique_coverage()
 
     yield
-
 
 app = FastAPI(
     title="EthiMask Service",
@@ -767,24 +779,15 @@ async def get_config():
     config = await config_manager.get_config()
 
     return {
-
-        "sensitivity_weight":
-            config["weights"][0],
-
-        "role_weight":
-            config["weights"][1],
-
-        "context_weight":
-            config["weights"][2],
-
-        "purpose_weight":
-            config["weights"][3],
-
-        "bias":
-            config["bias"],
-
-        "alpha":
-            config["alpha"]
+        "sensitivity_weight": config["weights"][0],
+        "role_weight": config["weights"][1],
+        "context_weight": config["weights"][2],
+        "purpose_weight": config["weights"][3],
+        "conformity_weight": config["weights"][4],
+        "frequency_weight": config["weights"][5],
+        "violations_weight": config["weights"][6],
+        "bias": config["bias"],
+        "alpha": config.get("alpha", 0.5)
     }
 
 
@@ -971,7 +974,11 @@ async def retrain_on_audit_logs():
         wr=weights[1],
         wc=weights[2],
         wp=weights[3],
-        bias=config["bias"]
+        whc=weights[4],
+        whf=weights[5],
+        whv=weights[6],
+        bias=config["bias"],
+        alpha=config.get("alpha", 0.5)
     )
 
     await config_manager.update_config(

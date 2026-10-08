@@ -1,0 +1,31 @@
+﻿id,full_name,name_arabic,cin_ma,phone_ma,rib_ma,credit_card,salary_mad,birth_date,city,city_arabic,email,status,company,notes
+1,Ahmed El Mansouri,أحمد المنصوري,AB123456,9471692394,OBI7OC0BGRHR0UYO9CL3C06XST,1024771112816038,1******,1985,Casablanca,الدار البيضاء,user_5716@masked.com,Active,Maroc Telecom,موظف منذ 5 سنوات
+2,Fatima Zahra Bennani,فاطمة الزهراء البناني,CD987654,6468068956,97WTDAL7KKVS534OKXFWUUR2V5,6229162409086438,1******,1992,Rabat,الرباط,user_3064@masked.com,Pending,BMCE Bank,في انتظار التحقق
+3,Youssef Ait Taleb,يوسف آيت الطالب,EF456789,0************,7V067P1GQGP8YKSS9PU7QIDBVM,279939989788077,3******,1978,Marrakech,مراكش,user_7951@masked.com,Active,OCP Group,مدير تقني
+4,Khadija Lahlou,خديجة لحلو,GH112233,0***********,O0YQYOH101IHZL2YV7XMJKDP5N,0853500618680713,9*****,1995,Fes,فاس,user_9872@masked.com,Actif,Attijariwafa Bank,خطأ في الكتابة
+5,Omar Radi,عمر الراضي,IJ445566,0469752724,Y95V0THRPLGEUW2V9H6XHHQRD3,8855523397589747,2******,1988,Tangier,طنجة,user_2778@masked.com,Suspended,Press Agency,حساب معلق
+6,Meryem Chakir,مريم شكير,KL778899,7891553097,P3OFIMICNGME5U45XG0L1EE8MR,9424760240868974,1******,1990,Agadir,أكادير,user_5781@masked.com,Actve,Sonacos,typo in status
+7,Hamid Ouazzani,حميد الوزاني,MN001122,0*************,R1DCBI6TPKGCNU7Z7ZDSIV5JGD,8526018564685204,2******,1982,Oujda,وجدة,user_3247@masked.com,Active,Sonasid,email manque extension
+8,Samira El Alaoui,سميرة العلوي,OP334455,+************,0BPVKVVP72W8OF7XOC9VEI,5779925683227032,1******,1987,Kenitra,القنيطرة,user_2333@masked.com,Active,ONEE,date format incorrect + RIB trop court
+9,Rachid Moussaoui,رشيد الموساوي,QR556677,,LPCSTQASCBLGVYPDP8CSHW04QR,,,1975,Meknes,مكناس,,Active,ONCF,missing phone email salary
+10,Nadia Benjelloun,نادية بنجلون,ST889900,9056487058646934,3U9GIF6EN1UIDXEDSDSCEGR27L,0620007314693066,4******,1980,Tetouan,تطوان,user_9333@masked.com,Active,RAM,phone trop long
+11,Mohammed Tazi,محمد التازي,UV112233,7603116969,I*****************,3629878708140992,3******,1977,Sale,سلا,user_4705@masked.com,Active,Bank Al-Maghrib,RIB format invalide
+12,Laila Bennani,ليلى البناني,WX445566,5219233202,BVO0BX7T8W5BCWNKXU9SFF9HX8,4******************,1******,1993,Temara,تمارة,user_9557@masked.com,Active,CDG,double @ email + card with dashes
+13,Khalid El Fassi,خالد الفاسي,YZ778899,z******************,WHMSVZL7KJ6F3X86FJXB0KNIW4,5051234332940358,0**,1988,Essaouira,الصويرة,user_7944@masked.com,Active,TMSA,phone en texte + salary zero
+14,Amina Chraibi,آمنة الشرايبي,AB-999888,3329472680,WMFYZVFT6GSFH0HHXA8ULDAVCI,063275528486337,2******,1991,El Jadida,الجديدة,user_6265@masked.com,Active,ONA,CIN format with dash
+15,Driss Benmoussa,إدريس بنموسى,CD.777666,3496365446,JL37C4YJ5D5MJZ7Z2Z10R1WET1,3170316817200448,8*****,1996,Mohammedia,المحمدية,user_6149@masked.com,en attente,Lafarge,CIN with dot + status french
+16,Houda El Ouafi,هدى الوافي,EF_555444,7835188960,ZHS7OJCSZDPPS33KCEU4Q8KDO2,1410709425749058,1******,1994,Beni Mellal,بني ملال,user_3737@masked.com,Active,Holcim,CIN with underscore
+17,Samir Touzani,سمير التوزاني,GH/333222,7263845686,Z5IS3PXQE8XM4H5EFNCIDT8H1M,9461448745763116,3******,1979,Khouribga,خريبكة,user_5222@masked.com,Active,Managem,CIN with slash
+18,Zineb El Amrani,زينب العمراني,IJ 111000,0082270641,4I7JM381TQ4Z5KVXA646D26TYR,6648740651830506,1******,1992,Settat,سطات,user_8932@masked.com,ACTIF,Lydec,CIN with space + status uppercase
+19,عبد الله القادري,Abdellah El Kadiri,KL888777,0881337618,7PQM6CL3JWFHZ4QFOPVY564JYF,0809169555583525,2******,1986,Taza,تازة,user_8646@masked.com,Active,CTM,name Arabic first + Arabic phone
+20,فاطمة الحسيني,Fatima El Hassani,MN666555,8108143437,S5AHYFKQJT1A2NG9N45Y0WF27I,4080884651703824,1******,1998,Nador,الناظور,user_5053@masked.com,معلق,BMCI,name Arabic + status Arabic
+21,حسن الإدريسي,Hassan El Idrissi,OP444333,2411514875,NQYUEYI0OO28XQCDI7G4Z4PW9L,1189650538344264,3******,1983,Al Hoceima,الحسيمة,user_1737@masked.com,Active,Crédit Agricole,bilingual entry
+22,Karim Benchekroun,كريم بنشقرون,QR222111,4537755787,01JC65P0W59VKK16H1ZSOZP6W,8333698116988783,1******,1989,Larache,العرائش,user_2549@masked.com,Active,Wafa Assurance,impossible date + RIB one digit short
+23,سارة المغربي,Sara El Maghribi,ST000999,5997918152,4IQMGHUDJQIO4ZMN3JDRZE0EOW,5196578421010422,2******,1995,Berkane,بركان,user_9370@masked.com,نشط,ANAPEC,fully bilingual
+24,يونس الأمين,Younes El Amine,UV999888,6296432492,P68R66AJVLB7LHRMEE250UAB2Y,5421568481137988,4******,1981,Khémisset,الخميسات,user_5519@masked.com,Active,Cosumar,exec level salary
+25,نورة السعدي,Noura Saadi,WX777666,7117565388,9F8T780P2LFTJTDQD5LOU5SY77,7974078128894998,7*****,[BIRTH_DATE_GEN],Sidi Kacem,سيدي قاسم,user_9299@masked.com,en cours,Centrale Danone,invalid birth date
+26,أيوب الهاشمي,Ayoub El Hashimi,YZ555444,9142559055,7HXHI14JGKC741P5FJI4WK04QG,7758014291913790,2******,1984,Sefrou,صفرو,user_1058@masked.com,Active,Marsa Maroc,
+27,إيمان الطاهري,Imane Tahiri,AB333222,0551522883,4ST6M3PVNVWE9ZCA8G7FSH4ZCG,1733866384363399,1******,1997,Guelmim,كلميم,user_8673@masked.com,Active,ONHYM,southern region
+28,ياسين الرحماني,Yassine Rahmani,CD111000,8860975463,P76OSSBWXXSIHKH1PCX10N5K5T,1535923793330514,3******,1978,Ouarzazate,ورزازات,user_4998@masked.com,مفعل,ONDA,atlas region
+29,هند العربي,Hind Larbi,EF999000,3860195410,BD7932UAFZG7TDKVKJBH44RLEE,2578150006934367,1******,1993,Errachidia,الراشيدية,user_6537@masked.com,Active,Royal Air Maroc,saharan region
+30,طارق الغزواني,Tarik Ghazouani,GH777000,5648394681,FYP16EHSN9R9JYO0HEHLI96D6M,6178797271855842,5******,1976,Laayoune,العيون,user_2717@masked.com,Active,Phosboucraa,southern territories

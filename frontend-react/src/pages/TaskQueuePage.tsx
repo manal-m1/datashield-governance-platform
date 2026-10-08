@@ -104,18 +104,32 @@ const TaskQueuePage = () => {
 
     const handleDownload = async (filename: string) => {
         try {
-            const response = await apiClient.get(`/annotation/exports/download/${filename}`, {
-                responseType: 'blob'
+            const response = await apiClient.get(
+                `/annotation/exports/download-file/${encodeURIComponent(filename)}`,
+                {
+                    responseType: 'blob'
+                }
+            );
+
+            const blob = new Blob([response.data], {
+                type: 'text/csv'
             });
-            const url = window.URL.createObjectURL(new Blob([response.data]));
+
+            const url = window.URL.createObjectURL(blob);
+
             const link = document.createElement('a');
             link.href = url;
             link.setAttribute('download', filename);
+
             document.body.appendChild(link);
             link.click();
-            link.parentNode?.removeChild(link);
+            link.remove();
+
+            window.URL.revokeObjectURL(url);
+
             addToast(`Downloading ${filename}`, 'success');
         } catch (err) {
+            console.error('Failed to download file', err);
             addToast('Failed to download file', 'error');
         }
     };
@@ -178,17 +192,28 @@ const TaskQueuePage = () => {
         }
     };
 
-    // Approbation Steward : finalise la tâche (COMPLETED)
-    const handleApproveTask = async (taskId: string, applyMasking: boolean = false) => {
+    // Approbation Steward : finalise la tâche (COMPLETED).
+    // Le CSV certifié est TOUJOURS masqué : apply_masking est forcé à true,
+    // quel que soit le paramètre reçu du modal.
+    const handleApproveTask = async (
+        taskId: string,
+        _applyMasking: boolean = true
+    ) => {
         try {
-            await apiClient.post(`/annotation/tasks/${taskId}/approve`, { apply_masking: applyMasking });
+            await apiClient.post(`/annotation/tasks/${taskId}/approve`, { apply_masking: true });
             setTasks(prev => prev.filter(t => t.id !== taskId));
-            addToast(applyMasking ? 'Task Approved and Masked' : 'Task Approved without Masking', 'success');
+            addToast('Task Approved and Masked', 'success');
             setIsModalOpen(false);
             fetchData();
-        } catch (err) {
-            console.error('Failed to approve task', err);
-            addToast('Failed to approve task', 'error');
+        } catch (err: any) {
+            console.error('Failed to approve task', err?.response?.data || err);
+            const detail = err?.response?.data?.detail;
+            addToast(
+                typeof detail === 'string'
+                    ? `Failed to approve task: ${detail}`
+                    : 'Failed to approve task',
+                'error'
+            );
         }
     };
 
@@ -235,7 +260,7 @@ const TaskQueuePage = () => {
     const handleModalValidate = (
         id: string,
         enrichments?: DetectionEnrichment[],
-        applyMasking: boolean = false
+        applyMasking: boolean = true
     ) => {
         if (isSteward) {
             handleApproveTask(id, applyMasking);

@@ -7,7 +7,7 @@ from typing import Any, Tuple, Optional
 import numpy as np
 import pyffx
 from .score_calculator import MaskingLevel
-
+import re
 
 class MaskingTechnique(str, Enum):
     PSEUDONYMIZATION = "pseudonymization"
@@ -18,6 +18,7 @@ class MaskingTechnique(str, Enum):
     HASHING = "hashing"
     ENCRYPTION = "encryption"
     FPE = "fpe"
+    PARTIAL_MASKING = "partial_masking"
 
 
 FPE_KEY_ENV = os.getenv("FPE_KEY")
@@ -93,6 +94,11 @@ class ContextualMasker:
                 return "[TOKENIZATION_UNAVAILABLE]", "tokenization_error"
             token = await self.vault.tokenize(str_value, entity_type)
             return token, "tokenization"
+        elif technique_str == MaskingTechnique.PARTIAL_MASKING.value:
+            return self._partial_mask(
+                str_value,
+                entity_type
+            ), "partial_masking"
 
         return self._partial_mask(str_value, entity_type), "partial_masking"
 
@@ -155,12 +161,81 @@ class ContextualMasker:
         return result
 
     def _generalize(self, value: str, entity_type: str) -> str:
-        if entity_type == "age": return "30-49"
-        if entity_type == "salary": return "10K-20K MAD"
+        try:
+            if entity_type == "age":
+                a = int(float(value))
+                lo = (a // 10) * 10
+                return f"{lo}-{lo + 9}"
+
+            if entity_type == "salary":
+                s = float(value)
+                lo = int(s // 5000) * 5000
+                return f"{lo}-{lo + 5000} MAD"
+
+            if entity_type == "birth_date":
+                m = re.search(r"(19|20)\d{2}", value)
+                if m:
+                    return m.group(0)  # année seulement
+        except (ValueError, TypeError):
+            pass
+
         return f"[{entity_type.upper()}_GEN]"
 
-    def _partial_mask(self, value: str, entity_type: str) -> str:
+    def _partial_mask(
+        self,
+        value: str,
+        entity_type: str
+    ) -> str:
+
+        if not value:
+            return value
+
+        # ------------------------------------------------------------
+        # EMAIL
+        # Example:
+        # ahmed@gmail.com
+        # ->
+        # a****@gmail.com
+        # ------------------------------------------------------------
+
         if entity_type == "email":
-            parts = value.split("@")
-            return (parts[0][:2] + "***@" + parts[1]) if len(parts) == 2 else value
-        return value[:2] + "*" * (max(0, len(value)-4)) + value[-2:] if len(value) > 4 else "*"*len(value)
+
+            parts = value.split("@", 1)
+
+            if len(parts) == 2:
+
+                local_part = parts[0]
+                domain = parts[1]
+
+                if len(local_part) <= 1:
+                    masked_local = "*"
+                else:
+                    masked_local = (
+                        local_part[0]
+                        + "*" * (len(local_part) - 1)
+                    )
+
+                return (
+                    masked_local
+                    + "@"
+                    + domain
+                )
+
+            return value
+
+        # ------------------------------------------------------------
+        # GENERAL PARTIAL MASKING
+        #
+        # BG124     -> B****
+        # AB123456  -> A*******
+        # 0600123456 -> 0*********
+        # Ahmed     -> A****
+        # ------------------------------------------------------------
+
+        if len(value) == 1:
+            return "*"
+
+        return (
+            value[0]
+            + "*" * (len(value) - 1)
+        )

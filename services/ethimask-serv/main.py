@@ -36,6 +36,7 @@ class MaskingConfig(BaseModel):
     role: UserRole = UserRole.DATA_LABELER
     context: str = "default"
     purpose: str = "general"
+    force_masking: bool = False   # export certifié : ignore le rôle, jamais "none"
     history_stats: Optional[Dict[str, float]] = {
         "conformity": 0.8,
         "frequency": 0.5,
@@ -545,7 +546,18 @@ def health_check():
 # ====================================================================
 # MASKING - LOGIQUE COMMUNE
 # ====================================================================
-
+EXPORT_TECHNIQUES = {
+    "cin": MaskingTechnique.FPE,
+    "phone": MaskingTechnique.FPE,
+    "account_number": MaskingTechnique.FPE,
+    "credit_card": MaskingTechnique.FPE,
+    "email": MaskingTechnique.PSEUDONYMIZATION,
+    "name": MaskingTechnique.PSEUDONYMIZATION,
+    "salary": MaskingTechnique.GENERALIZATION,
+    "birth_date": MaskingTechnique.GENERALIZATION,
+    "age": MaskingTechnique.GENERALIZATION,
+}
+DEFAULT_EXPORT_TECHNIQUE = MaskingTechnique.PSEUDONYMIZATION
 async def _apply_masking(
     request: MaskRequest
 ) -> MaskResponse:
@@ -576,27 +588,32 @@ async def _apply_masking(
         if field not in masked_data:
             continue
 
-        level, confidence = perceptron.decide_masking(
-            detection.sensitivity_level,
-            request.config.role,
-            request.config.context,
-            request.config.purpose,
-            history=request.config.history_stats
-        )
-
-        policy = await policy_manager.get_policy(
-            detection.entity_type,
-            request.config.role.value
-        )
-
-        if policy:
-
-            level = policy.level
-            technique = policy.technique
-
+        if request.config.force_masking:
+            # Export : le masquage ne dépend PAS du rôle
+            level = MaskingLevel.PARTIAL
+            technique = EXPORT_TECHNIQUES.get(
+                detection.entity_type,
+                DEFAULT_EXPORT_TECHNIQUE
+            )
         else:
+            level, confidence = perceptron.decide_masking(
+                detection.sensitivity_level,
+                request.config.role,
+                request.config.context,
+                request.config.purpose,
+                history=request.config.history_stats
+            )
 
-            technique = None
+            policy = await policy_manager.get_policy(
+                detection.entity_type,
+                request.config.role.value
+            )
+
+            if policy:
+                level = policy.level
+                technique = policy.technique
+            else:
+                technique = None
 
         masked_val, tech_used = await masker.mask(
             masked_data[field],
@@ -606,7 +623,6 @@ async def _apply_masking(
         )
 
         masked_data[field] = masked_val
-
         techniques_used[field] = tech_used
 
         audit_logs_batch.append(

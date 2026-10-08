@@ -159,22 +159,43 @@ services:
     restart: unless-stopped
 
   # SERVICE 7: Annotation (Port 8007)
+    # SERVICE 7: Annotation (Port 8007)
   annotation-service:
     build: ./services/annotation-serv
     container_name: annotation-service
+
     env_file:
       - .env
+
+    environment:
+      CLEANING_SERVICE_URL: http://cleaning-service:8004
+      PRESIDIO_SERVICE_URL: http://presidio-service:8003
+      ETHIMASK_SERVICE_URL: http://ethimask-service:8009
+
+      CLEANING_TIMEOUT: 120
+      PRESIDIO_TIMEOUT: 30
+      ETHIMASK_TIMEOUT: 120
+
+      MASK_BATCH_SIZE: 100
+
     ports:
       - "8007:8007"
+
     depends_on:
       - mongo
+      - cleaning-service
+      - presidio-service
+      - ethimask-service
+
     networks:
       - datashield-network
+
     volumes:
       - ./services/common:/common
       - ./airflow/datasets:/opt/airflow/datasets
-    restart: unless-stopped
 
+    restart: unless-stopped
+  
   # SERVICE 8: Quality ISO 25012 (Port 8008)
   quality-service:
     build: ./services/quality-serv
